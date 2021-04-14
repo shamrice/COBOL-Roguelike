@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-04-12
+      *> Last Updated: 2021-04-14
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -38,10 +38,12 @@
            78  ws-max-map-width             value 80.
            78  ws-max-view-height           value 20.
            78  ws-max-view-width            value 50.
+           78  ws-max-num-enemies           value 99.
 
        local-storage section.
            01  ws-counter-1                 pic 999.
            01  ws-counter-2                 pic 999.
+           01  ls-enemy-idx                 pic 99.
            
            01  ws-scr-draw-pos.
                05  ws-scr-draw-y            pic 99.
@@ -56,6 +58,11 @@
                05  ws-temp-map-pos-x        pic S99 value 01.
 
            01  ws-line-mask                 pic x(80) value spaces. 
+
+           01  ls-enemy-draw-pos    occurs 0 to ws-max-num-enemies times
+                                    depending on l-num-enemies.
+               05  ls-enemy-draw-y          pic 99.
+               05  ls-enemy-draw-x          pic 99.
 
        linkage section.
 
@@ -105,10 +112,62 @@
                        15  ws-tile-effect-id            pic 99.       
 
 
+           01  ws-enemy-data.
+               05  ws-enemy       occurs 0 to unbounded times
+                                  depending on l-num-enemies.
+                   10  ws-enemy-hp.
+                       15  ws-enemy-hp-total    pic 999 value 10.
+                       15  ws-enemy-hp-current  pic 999 value 10.
+                   10  ws-enemy-attack-damage   pic 999 value 1.
+                   10  ws-enemy-pos.
+                       15  ws-enemy-y           pic 99.
+                       15  ws-enemy-x           pic 99.
+                   10  ws-enemy-color           pic 9 value red.                                     
+      *>TODO: this isn't configurable.
+                   10  ws-enemy-char            pic x value "&". 
+                       88  ws-enemy-char-alive  value "&".
+                       88  ws-enemy-char-dead   value "X".
+                       88  ws-enemy-char-hurt   value "#".
+                   10  ws-enemy-status              pic 9 value 0.
+                       88  ws-enemy-status-alive    value 0.
+                       88  ws-enemy-status-dead     value 1.
+                       88  ws-enemy-status-attacked value 2.
+                       88  ws-enemy-status-other    value 3.
+                   10  ws-enemy-movement-ticks.
+                       15  ws-enemy-current-ticks   pic 9.
+                       15  ws-enemy-max-ticks       pic 9 value 3.
 
-       procedure division using ws-cursor ws-tile-map-table-matrix.
+           01  l-num-enemies                   pic 99.
+
+       procedure division using 
+           ws-cursor ws-tile-map-table-matrix ws-enemy-data
+           l-num-enemies.
 
        main-procedure.
+
+
+      *> If there's an enemies on the visible section of the screen, 
+      *> Find their draw screen positions to be placed during the tile
+      *> loop below.
+           if l-num-enemies > 0 then 
+               perform varying ls-enemy-idx from 1 by 1 
+               until ls-enemy-idx > l-num-enemies
+
+                   if ws-enemy-y(ls-enemy-idx) > ws-cursor-pos-y then                    
+                       compute ls-enemy-draw-y(ls-enemy-idx) = 
+                           ws-enemy-y(ls-enemy-idx) - ws-cursor-pos-y
+                       end-compute 
+                    end-if 
+
+                   if ws-enemy-x(ls-enemy-idx) > ws-cursor-pos-x then                    
+                       compute ls-enemy-draw-x(ls-enemy-idx) = 
+                           ws-enemy-x(ls-enemy-idx) - ws-cursor-pos-x
+                       end-compute 
+                    end-if                    
+
+               end-perform 
+           end-if 
+
 
            perform varying ws-counter-1 
            from 1 by 1 until ws-counter-1 > ws-max-view-height
@@ -153,6 +212,21 @@
                        end-display  
                    end-if   
 
+      *> Draw enemies
+                   perform varying ls-enemy-idx from 1 by 1 
+                   until ls-enemy-idx > l-num-enemies
+                       if ws-scr-draw-pos = 
+                           ls-enemy-draw-pos(ls-enemy-idx) then 
+                           display 
+                               ws-enemy-char(ls-enemy-idx) 
+                               at ls-enemy-draw-pos(ls-enemy-idx)
+                               foreground-color
+                                   ws-enemy-color(ls-enemy-idx)
+                               background-color
+                                  ws-tile-bg(ws-map-pos-y, ws-map-pos-x)
+                           end-display
+                       end-if 
+                   end-perform
 
                end-perform
            end-perform.

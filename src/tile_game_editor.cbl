@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-11
+      *> Last Updated: 2021-04-14
       *> Purpose: Map editor for the tile based console game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -85,6 +85,9 @@
 
            78  ws-max-map-height              value 25.
            78  ws-max-map-width               value 80.
+           78  ws-max-num-enemies             value 99.
+
+           01  ws-line-mask                   pic x(80) value spaces.
 
            01  ws-cursor.
                05  ws-cursor-pos.
@@ -118,6 +121,37 @@
            01  ws-is-quit                     pic a value 'N'.
                88  ws-quit                    value 'Y'.
                88  ws-not-quit                value 'N'.
+
+
+           
+           01  ws-cur-num-enemies           pic 99 value 0.
+
+
+           01  ws-enemy-data.
+               05  ws-enemy       occurs 0 to ws-max-num-enemies times
+                                  depending on ws-cur-num-enemies.
+                   10  ws-enemy-hp.
+                       15  ws-enemy-hp-total    pic 999 value 10.
+                       15  ws-enemy-hp-current  pic 999 value 10.
+                   10  ws-enemy-attack-damage   pic 999 value 1.
+                   10  ws-enemy-pos.
+                       15  ws-enemy-y           pic 99.
+                       15  ws-enemy-x           pic 99.
+                   10  ws-enemy-color           pic 9 value red.                                     
+      *>TODO: this isn't configurable will reset after hit.
+                   10  ws-enemy-char            pic x value "&". 
+                       88  ws-enemy-char-alive  value "&".
+                       88  ws-enemy-char-dead   value "X".
+                       88  ws-enemy-char-hurt   value "#".
+                   10  ws-enemy-status              pic 9 value 0.
+                       88  ws-enemy-status-alive    value 0.
+                       88  ws-enemy-status-dead     value 1.
+                       88  ws-enemy-status-attacked value 2.
+                       88  ws-enemy-status-other    value 3.
+                   10  ws-enemy-movement-ticks.
+                       15  ws-enemy-current-ticks   pic 9.
+                       15  ws-enemy-max-ticks       pic 9 value 3.
+
 
            01  ws-tile-map-table-matrix.
                05  ws-tile-map           occurs ws-max-map-height times.
@@ -160,6 +194,13 @@
                05  ws-temp-map-pos-x        pic S99 value 01.
 
            01  ws-filler                    pic 9(9).
+
+           01  ws-enemy-placed-found        pic a value 'N'.
+               88  ws-enemy-found           value 'Y'.
+               88  ws-enemy-not-found       value 'N'.
+           01  ws-enemy-found-idx           pic 99.
+
+           01  ws-replace-enemy             pic a.
 
 
        procedure division.
@@ -239,7 +280,8 @@
            end-if 
       
            call "draw-dynamic-screen-data" 
-               using ws-cursor ws-tile-map-table-matrix
+               using ws-cursor ws-tile-map-table-matrix ws-enemy-data
+               ws-cur-num-enemies
            end-call 
            set ws-scr-no-refresh to true
 
@@ -305,6 +347,9 @@
 
                when ws-kb-input = '0' 
                    move zero to ws-cursor-draw-color-fg
+
+               when ws-kb-input = 'd'
+                   perform place-enemy-at-cursor-pos
 
                when ws-kb-input = 'e'
                    perform set-effect-id
@@ -505,6 +550,80 @@
            exit paragraph.
 
 
+       place-enemy-at-cursor-pos.
+           compute ws-temp-map-pos-y = ws-cursor-pos-y + ws-cursor-scr-y
+           compute ws-temp-map-pos-x = ws-cursor-pos-x + ws-cursor-scr-x                          
+
+      *> Check to see if enemy was previously placed there.
+      *> If so, ask to remove it.
+           set ws-enemy-not-found to true
+           move zeros to ws-enemy-found-idx
+
+           perform varying ws-counter-1 from 1 by 1
+               until ws-counter-1 > ws-cur-num-enemies
+
+               if (ws-temp-map-pos = ws-enemy-pos(ws-counter-1)) then 
+                   set ws-enemy-found to true 
+                   move ws-counter-1 to ws-enemy-found-idx
+                   exit perform 
+               end-if 
+           end-perform 
+
+           if ws-enemy-found then 
+               display "Remove placed enemy? [y/n] " at 2101 
+               accept ws-replace-enemy at 2140 
+               if ws-replace-enemy = 'y' then 
+      *>           Shift whole array down one element, replacing deleted enemy               
+                   perform varying ws-counter-1 
+                       from ws-enemy-found-idx by 1 
+                       until ws-counter-1 > ws-cur-num-enemies + 1
+                       
+                       move ws-enemy(ws-counter-1 + 1) to 
+                           ws-enemy(ws-counter-1)
+                   end-perform 
+
+                   subtract 1 from ws-cur-num-enemies
+               end-if 
+               exit paragraph 
+           end-if 
+
+      *> Place new enemy if none exists.
+           add 1 to ws-cur-num-enemies
+
+           display "Enter enemy max hp:" at 2101
+           accept ws-enemy-hp-total(ws-cur-num-enemies) at 2121
+           move ws-enemy-hp-total(ws-cur-num-enemies) 
+               to ws-enemy-hp-current(ws-cur-num-enemies)
+
+           
+           display "Enter enemy attack damage: " at 2101
+           accept ws-enemy-attack-damage(ws-cur-num-enemies) at 2128
+
+           display ws-line-mask at 2101  
+
+           display "Enter enemy color [0-7]: " at 2101
+           accept ws-enemy-color(ws-cur-num-enemies) at 2126 
+
+           display ws-line-mask at 2101  
+
+           display "Enter enemy character: " at 2101
+           accept ws-enemy-char(ws-cur-num-enemies) at 2124 
+
+           display ws-line-mask at 2101  
+
+           display "Enter enemy ticks to move: " at 2101
+           accept ws-enemy-max-ticks(ws-cur-num-enemies) at 2128
+
+
+           move ws-temp-map-pos-y to ws-enemy-y(ws-cur-num-enemies) 
+           move ws-temp-map-pos-x to ws-enemy-x(ws-cur-num-enemies)
+
+           display "Enemy placed at:" at 2401 ws-temp-map-pos at 2417                  
+
+      *> TODO : Input validation. Subtract from total if zeros are entered.      
+
+           exit paragraph.
+
 
        place-tile-at-mouse-pos.           
            compute ws-temp-map-pos-y = ws-cursor-pos-y + ws-mouse-row                   
@@ -628,13 +747,14 @@
            display "arrows - move cursor" at 0253
            display "     b - toggle blocking tiles" at 0353
            display "     c - set tile character" at 0453
-           display "   f/g - set foreground/background color" at 0553
-           display "     h - toggle fg highlight" at 0653
-           display "     k - toggle blinking tiles" at 0753
-           display "     l - load map data" at 0853
-           display "     o - save map data" at 0953
-           display "     q - quit editor" at 1053
-           display " space - place tile" at 1153
+           display "     d - place/remove enemy" at 0553
+           display "   f/g - set foreground/background color" at 0653
+           display "     h - toggle fg highlight" at 0753
+           display "     k - toggle blinking tiles" at 0853
+           display "     l - load map data" at 0953
+           display "     o - save map data" at 1053
+           display "     q - quit editor" at 1153
+           display " space - place tile" at 1253
 
            exit paragraph.      
 

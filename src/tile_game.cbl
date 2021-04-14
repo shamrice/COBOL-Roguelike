@@ -86,6 +86,7 @@
            78  ws-max-map-width               value 80.
            78  ws-max-view-height             value 20.
            78  ws-max-view-width              value 45.
+           78  ws-max-num-enemies             value 99.
 
            01  ws-player.
                05  ws-player-pos.
@@ -103,6 +104,7 @@
                05  ws-enemy-hp.
                    10  ws-enemy-hp-total    pic 999 value 10.
                    10  ws-enemy-hp-current  pic 999 value 10.
+               05  ws-enemy-attack-damage   pic 999 value 1.
                05  ws-enemy-pos.
                    10  ws-enemy-y           pic 99.
                    10  ws-enemy-x           pic 99.

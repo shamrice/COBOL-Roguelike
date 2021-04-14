@@ -58,7 +58,7 @@
 
        linkage section.
 
-           01  l-tile-effect-id             pic 99.
+           01  l-tile-effect-id           pic 99.
 
            01  l-map-files.  
                05  l-map-name             pic x(15).
@@ -68,8 +68,8 @@
           
 
            01  l-cursor-pos.
-               05  l-cursor-pos-y        pic S99.
-               05  l-cursor-pos-x        pic S99.
+               05  l-cursor-pos-y          pic S99.
+               05  l-cursor-pos-x          pic S99.
 
            01  l-teleport-data-record.
                05  l-teleport-pos.
@@ -99,11 +99,7 @@
            goback.
 
        save-teleport.
-           
-      *     compute ws-temp-map-pos-y = ws-cursor-pos-y + ws-cursor-scr-y
-                   
-      *     compute ws-temp-map-pos-x = ws-cursor-pos-x + ws-cursor-scr-x                   
-
+         
            open i-o fd-teleport-data
 
            move l-cursor-pos to f-teleport-pos
@@ -111,12 +107,6 @@
            read fd-teleport-data into l-teleport-data-record
                key is f-teleport-pos
                invalid key 
-      *             display "Teleport dest y: " at 2101
-      *             accept ws-teleport-dest-y at 2118
-      *             display "Teleport dest x: " at 2101
-      *             accept ws-teleport-dest-x at 2118
-      *             display "Teleport dest map: " at 2101
-      *             accept ws-teleport-dest-map at 2120
 
                    if l-teleport-dest-y not = 0 
                        and l-teleport-dest-x not = 0
@@ -124,8 +114,7 @@
                        
                        subtract 10 from l-teleport-dest-y
                        subtract 20 from l-teleport-dest-x
-
-      *                 move ws-temp-map-pos to ws-teleport-pos
+      
                        move l-cursor-pos to l-teleport-pos 
                        write f-teleport-data-record 
                            from l-teleport-data-record
