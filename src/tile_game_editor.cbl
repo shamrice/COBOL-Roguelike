@@ -28,8 +28,7 @@
 
        file section.
 
-      * TODO : copy book for shared file stuff
-      * TODO : implement BLINK tile.
+      * TODO : copy book for shared file stuff      
 
            fd fd-tile-data.
            01  f-tile-data-record.
@@ -571,7 +570,7 @@
 
            if ws-enemy-found then 
                display "Remove placed enemy? [y/n] " at 2101 
-               accept ws-replace-enemy at 2140 
+               accept ws-replace-enemy at 2128 
                if ws-replace-enemy = 'y' then 
       *>           Shift whole array down one element, replacing deleted enemy               
                    perform varying ws-counter-1 
