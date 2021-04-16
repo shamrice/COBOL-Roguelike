@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-14
+      *> Last Updated: 2021-04-16
       *> Purpose: Map editor for the tile based console game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -23,6 +23,9 @@
                assign to dynamic ws-map-dat-file 
                organization is record sequential.         
           
+               select optional fd-enemy-data
+               assign to dynamic ws-map-enemy-file
+               organization is record sequential.
 
        data division.
 
@@ -30,7 +33,7 @@
 
       * TODO : copy book for shared file stuff      
 
-           fd fd-tile-data.
+           fd  fd-tile-data.
            01  f-tile-data-record.
                05  f-tile-fg               pic 9.   
                05  f-tile-bg               pic 9.
@@ -40,6 +43,21 @@
                05  f-tile-blinking         pic a.
                05  f-tile-effect-id        pic 99.
 
+           fd  fd-enemy-data.           
+           01  f-enemy.
+               05  f-enemy-hp.
+                   10  f-enemy-hp-total         pic 999.
+                   10  f-enemy-hp-current       pic 999.
+               05  f-enemy-attack-damage        pic 999.
+               05  f-enemy-pos.
+                   10  f-enemy-y                pic 99.
+                   10  f-enemy-x                pic 99.
+               05  f-enemy-color                pic 9. 
+               05  f-enemy-char                 pic x. 
+               05  f-enemy-status               pic 9.
+               05  f-enemy-movement-ticks.
+                   10  f-enemy-current-ticks    pic 9.
+                   10  f-enemy-max-ticks        pic 9.
 
        working-storage section.
 
@@ -63,13 +81,15 @@
 
 
            01  ws-map-files.  
-               05  ws-map-name             pic x(15) value "world1".
-               05  ws-map-name-temp        pic x(15) value "world1".           
+               05  ws-map-name             pic x(15) value "world0".
+               05  ws-map-name-temp        pic x(15) value "world0".           
                05  ws-map-dat-file         pic x(15).               
                05  ws-map-tel-file         pic x(15).
+               05  ws-map-enemy-file       pic x(15).
                           
            78  ws-data-file-ext            value ".dat".
            78  ws-teleport-file-ext        value ".tel".
+           78  ws-enemy-file-ext           value ".bgs".
 
 
       *> Color constants:    
@@ -86,7 +106,7 @@
            78  ws-max-map-width               value 80.
            78  ws-max-num-enemies             value 99.
 
-           01  ws-line-mask                   pic x(80) value spaces.
+           01  ws-line-mask                   pic x(50) value spaces.
 
            01  ws-cursor.
                05  ws-cursor-pos.
@@ -110,8 +130,17 @@
                    88  ws-cursor-not-block    value 'N'.
                05  ws-cursor-draw-blinking    pic a value 'N'.
                    88  ws-cursor-blink        value 'Y'.
-                   88  ws-cursor-not-blink    value 'N'. 
-               05  ws-cursor-draw-effect      pic 99.
+                   88  ws-cursor-not-blink    value 'N'.
+               05  ws-cursor-enemy-settings.
+                   10  ws-cursor-enemy-hp              pic 999 value 10.                       
+                   10  ws-cursor-enemy-attack-damage   pic 999 value 1.
+                   10  ws-cursor-enemy-color           pic 9 value red.                                           
+                   10  ws-cursor-enemy-char            pic x value "&". 
+                   10  ws-cursor-enemy-movement-ticks  pic 9 value 3.    
+               05  ws-cursor-draw-effect               pic 99.                   
+               05  ws-cursor-type                      pic a value 'T'.
+                   88  ws-cursor-type-tile             value 'T'.
+                   88  ws-cursor-type-enemy            value 'E'.                                                      
                78  ws-cursor-char             value "+".
 
 
@@ -121,7 +150,9 @@
                88  ws-quit                    value 'Y'.
                88  ws-not-quit                value 'N'.
 
-
+           01  ws-display-mode                     pic a value 'R'.
+               88  ws-display-mode-regular         value 'R'.
+               88  ws-display-mode-effects         value 'E'.
            
            01  ws-cur-num-enemies           pic 99 value 0.
 
@@ -207,6 +238,7 @@
        init-setup. 
            set environment "COB_SCREEN_EXCEPTIONS" to 'Y'.
            set environment "COB_SCREEN_ESC" to 'Y'.
+           set environment "COB_SCREEN_TAB" to 'Y'.
            set environment "COB_TIMEOUT_SCALE" to '3'.       
       
       *> make mouse active
@@ -235,8 +267,11 @@
 
            move function concatenate(
                function trim(ws-map-name), ws-teleport-file-ext)
-               to ws-map-tel-file
+               to ws-map-tel-file            
 
+           move function concatenate(
+               function trim(ws-map-name), ws-enemy-file-ext)
+               to ws-map-enemy-file       
 
            perform generate-init-world-data.
       
@@ -280,7 +315,7 @@
       
            call "draw-dynamic-screen-data" 
                using ws-cursor ws-tile-map-table-matrix ws-enemy-data
-               ws-cur-num-enemies
+               ws-cur-num-enemies ws-display-mode
            end-call 
            set ws-scr-no-refresh to true
 
@@ -307,6 +342,25 @@
                when COB-SCR-KEY-RIGHT
                    add 1 to ws-cursor-pos-delta-x
 
+               when COB-SCR-ESC
+                   display "QUITING" at 0917 
+                   set ws-quit to true 
+
+               when COB-SCR-F6 
+                   if ws-display-mode-effects then 
+                       set ws-display-mode-regular to true 
+                   else 
+                       set ws-display-mode-effects to true 
+                   end-if 
+
+               when COB-SCR-TAB                    
+                   if ws-cursor-type-tile then 
+                       set ws-cursor-type-enemy to true 
+                   else 
+                       set ws-cursor-type-tile to true 
+                   end-if
+
+
       *> Mouse click status
                when COB-SCR-LEFT-PRESSED 
                    set ws-mouse-clicked to true 
@@ -316,10 +370,7 @@
                    set ws-mouse-not-clicked to true 
       *             display "NOT CL" at 3505
 
-               when COB-SCR-ESC
-                   display "QUITING" at 0917 
-                   set ws-quit to true 
-
+    
       *         when other 
       *             display "KB INPUT" at 1750 ws-crt-status at 1765
 
@@ -332,7 +383,7 @@
            if ws-mouse-position not = zeros                
                and ws-mouse-row <= 20 
                and ws-mouse-clicked then                      
-               perform place-tile-at-mouse-pos      
+               perform place-item-at-mouse-pos      
            end-if 
  
       *> Non-special key input handling.
@@ -341,14 +392,19 @@
                when ws-kb-input = 'q'
                    display "QUITING" at 0917
                    set ws-quit to true              
-
-      *> TODO : alphabetize these
+      
 
                when ws-kb-input = '0' 
                    move zero to ws-cursor-draw-color-fg
 
+               when ws-kb-input = 'b'
+                   perform toggle-blocking-mode
+
+               when ws-kb-input = 'c'
+                   perform set-tile-char
+               
                when ws-kb-input = 'd'
-                   perform place-enemy-at-cursor-pos
+                   perform set-enemy-settings
 
                when ws-kb-input = 'e'
                    perform set-effect-id
@@ -359,29 +415,22 @@
                when ws-kb-input = 'g'
                    perform set-background-color
 
-               when ws-kb-input = 'c'
-                   perform set-tile-char
-               
-               when ws-kb-input = 'b'
-                   perform toggle-blocking-mode
-
-               when ws-kb-input = 'o' 
-                   perform write-world-data
-
                when ws-kb-input = 'h'
                    perform toggle-fg-highlight
-
+               
                when ws-kb-input = 'k'
                    perform toggle-blink
-                   
+               
+               when ws-kb-input = 'o' 
+                   perform write-world-data                   
 
                when ws-kb-input = space
                    if ws-crt-status not = COB-SCR-TIME-OUT
                        and ws-cursor-pos-delta = zeros 
                        and ws-crt-status = zeros      
-                       then                        
-                       perform place-tile-at-cursor-pos
-                   end-if
+                       then       
+                           perform place-item-at-cursor-pos
+                   end-if 
                   
                when other   
                    display "KB INPUT: " at 2601 ws-kb-input at 2610
@@ -462,7 +511,7 @@
            end-display 
            display "]:" at 2127 foreground-color 7 background-color 0               
 
-           accept ws-cursor-draw-color-fg at 2130
+           accept ws-cursor-draw-color-fg at 2130 update
            if ws-cursor-draw-color-fg > 7 then 
                move 7 to ws-cursor-draw-color-fg
            end-if 
@@ -481,7 +530,7 @@
            display "6" at 2125 foreground-color 0 background-color 6
            display "7" at 2126 foreground-color 0 background-color 7
            display "]:" at 2127 foreground-color 7 background-color 0
-           accept ws-cursor-draw-color-bg at 2130
+           accept ws-cursor-draw-color-bg at 2130 update
            if ws-cursor-draw-color-bg > 7 then 
                move 7 to ws-cursor-draw-color-bg
            end-if 
@@ -496,7 +545,7 @@
       *> Also highlight is reversed as well, so cannot display highlight
       *> foreground characters on accept.              
            accept 
-               ws-cursor-draw-char at 2117 
+               ws-cursor-draw-char at 2117 update 
                foreground-color ws-cursor-draw-color-bg
                background-color ws-cursor-draw-color-fg
            end-accept
@@ -538,7 +587,8 @@
 
        set-effect-id. 
            display "Tile effect id: " at 2101
-           accept ws-cursor-draw-effect at 2117
+           display "[Zero to clear]" at 2122
+           accept ws-cursor-draw-effect at 2117 update 
 
            if ws-cursor-draw-effect > 0 then 
                call "setup-tile-effect" using 
@@ -549,82 +599,34 @@
            exit paragraph.
 
 
-       place-enemy-at-cursor-pos.
-           compute ws-temp-map-pos-y = ws-cursor-pos-y + ws-cursor-scr-y
-           compute ws-temp-map-pos-x = ws-cursor-pos-x + ws-cursor-scr-x                          
-
-      *> Check to see if enemy was previously placed there.
-      *> If so, ask to remove it.
-           set ws-enemy-not-found to true
-           move zeros to ws-enemy-found-idx
-
-           perform varying ws-counter-1 from 1 by 1
-               until ws-counter-1 > ws-cur-num-enemies
-
-               if (ws-temp-map-pos = ws-enemy-pos(ws-counter-1)) then 
-                   set ws-enemy-found to true 
-                   move ws-counter-1 to ws-enemy-found-idx
-                   exit perform 
-               end-if 
-           end-perform 
-
-           if ws-enemy-found then 
-               display "Remove placed enemy? [y/n] " at 2101 
-               accept ws-replace-enemy at 2128 
-               if ws-replace-enemy = 'y' then 
-      *>           Shift whole array down one element, replacing deleted enemy               
-                   perform varying ws-counter-1 
-                       from ws-enemy-found-idx by 1 
-                       until ws-counter-1 > ws-cur-num-enemies + 1
-                       
-                       move ws-enemy(ws-counter-1 + 1) to 
-                           ws-enemy(ws-counter-1)
-                   end-perform 
-
-                   subtract 1 from ws-cur-num-enemies
-               end-if 
-               exit paragraph 
-           end-if 
-
-      *> Place new enemy if none exists.
-           add 1 to ws-cur-num-enemies
-
+       set-enemy-settings.
            display "Enter enemy max hp:" at 2101
-           accept ws-enemy-hp-total(ws-cur-num-enemies) at 2121
-           move ws-enemy-hp-total(ws-cur-num-enemies) 
-               to ws-enemy-hp-current(ws-cur-num-enemies)
-
-           
+           accept ws-cursor-enemy-hp at 2121 update 
+                      
            display "Enter enemy attack damage: " at 2101
-           accept ws-enemy-attack-damage(ws-cur-num-enemies) at 2128
+           accept ws-cursor-enemy-attack-damage at 2128 update
 
            display ws-line-mask at 2101  
 
            display "Enter enemy color [0-7]: " at 2101
-           accept ws-enemy-color(ws-cur-num-enemies) at 2126 
+           accept ws-cursor-enemy-color at 2126 update 
 
            display ws-line-mask at 2101  
 
            display "Enter enemy character: " at 2101
-           accept ws-enemy-char(ws-cur-num-enemies) at 2124 
+           accept ws-cursor-enemy-char at 2124 update 
 
            display ws-line-mask at 2101  
 
            display "Enter enemy ticks to move: " at 2101
-           accept ws-enemy-max-ticks(ws-cur-num-enemies) at 2128
-
-
-           move ws-temp-map-pos-y to ws-enemy-y(ws-cur-num-enemies) 
-           move ws-temp-map-pos-x to ws-enemy-x(ws-cur-num-enemies)
-
-           display "Enemy placed at:" at 2401 ws-temp-map-pos at 2417                  
-
-      *> TODO : Input validation. Subtract from total if zeros are entered.      
+           accept ws-cursor-enemy-movement-ticks at 2128 update 
 
            exit paragraph.
 
 
-       place-tile-at-mouse-pos.           
+
+
+       place-item-at-mouse-pos.           
            compute ws-temp-map-pos-y = ws-cursor-pos-y + ws-mouse-row                   
            compute ws-temp-map-pos-x = ws-cursor-pos-x + ws-mouse-col 
 
@@ -634,20 +636,28 @@
                and ws-temp-map-pos-x <= ws-max-map-width then 
 
                display "MOUSE: " at 2260 ws-temp-map-pos at 2270
-               perform place-tile                  
+               if ws-cursor-type-tile then 
+                   perform place-tile                  
+               else 
+                   perform place-enemy
+               end-if 
            end-if 
 
            exit paragraph.
 
 
-       place-tile-at-cursor-pos.
+       place-item-at-cursor-pos.
            compute ws-temp-map-pos-y = ws-cursor-pos-y + ws-cursor-scr-y
            compute ws-temp-map-pos-x = ws-cursor-pos-x + ws-cursor-scr-x                   
-           perform place-tile.
+           if ws-cursor-type-tile then 
+                   perform place-tile                  
+               else 
+                   perform place-enemy
+               end-if 
            exit paragraph.
 
 
-      *> Called from place tile of cursor or mouse!!! not directly!!!
+      *> Called from place item at cursor or mouse!!! not directly!!!
        place-tile.
 
            move ws-cursor-draw-color-fg 
@@ -681,6 +691,78 @@
            end-if 
 
            display "Tile placed at:" at 2401 ws-temp-map-pos at 2417                  
+
+           exit paragraph.
+
+
+      *> Called from place item at cursor or mouse!!! not directly!!!
+       place-enemy.
+      
+      *> Check to see if enemy was previously placed there.
+      *> If so, ask to remove it.
+           set ws-enemy-not-found to true
+           move zeros to ws-enemy-found-idx
+
+           perform varying ws-counter-1 from 1 by 1
+               until ws-counter-1 > ws-cur-num-enemies
+
+               if (ws-temp-map-pos = ws-enemy-pos(ws-counter-1)) then 
+                   set ws-enemy-found to true 
+                   move ws-counter-1 to ws-enemy-found-idx                   
+                   exit perform 
+               end-if 
+           end-perform 
+
+           if ws-enemy-found then 
+               display "Remove placed enemy? [y/n] " at 2101                
+               accept ws-replace-enemy at 2128 with auto-skip 
+               if ws-replace-enemy = 'y' then 
+      *>           Shift whole array down one element, replacing deleted enemy               
+                   perform varying ws-counter-1 
+                       from ws-enemy-found-idx by 1 
+                       until ws-counter-1 > ws-cur-num-enemies + 1
+                       
+                       move ws-enemy(ws-counter-1 + 1) to 
+                           ws-enemy(ws-counter-1)
+                   end-perform 
+
+                   subtract 1 from ws-cur-num-enemies
+               end-if 
+               exit paragraph 
+           end-if 
+
+      *> Place new enemy if none exists and enemy to place isn't empty.
+           if ws-cursor-enemy-hp not = zeros 
+               and ws-cursor-enemy-char not = spaces 
+               and ws-cursor-enemy-movement-ticks not = zeros then 
+
+               add 1 to ws-cur-num-enemies
+
+               move ws-cursor-enemy-color 
+                   to ws-enemy-color(ws-cur-num-enemies)
+           
+               move ws-cursor-enemy-attack-damage 
+                   to ws-enemy-attack-damage(ws-cur-num-enemies)
+           
+               move ws-cursor-enemy-char 
+                   to ws-enemy-char(ws-cur-num-enemies)
+           
+               move ws-cursor-enemy-hp 
+                   to ws-enemy-hp-current(ws-cur-num-enemies)
+
+               move ws-cursor-enemy-hp 
+                   to ws-enemy-hp-total(ws-cur-num-enemies)
+
+               move ws-cursor-enemy-movement-ticks 
+                   to ws-enemy-max-ticks(ws-cur-num-enemies)               
+
+               move ws-temp-map-pos-y to ws-enemy-y(ws-cur-num-enemies) 
+               move ws-temp-map-pos-x to ws-enemy-x(ws-cur-num-enemies)
+
+               display 
+                   "Enemy placed at:" at 2401 ws-temp-map-pos at 2417                  
+               end-display
+           end-if 
 
            exit paragraph.
 
@@ -736,6 +818,14 @@
 
            close fd-tile-data
 
+           open output fd-enemy-data
+               perform varying ws-counter-1 
+               from 1 by 1 until ws-counter-1 > ws-max-num-enemies
+                   move ws-enemy(ws-counter-1) to f-enemy
+                   write f-enemy 
+               end-perform 
+           close fd-enemy-data
+
            display "Saved world data." at 0101
 
            exit paragraph. 
@@ -746,14 +836,15 @@
            display "arrows - move cursor" at 0253
            display "     b - toggle blocking tiles" at 0353
            display "     c - set tile character" at 0453
-           display "     d - place/remove enemy" at 0553
-           display "   f/g - set foreground/background color" at 0653
-           display "     h - toggle fg highlight" at 0753
+           display "     d - set enemy attributes" at 0553
+           display "   f/g - set fore/background tile color" at 0653
+           display "     h - toggle fg tile highlight" at 0753
            display "     k - toggle blinking tiles" at 0853
            display "     l - load map data" at 0953
            display "     o - save map data" at 1053
            display "     q - quit editor" at 1153
-           display " space - place tile" at 1253
+           display " space - place tile or enemy" at 1253
+           display "   tab - toggle tile/enemy placement mode" at 1353
 
            exit paragraph.      
 

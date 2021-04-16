@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-11
-      *> Last Updated: 2021-04-12
+      *> Last Updated: 2021-04-16
       *> Purpose: Module to draw individual character with correct display 
       *>          attributes.
       *> Tectonics:
@@ -51,7 +51,11 @@
                10  l-tile-effect-id            pic 99.            
             
 
-       procedure division using  l-scr-draw-pos l-tile-map-data.
+           01  l-char-to-draw                  pic x.
+
+       procedure division using  
+           l-scr-draw-pos l-tile-map-data l-char-to-draw.
+
 
        main-procedure.
 
@@ -59,7 +63,7 @@
 
                when l-tile-is-highlight and l-tile-not-blinking
                    display 
-                       l-tile-char 
+                       l-char-to-draw 
                        at l-scr-draw-pos 
                        background-color l-tile-bg 
                        foreground-color l-tile-fg
@@ -68,7 +72,7 @@
                
                when l-tile-is-highlight and l-tile-is-blinking
                    display 
-                       l-tile-char 
+                       l-char-to-draw
                        at l-scr-draw-pos 
                        background-color l-tile-bg 
                        foreground-color l-tile-fg
@@ -77,7 +81,7 @@
 
                when l-tile-not-highlight and l-tile-is-blinking
                    display 
-                       l-tile-char 
+                       l-char-to-draw
                        at l-scr-draw-pos 
                        background-color l-tile-bg 
                        foreground-color l-tile-fg
@@ -86,7 +90,7 @@
                                                
                when other  
                    display 
-                       l-tile-char at l-scr-draw-pos 
+                       l-char-to-draw at l-scr-draw-pos 
                        background-color l-tile-bg 
                        foreground-color l-tile-fg 
                    end-display
