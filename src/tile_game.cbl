@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-04
+      *> Last Updated: 2021-04-16
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -30,20 +30,26 @@
                access is dynamic 
                record key is f-teleport-pos.               
 
+               select optional fd-enemy-data
+               assign to dynamic ws-map-enemy-file
+               organization is record sequential.
 
        data division.
 
        file section.
 
-           fd fd-tile-data.
+           fd  fd-tile-data.
            01  f-tile-data-record.
                05  f-tile-fg               pic 9.   
                05  f-tile-bg               pic 9.
                05  f-tile-char             pic x.
-               05  f-tile-is-blocking      pic a.
+               05  f-tile-highlight        pic a.
+               05  f-tile-blocking         pic a.
+               05  f-tile-blinking         pic a.
                05  f-tile-effect-id        pic 99.
 
-           fd fd-teleport-data.
+
+           fd  fd-teleport-data.
            01  f-teleport-data-record.
                05  f-teleport-pos.
                    10  f-teleport-y        pic S99.
@@ -52,6 +58,22 @@
                    10  f-teleport-dest-y   pic S99.
                    10  f-teleport-dest-x   pic S99.
                05  f-teleport-dest-map     pic x(15).
+
+           fd  fd-enemy-data.           
+           01  f-enemy.
+               05  f-enemy-hp.
+                   10  f-enemy-hp-total         pic 999.
+                   10  f-enemy-hp-current       pic 999.
+               05  f-enemy-attack-damage        pic 999.
+               05  f-enemy-pos.
+                   10  f-enemy-y                pic 99.
+                   10  f-enemy-x                pic 99.
+               05  f-enemy-color                pic 9. 
+               05  f-enemy-char                 pic x. 
+               05  f-enemy-status               pic 9.
+               05  f-enemy-movement-ticks.
+                   10  f-enemy-current-ticks    pic 999.
+                   10  f-enemy-max-ticks        pic 999.
 
        working-storage section.
 
@@ -62,13 +84,15 @@
                05  ws-crt-status-key-2     pic 99.
 
            01  ws-map-files.  
-               05  ws-map-name             pic x(15) value "world1".
-               05  ws-map-name-temp        pic x(15) value "world1".           
+               05  ws-map-name             pic x(15) value "world0".
+               05  ws-map-name-temp        pic x(15) value "world0".           
                05  ws-map-dat-file         pic x(15).               
                05  ws-map-tel-file         pic x(15).
+               05  ws-map-enemy-file       pic x(15).
                           
            78  ws-data-file-ext            value ".dat".
            78  ws-teleport-file-ext        value ".tel".
+           78  ws-enemy-file-ext           value ".bgs".
 
            01  ws-temp-time                pic 9(9).
 
@@ -100,29 +124,44 @@
                    10  ws-player-scr-x         pic 99 value 20.    
                78  ws-player-char              value "@".
 
-           01  ws-enemy.         *>occurs x number of times... configure on later date.
-               05  ws-enemy-hp.
-                   10  ws-enemy-hp-total    pic 999 value 10.
-                   10  ws-enemy-hp-current  pic 999 value 10.
-               05  ws-enemy-attack-damage   pic 999 value 1.
-               05  ws-enemy-pos.
-                   10  ws-enemy-y           pic 99.
-                   10  ws-enemy-x           pic 99.
-               05  ws-enemy-color           pic 9 value red.                                     
-               05  ws-enemy-char            pic x value "&".
-                   88  ws-enemy-char-alive  value "&".
-                   88  ws-enemy-char-dead   value "X".
-                   88  ws-enemy-char-hurt   value "#".
-               05  ws-enemy-status              pic 9 value 0.
-                   88  ws-enemy-status-alive    value 0.
-                   88  ws-enemy-status-dead     value 1.
-                   88  ws-enemy-status-attacked value 2.
-                   88  ws-enemy-status-other    value 3.
-               05  ws-enemy-movement-ticks.
-                   10  ws-enemy-current-ticks   pic 9.
-                   10  ws-enemy-max-ticks       pic 9 value 3.
+           
+           01  ws-cur-num-enemies           pic 99 value 0.
 
-               
+           01  ws-enemy-data.
+               05  ws-enemy       occurs 0 to ws-max-num-enemies times
+                                  depending on ws-cur-num-enemies.
+                   10  ws-enemy-hp.
+                       15  ws-enemy-hp-total    pic 999 value 10.
+                       15  ws-enemy-hp-current  pic 999 value 10.
+                   10  ws-enemy-attack-damage   pic 999 value 1.
+                   10  ws-enemy-pos.
+                       15  ws-enemy-y           pic 99.
+                       15  ws-enemy-x           pic 99.
+                   10  ws-enemy-color           pic 9 value red.                                     
+      *>TODO: this isn't configurable will reset after hit.
+                   10  ws-enemy-char            pic x value "&". 
+                       88  ws-enemy-char-alive  value "&".
+                       88  ws-enemy-char-dead   value "X".
+                       88  ws-enemy-char-hurt   value "#".
+                   10  ws-enemy-status              pic 9 value 0.
+                       88  ws-enemy-status-alive    value 0.
+                       88  ws-enemy-status-dead     value 1.
+                       88  ws-enemy-status-attacked value 2.
+                       88  ws-enemy-status-other    value 3.
+                   10  ws-enemy-movement-ticks.
+                       15  ws-enemy-current-ticks   pic 999.
+                       15  ws-enemy-max-ticks       pic 999 value 3.
+
+           01  ws-enemy-placed-found        pic a value 'N'.
+               88  ws-enemy-found           value 'Y'.
+               88  ws-enemy-not-found       value 'N'.
+           01  ws-enemy-found-idx           pic 99.
+
+           01  ws-enemy-draw-pos    occurs 0 to ws-max-num-enemies times
+                                    depending on ws-cur-num-enemies.
+               05  ws-enemy-draw-y          pic 99.
+               05  ws-enemy-draw-x          pic 99.
+
 
            01  ws-kb-input                  pic x.
 
@@ -130,15 +169,22 @@
                88  ws-quit                  value 'Y'.
                88  ws-not-quit              value 'N'.
 
-           01  ws-tile-map            occurs ws-max-map-height times.
-               05  ws-tile-map-data   occurs ws-max-map-width times.
-                   10  ws-tile-fg               pic 9.   
-                   10  ws-tile-bg               pic 9.
-                   10  ws-tile-char             pic x.
-                   10  ws-tile-is-blocking      pic a value 'N'.
-                       88  ws-tile-blocking     value 'Y'.
-                       88  ws-tile-not-blocking value 'N'.  
-                   10  ws-tile-effect-id        pic 99.       
+           01  ws-tile-map-table-matrix.
+               05  ws-tile-map           occurs ws-max-map-height times.
+                   10  ws-tile-map-data   occurs ws-max-map-width times.
+                       15  ws-tile-fg                   pic 9.   
+                       15  ws-tile-bg                   pic 9.
+                       15  ws-tile-char                 pic x.
+                       15  ws-tile-highlight            pic a value 'N'.
+                           88 ws-tile-is-highlight      value 'Y'.
+                           88 ws-tile-not-highlight     value 'N'.
+                       15  ws-tile-blocking             pic a value 'N'.
+                           88  ws-tile-is-blocking      value 'Y'.
+                           88  ws-tile-not-blocking     value 'N'.  
+                       15  ws-tile-blinking             pic a value 'N'.
+                           88  ws-tile-is-blinking      value 'Y'.
+                           88  ws-tile-not-blinking     value 'N'.
+                       15  ws-tile-effect-id            pic 99.      
 
 
            01  ws-scr-refresh-req           pic a value 'Y'.
@@ -155,6 +201,8 @@
 
            01  ws-counter-1                 pic 999.
            01  ws-counter-2                 pic 999.
+           01  ws-enemy-idx                 pic 99.
+
            01  ws-temp-color                pic 9.
 
            01  ws-temp-map-pos.
@@ -191,9 +239,7 @@
            set environment "COB_TIMEOUT_SCALE" to '3'.
 
        init-setup. 
-           move 0505 to ws-player-pos  
-
-           move 0220 to ws-enemy-pos                      
+           move 0505 to ws-player-pos                         
 
            display space blank screen 
 
@@ -201,8 +247,7 @@
            move function random(ws-temp-time) to ws-filler.
 
       *     perform generate-fake-world-data.
-      
-
+           
        load-tile-map.
 
       *> Set file names based on map name
@@ -214,9 +259,16 @@
                function trim(ws-map-name), ws-teleport-file-ext)
                to ws-map-tel-file
 
-      *> Load data from file.
-           open input fd-tile-data
+           move function concatenate(
+               function trim(ws-map-name), ws-enemy-file-ext)
+               to ws-map-enemy-file               
 
+      *> Load data from file.
+           
+           initialize f-tile-data-record
+           open input fd-tile-data
+           display ws-map-dat-file at 0150
+           
            perform varying ws-counter-1 
            from 1 by 1 until ws-counter-1 > ws-max-map-height
                perform varying ws-counter-2 
@@ -225,20 +277,50 @@
                    read fd-tile-data 
                        into ws-tile-map-data(ws-counter-1, ws-counter-2)
                    end-read 
-
+                   display ws-tile-map-data(ws-counter-1, ws-counter-2)
+                       at 0501
+                   end-display               
                end-perform
            end-perform
+           display "Press enter to close input file" at 0625
+           accept ws-filler 
+           close fd-tile-data
+           display "Input file closed" at 0625
+           display ws-player-pos at 0725
+           accept ws-filler 
+           
+      *> Reset enemy file info.
+           move 0 to ws-cur-num-enemies
+           set ws-not-eof to true             
 
-           close fd-tile-data.       
+           open input fd-enemy-data      
+               perform until ws-is-eof 
+                   add 1 to ws-cur-num-enemies        
+                   if ws-cur-num-enemies < ws-max-num-enemies then            
+                       read fd-enemy-data 
+                           into ws-enemy(ws-cur-num-enemies)    
+                           at end set ws-is-eof to true 
+                       end-read 
+                   else 
+                       set ws-is-eof to true 
+                   end-if 
+                   
+                   display ws-cur-num-enemies at 0101
+                   display f-enemy at 0201
+                   display ws-eof at 0301      
+               end-perform 
+           close fd-enemy-data
 
+      *     stop run.
+           .
 
        main-procedure.
-
+           
            perform until ws-quit   
 
       *         move function current-date to ws-current-date-data
       *         move ws-current-millisecond to ws-start-frame
-
+               
                perform draw-playfield                              
                perform get-input                              
                perform move-player  
@@ -274,7 +356,7 @@
            move zeros to ws-temp-map-pos
 
            display "pscrpos: " at 1950 ws-player-scr-pos at 1960
-           display "enemyHP: " at 0150 ws-enemy-hp-current at 0160
+      *     display "enemyHP: " at 0150 ws-enemy-hp-current at 0160
 
            perform varying ws-counter-1 
            from 1 by 1 until ws-counter-1 > ws-max-view-height
@@ -322,21 +404,44 @@
                        end-display  
                    end-if  
 
-      *> draw enemy
-                   if ws-map-pos-y = ws-enemy-y 
-                       and ws-map-pos-x = ws-enemy-x then 
-
-                       display ws-enemy-char 
-                           at ws-scr-draw-pos 
-                           background-color 
-                           ws-tile-bg(ws-map-pos-y, ws-map-pos-x) 
-                           foreground-color ws-enemy-color highlight 
-                       end-display 
-                   end-if  
-
-
-               end-perform
+                end-perform
            end-perform.
+
+      *> Draw enemies if they exist and are visible.
+           if ws-cur-num-enemies > 0 then 
+               perform varying ws-enemy-idx from 1 by 1 
+               until ws-enemy-idx > ws-cur-num-enemies
+
+                   if ws-enemy-y(ws-enemy-idx) > ws-player-y then                    
+                       compute ws-enemy-draw-y(ws-enemy-idx) = 
+                           ws-enemy-y(ws-enemy-idx) - ws-player-y
+                       end-compute 
+                    end-if 
+
+                   if ws-enemy-x(ws-enemy-idx) > ws-player-x then                    
+                       compute ws-enemy-draw-x(ws-enemy-idx) = 
+                           ws-enemy-x(ws-enemy-idx) - ws-player-x
+                       end-compute 
+                   end-if   
+
+      *>       Draw enemy if in visible view area.
+                   if ws-enemy-draw-y(ws-enemy-idx) > 0 and 
+                   ws-enemy-draw-y(ws-enemy-idx) <= ws-max-view-height
+                   and ws-enemy-draw-x(ws-enemy-idx) > 0 and 
+                   ws-enemy-draw-x(ws-enemy-idx) <= ws-max-view-width
+                   then 
+                       display 
+                           ws-enemy-char(ws-enemy-idx) 
+                           at ws-enemy-draw-pos(ws-enemy-idx)
+                           foreground-color ws-enemy-color(ws-enemy-idx)
+                           background-color ws-tile-bg(
+                               ws-enemy-y(ws-enemy-idx), 
+                               ws-enemy-x(ws-enemy-idx))
+                       end-display
+                   end-if                   
+
+               end-perform 
+           end-if  
 
            set ws-scr-no-refresh to true
 
@@ -479,12 +584,14 @@
                    display "No teleport at" at 2201 
                        f-teleport-pos at 2216
                    end-display 
-               not invalid key                    
-                   move f-teleport-dest-y to ws-player-y
-                   move f-teleport-dest-x to ws-player-x 
-                   
+               not invalid key  
+               *> something is up with this not loading correctly...                  
+      *             move f-teleport-dest-y to ws-player-y
+      *             move f-teleport-dest-x to ws-player-x 
+                   move 1020 to ws-player-pos 
                    display "Teleport at: " at 2301  
                        f-teleport-pos at 2317
+                       ws-player-pos at 2325
                    end-display  
                    if f-teleport-dest-map not = ws-map-name then
                        move f-teleport-dest-map to ws-map-name-temp                        
@@ -499,9 +606,9 @@
                ws-map-dat-file at 0960 
            end-display
 
-           if ws-map-name-temp not = ws-map-name then 
-               display "New map!" at 1060
+           if ws-map-name-temp not = ws-map-name then                
                move ws-map-name-temp to ws-map-name
+               display "New map!" at 1060 ws-map-name at 1070               
                perform load-tile-map                 
            end-if 
 
@@ -511,38 +618,44 @@
 
        move-enemy.
 
-      *> TODO : simple filler code... needs to be actually written out.
+      *> TODO : filler code... needs to be actually written out.
 
-           if ws-enemy-status-dead then               
-               exit paragraph
-           end-if
+           perform varying ws-enemy-idx 
+           from 1 by 1 until ws-enemy-idx > ws-cur-num-enemies
 
+               if not ws-enemy-status-dead(ws-enemy-idx) then 
 
-           add 1 to ws-enemy-current-ticks
-           if ws-enemy-current-ticks <= ws-enemy-max-ticks then 
-               exit paragraph
-           end-if  
+               *> magic numbers!
+                   add 20 to ws-enemy-current-ticks(ws-enemy-idx)
 
-           if ws-enemy-current-ticks > ws-enemy-max-ticks then 
-               move 0 to ws-enemy-current-ticks
-           end-if 
+                   if ws-enemy-current-ticks(ws-enemy-idx) >= 
+                   ws-enemy-max-ticks(ws-enemy-idx) then 
 
-      *> reset them back to alive status if hurt.
-           if ws-enemy-char-hurt then 
-               set ws-enemy-char-alive to true 
-           end-if 
+                       move 0 to ws-enemy-current-ticks(ws-enemy-idx)
+                       
+                       if ws-enemy-char-hurt(ws-enemy-idx) 
+                       then 
+                           set ws-enemy-char-alive(ws-enemy-idx) to true 
+                       end-if 
 
-           if ws-enemy-y < ws-player-y + ws-player-scr-y then 
-               add 1 to ws-enemy-y            
-           else 
-               subtract 1 from ws-enemy-y 
-           end-if  
+                       if ws-enemy-y(ws-enemy-idx) < 
+                       ws-player-y + ws-player-scr-y then 
 
-           if ws-enemy-x < ws-player-x + ws-player-scr-x then 
-               add 1 to ws-enemy-x 
-           else 
-               subtract 1 from ws-enemy-x 
-           end-if 
+                           add 1 to ws-enemy-y(ws-enemy-idx)
+                       else 
+                           subtract 1 from ws-enemy-y(ws-enemy-idx)
+                       end-if  
+
+                       if ws-enemy-x(ws-enemy-idx) < 
+                       ws-player-x + ws-player-scr-x then 
+               
+                           add 1 to ws-enemy-x(ws-enemy-idx)
+                       else 
+                           subtract 1 from ws-enemy-x(ws-enemy-idx)
+                       end-if 
+                   end-if 
+               end-if 
+           end-perform 
 
            exit paragraph.
                
@@ -551,12 +664,12 @@
        player-attack.
 
       *> TODO : filler paragraph attacks bad guy regardless where he is.           
-           if ws-enemy-hp-current > 0 then 
-               subtract 1 from ws-enemy-hp-current
-               set ws-enemy-char-hurt to true
+           if ws-enemy-hp-current(ws-enemy-idx) > 0 then 
+               subtract 1 from ws-enemy-hp-current(ws-enemy-idx)
+               set ws-enemy-char-hurt(ws-enemy-idx) to true
            else 
-               set ws-enemy-char-dead to true 
-               set ws-enemy-status-dead to true 
+               set ws-enemy-char-dead(ws-enemy-idx) to true 
+               set ws-enemy-status-dead(ws-enemy-idx) to true 
            end-if 
 
            exit paragraph.
@@ -580,11 +693,11 @@
 
                    compute ws-filler = function random * 10 + 1
                    if ws-filler > 8 then  
-                       move 'Y' to f-tile-is-blocking                       
+                       move 'Y' to f-tile-blocking                       
                        move "B" to f-tile-char
                        move zero to f-tile-fg
                    else
-                       move 'N' to f-tile-is-blocking
+                       move 'N' to f-tile-blocking
                        move space to f-tile-char
                    end-if 
 

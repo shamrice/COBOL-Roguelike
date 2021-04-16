@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-04-16git 
+      *> Last Updated: 2021-04-16 
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -97,7 +97,7 @@
                    10  l-cursor-enemy-attack-damage   pic 999 value 1.
                    10  l-cursor-enemy-color           pic 9 value red.                                           
                    10  l-cursor-enemy-char            pic x value "&". 
-                   10  l-cursor-enemy-movement-ticks  pic 9.                   
+                   10  l-cursor-enemy-movement-ticks  pic 999.                   
                05  l-cursor-draw-effect       pic 99.
                05  l-cursor-type              pic a value 'T'.
                    88  l-cursor-type-tile     value 'T'.
@@ -145,8 +145,8 @@
                        88  l-enemy-status-attacked value 2.
                        88  l-enemy-status-other    value 3.
                    10  l-enemy-movement-ticks.
-                       15  l-enemy-current-ticks   pic 9.
-                       15  l-enemy-max-ticks       pic 9 value 3.
+                       15  l-enemy-current-ticks   pic 999.
+                       15  l-enemy-max-ticks       pic 999 value 3.
 
            01  l-num-enemies                   pic 99.
 

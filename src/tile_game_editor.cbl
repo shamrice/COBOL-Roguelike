@@ -56,8 +56,8 @@
                05  f-enemy-char                 pic x. 
                05  f-enemy-status               pic 9.
                05  f-enemy-movement-ticks.
-                   10  f-enemy-current-ticks    pic 9.
-                   10  f-enemy-max-ticks        pic 9.
+                   10  f-enemy-current-ticks    pic 999.
+                   10  f-enemy-max-ticks        pic 999.
 
        working-storage section.
 
@@ -136,7 +136,7 @@
                    10  ws-cursor-enemy-attack-damage   pic 999 value 1.
                    10  ws-cursor-enemy-color           pic 9 value red.                                           
                    10  ws-cursor-enemy-char            pic x value "&". 
-                   10  ws-cursor-enemy-movement-ticks  pic 9 value 3.    
+                   10  ws-cursor-enemy-movement-ticks  pic 999 value 3.    
                05  ws-cursor-draw-effect               pic 99.                   
                05  ws-cursor-type                      pic a value 'T'.
                    88  ws-cursor-type-tile             value 'T'.
@@ -179,8 +179,8 @@
                        88  ws-enemy-status-attacked value 2.
                        88  ws-enemy-status-other    value 3.
                    10  ws-enemy-movement-ticks.
-                       15  ws-enemy-current-ticks   pic 9.
-                       15  ws-enemy-max-ticks       pic 9 value 3.
+                       15  ws-enemy-current-ticks   pic 999.
+                       15  ws-enemy-max-ticks       pic 999 value 3.
 
 
            01  ws-tile-map-table-matrix.
@@ -754,7 +754,9 @@
                    to ws-enemy-hp-total(ws-cur-num-enemies)
 
                move ws-cursor-enemy-movement-ticks 
-                   to ws-enemy-max-ticks(ws-cur-num-enemies)               
+                   to ws-enemy-max-ticks(ws-cur-num-enemies) 
+               move ws-cursor-enemy-movement-ticks
+                   to ws-enemy-current-ticks(ws-cur-num-enemies)              
 
                move ws-temp-map-pos-y to ws-enemy-y(ws-cur-num-enemies) 
                move ws-temp-map-pos-x to ws-enemy-x(ws-cur-num-enemies)
@@ -820,7 +822,7 @@
 
            open output fd-enemy-data
                perform varying ws-counter-1 
-               from 1 by 1 until ws-counter-1 > ws-max-num-enemies
+               from 1 by 1 until ws-counter-1 > ws-cur-num-enemies
                    move ws-enemy(ws-counter-1) to f-enemy
                    write f-enemy 
                end-perform 
