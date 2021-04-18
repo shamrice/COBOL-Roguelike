@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-04-16 
+      *> Last Updated: 2021-04-18
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -60,7 +60,7 @@
            01  ws-line-mask                 pic x(80) value spaces. 
 
            01  ls-enemy-draw-pos    occurs 0 to ws-max-num-enemies times
-                                    depending on l-num-enemies.
+                                    depending on l-cur-num-enemies.
                05  ls-enemy-draw-y          pic 99.
                05  ls-enemy-draw-x          pic 99.
 
@@ -98,6 +98,10 @@
                    10  l-cursor-enemy-color           pic 9 value red.                                           
                    10  l-cursor-enemy-char            pic x value "&". 
                    10  l-cursor-enemy-movement-ticks  pic 999.                   
+               05  l-cursor-teleport-settings.
+                   10  l-cursor-tel-dest-y            pic 99.
+                   10  l-cursor-tel-dest-x            pic 99.
+                   10  l-cursor-tel-dest-map          pic x(15).                       
                05  l-cursor-draw-effect       pic 99.
                05  l-cursor-type              pic a value 'T'.
                    88  l-cursor-type-tile     value 'T'.
@@ -124,8 +128,9 @@
 
 
            01  l-enemy-data.
+               05  l-cur-num-enemies           pic 99.
                05  l-enemy       occurs 0 to unbounded times
-                                  depending on l-num-enemies.
+                                  depending on l-cur-num-enemies.
                    10  l-enemy-hp.
                        15  l-enemy-hp-total    pic 999 value 10.
                        15  l-enemy-hp-current  pic 999 value 10.
@@ -146,9 +151,7 @@
                        88  l-enemy-status-other    value 3.
                    10  l-enemy-movement-ticks.
                        15  l-enemy-current-ticks   pic 999.
-                       15  l-enemy-max-ticks       pic 999 value 3.
-
-           01  l-num-enemies                   pic 99.
+                       15  l-enemy-max-ticks       pic 999 value 3.           
 
            01  l-display-mode                     pic a value 'R'.
                88  l-display-mode-regular         value 'R'.
@@ -156,7 +159,7 @@
 
        procedure division using 
                l-cursor l-tile-map-table-matrix l-enemy-data
-               l-num-enemies l-display-mode.
+               l-display-mode.
 
        main-procedure.
 
@@ -223,9 +226,9 @@
            end-perform.
 
       *> Draw enemies if they exist and are visible.
-           if l-num-enemies > 0 then 
+           if l-cur-num-enemies > 0 then 
                perform varying ls-enemy-idx from 1 by 1 
-               until ls-enemy-idx > l-num-enemies
+               until ls-enemy-idx > l-cur-num-enemies
 
                    if l-enemy-y(ls-enemy-idx) > l-cursor-pos-y then                    
                        compute ls-enemy-draw-y(ls-enemy-idx) = 

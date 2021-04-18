@@ -22,17 +22,20 @@
        file-control.
            select optional fd-tile-data 
                assign to dynamic ws-map-dat-file 
-               organization is record sequential.
+               organization is record sequential
+               file status is ws-map-file-status.
 
            select optional fd-teleport-data 
                assign to dynamic ws-map-tel-file      
                organization is indexed
                access is dynamic 
-               record key is f-teleport-pos.               
+               record key is f-teleport-pos
+               file status is ws-teleport-file-status.               
 
                select optional fd-enemy-data
                assign to dynamic ws-map-enemy-file
-               organization is record sequential.
+               organization is record sequential
+               file status is ws-enemy-file-status.
 
        data division.
 
@@ -89,7 +92,15 @@
                05  ws-map-dat-file         pic x(15).               
                05  ws-map-tel-file         pic x(15).
                05  ws-map-enemy-file       pic x(15).
-                          
+
+           01  ws-map-file-statuses.
+               05  ws-map-file-status      pic xx.
+               05  ws-teleport-file-status pic xx.
+               05  ws-enemy-file-status    pic xx.
+
+           78  ws-file-status-ok           value "00".
+           78  ws-file-status-eof          value "10".
+
            78  ws-data-file-ext            value ".dat".
            78  ws-teleport-file-ext        value ".tel".
            78  ws-enemy-file-ext           value ".bgs".
@@ -139,18 +150,18 @@
                        15  ws-enemy-x           pic 99.
                    10  ws-enemy-color           pic 9 value red.                                     
       *>TODO: this isn't configurable will reset after hit.
-                   10  ws-enemy-char            pic x value "&". 
+                   10  ws-enemy-char            pic x value space. 
                        88  ws-enemy-char-alive  value "&".
                        88  ws-enemy-char-dead   value "X".
                        88  ws-enemy-char-hurt   value "#".
-                   10  ws-enemy-status              pic 9 value 0.
+                   10  ws-enemy-status              pic 9 value 3.
                        88  ws-enemy-status-alive    value 0.
                        88  ws-enemy-status-dead     value 1.
                        88  ws-enemy-status-attacked value 2.
                        88  ws-enemy-status-other    value 3.
                    10  ws-enemy-movement-ticks.
                        15  ws-enemy-current-ticks   pic 999.
-                       15  ws-enemy-max-ticks       pic 999 value 3.
+                       15  ws-enemy-max-ticks       pic 999.
 
            01  ws-enemy-placed-found        pic a value 'N'.
                88  ws-enemy-found           value 'Y'.
@@ -263,11 +274,18 @@
                function trim(ws-map-name), ws-enemy-file-ext)
                to ws-map-enemy-file               
 
-      *> Load data from file.
-           
-           initialize f-tile-data-record
+      *> Load data from files.
+
            open input fd-tile-data
-           display ws-map-dat-file at 0150
+
+           if ws-map-file-status not = ws-file-status-ok then 
+               display 
+                   "Failed to open tile data: " at 0101
+                   ws-map-dat-file at 0130
+               end-display 
+               stop run 
+           end-if     
+                     
            
            perform varying ws-counter-1 
            from 1 by 1 until ws-counter-1 > ws-max-map-height
@@ -277,9 +295,12 @@
                    read fd-tile-data 
                        into ws-tile-map-data(ws-counter-1, ws-counter-2)
                    end-read 
-                   display ws-tile-map-data(ws-counter-1, ws-counter-2)
-                       at 0501
-                   end-display               
+                   if ws-map-file-status not = ws-file-status-ok then 
+                       display "Error reading tile map data." at 0101
+                       display ws-map-file-status at 0201
+                       close fd-tile-data
+                       stop run 
+                   end-if 
                end-perform
            end-perform
            display "Press enter to close input file" at 0625
@@ -296,11 +317,25 @@
            open input fd-enemy-data      
                perform until ws-is-eof 
                    add 1 to ws-cur-num-enemies        
-                   if ws-cur-num-enemies < ws-max-num-enemies then            
+                   if ws-cur-num-enemies < ws-max-num-enemies then  
+
+                       initialize ws-enemy(ws-cur-num-enemies)  
+                       initialize ws-enemy-draw-pos(ws-cur-num-enemies)
+
                        read fd-enemy-data 
                            into ws-enemy(ws-cur-num-enemies)    
                            at end set ws-is-eof to true 
-                       end-read 
+                       end-read
+
+                       if ws-enemy-file-status not = 
+                       ws-file-status-ok and ws-enemy-file-status not = 
+                       ws-file-status-eof then 
+                           display "Error reading enemy data." at 0101
+                           display ws-enemy-file-status at 0201
+                           close fd-enemy-data
+                           stop run 
+                       end-if  
+
                    else 
                        set ws-is-eof to true 
                    end-if 
@@ -310,8 +345,6 @@
                    display ws-eof at 0301      
                end-perform 
            close fd-enemy-data
-
-      *     stop run.
            .
 
        main-procedure.
@@ -320,11 +353,11 @@
 
       *         move function current-date to ws-current-date-data
       *         move ws-current-millisecond to ws-start-frame
-               
+                               
                perform draw-playfield                              
                perform get-input                              
                perform move-player  
-               perform move-enemy                        
+               perform move-enemy                       
 
       *> TODO: Decide if want actual FPS figured out or more like a rouge-like
       *>       game where there's a steady "tick" unless player has input.         
@@ -352,6 +385,8 @@
       *>     if ws-scr-no-refresh then 
       *>         exit paragraph 
       *>     end-if 
+
+      *> TODO : UPDATE DRAW ROUTINE TO MATCH EDITOR! This is outdated and missing features.
 
            move zeros to ws-temp-map-pos
 
@@ -574,6 +609,7 @@
       ******************************************************************
        check-teleport.
 
+      *> TODO : Update this to new way teleports are handled.
            open input fd-teleport-data
       
            move ws-player-pos to f-teleport-pos 

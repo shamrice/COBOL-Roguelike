@@ -27,6 +27,10 @@
                assign to dynamic ws-map-enemy-file
                organization is record sequential.
 
+               select optional fd-teleport-data
+               assign to dynamic ws-map-tel-file
+               organization is record sequential.
+
        data division.
 
        file section.
@@ -58,6 +62,16 @@
                05  f-enemy-movement-ticks.
                    10  f-enemy-current-ticks    pic 999.
                    10  f-enemy-max-ticks        pic 999.
+
+           fd  fd-teleport-data.
+           01  f-teleport-data-record.
+               05  f-teleport-pos.
+                   10  f-teleport-y        pic S99.
+                   10  f-teleport-x        pic S99.
+               05  f-teleport-dest-pos.
+                   10  f-teleport-dest-y   pic S99.
+                   10  f-teleport-dest-x   pic S99.
+               05  f-teleport-dest-map     pic x(15).                   
 
        working-storage section.
 
@@ -105,6 +119,7 @@
            78  ws-max-map-height              value 25.
            78  ws-max-map-width               value 80.
            78  ws-max-num-enemies             value 99.
+           78  ws-max-num-teleports           value 999.
 
            01  ws-line-mask                   pic x(50) value spaces.
 
@@ -136,7 +151,11 @@
                    10  ws-cursor-enemy-attack-damage   pic 999 value 1.
                    10  ws-cursor-enemy-color           pic 9 value red.                                           
                    10  ws-cursor-enemy-char            pic x value "&". 
-                   10  ws-cursor-enemy-movement-ticks  pic 999 value 3.    
+                   10  ws-cursor-enemy-movement-ticks  pic 999 value 3.
+               05  ws-cursor-teleport-settings.
+                   10  ws-cursor-tel-dest-y            pic 99.
+                   10  ws-cursor-tel-dest-x            pic 99.
+                   10  ws-cursor-tel-dest-map          pic x(15).    
                05  ws-cursor-draw-effect               pic 99.                   
                05  ws-cursor-type                      pic a value 'T'.
                    88  ws-cursor-type-tile             value 'T'.
@@ -153,11 +172,10 @@
            01  ws-display-mode                     pic a value 'R'.
                88  ws-display-mode-regular         value 'R'.
                88  ws-display-mode-effects         value 'E'.
-           
-           01  ws-cur-num-enemies           pic 99 value 0.
-
+                     
 
            01  ws-enemy-data.
+               05  ws-cur-num-enemies           pic 99 value 0.
                05  ws-enemy       occurs 0 to ws-max-num-enemies times
                                   depending on ws-cur-num-enemies.
                    10  ws-enemy-hp.
@@ -201,15 +219,21 @@
                        15  ws-tile-effect-id            pic 99.       
 
 
-           01  ws-teleport-data-record.
-               05  ws-teleport-pos.
-                   10  ws-teleport-y        pic S99.
-                   10  ws-teleport-x        pic S99.
-               05  ws-teleport-dest-pos.
-                   10  ws-teleport-dest-y   pic S99.
-                   10  ws-teleport-dest-x   pic S99.
-               05  ws-teleport-dest-map     pic x(15).
+           01  ws-teleport-data.
+               05  ws-cur-num-teleports        pic 999.
+               05  ws-teleport-data-record     occurs 0 
+                                               to ws-max-num-teleports
+                                      depending on ws-cur-num-teleports.
+                   10  ws-teleport-pos.
+                       15  ws-teleport-y        pic S99.
+                       15  ws-teleport-x        pic S99.
+                   10  ws-teleport-dest-pos.
+                       15  ws-teleport-dest-y   pic S99.
+                       15  ws-teleport-dest-x   pic S99.
+                   10  ws-teleport-dest-map     pic x(15).
        
+           
+
            01  ws-temp-input                pic x.
 
            01  ws-scr-refresh-req           pic a value 'Y'.
@@ -315,7 +339,7 @@
       
            call "draw-dynamic-screen-data" 
                using ws-cursor ws-tile-map-table-matrix ws-enemy-data
-               ws-cur-num-enemies ws-display-mode
+               ws-display-mode
            end-call 
            set ws-scr-no-refresh to true
 
@@ -592,7 +616,7 @@
 
            if ws-cursor-draw-effect > 0 then 
                call "setup-tile-effect" using 
-                   ws-cursor-draw-effect ws-teleport-data-record
+                   ws-cursor-draw-effect ws-cursor-teleport-settings
            end-if 
 
            set ws-scr-refresh to true 
@@ -678,15 +702,13 @@
 
            move ws-cursor-draw-blinking
                to ws-tile-blinking(ws-temp-map-pos-y, ws-temp-map-pos-x)
-
-           move ws-cursor-draw-effect
-               to ws-tile-effect-id(
-                   ws-temp-map-pos-y, ws-temp-map-pos-x)
                    
            if ws-cursor-draw-effect > 0 then 
-               call "save-tile-effect" using 
-                   ws-cursor-draw-effect ws-map-files ws-cursor-pos 
-                   ws-teleport-data-record
+               call "set-tile-effect" using
+                   ws-temp-map-pos
+                   ws-tile-effect-id(
+                       ws-temp-map-pos-y, ws-temp-map-pos-x)
+                   ws-cursor ws-teleport-data 
                end-call 
            end-if 
 
@@ -706,7 +728,7 @@
            perform varying ws-counter-1 from 1 by 1
                until ws-counter-1 > ws-cur-num-enemies
 
-               if (ws-temp-map-pos = ws-enemy-pos(ws-counter-1)) then 
+               if ws-temp-map-pos = ws-enemy-pos(ws-counter-1) then 
                    set ws-enemy-found to true 
                    move ws-counter-1 to ws-enemy-found-idx                   
                    exit perform 
@@ -827,6 +849,16 @@
                    write f-enemy 
                end-perform 
            close fd-enemy-data
+
+
+           open output fd-teleport-data
+               perform varying ws-counter-1 
+               from 1 by 1 until ws-counter-1 > ws-cur-num-teleports
+                   move ws-teleport-data-record(ws-counter-1) 
+                       to f-teleport-data-record
+                   write f-teleport-data-record
+               end-perform 
+           close fd-teleport-data
 
            display "Saved world data." at 0101
 
