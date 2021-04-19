@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cobc -x tile_game_editor.cbl draw_dynamic_screen_data.cbl draw_tile_character.cbl setup-tile-effect.cbl set-tile-effect.cbl
+cobc -x ./editor/tile_game_editor.cbl ./editor/draw_dynamic_screen_data.cbl ./shared/draw_tile_character.cbl ./editor/setup-tile-effect.cbl ./editor/set-tile-effect.cbl
 
