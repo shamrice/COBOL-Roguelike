@@ -27,7 +27,8 @@
 
            select optional fd-teleport-data
                assign to dynamic ws-map-tel-file
-               organization is record sequential.            
+               organization is record sequential
+               file status is ws-teleport-file-status.            
 
            select optional fd-enemy-data
                assign to dynamic ws-map-enemy-file
@@ -165,6 +166,10 @@
                88  ws-enemy-found           value 'Y'.
                88  ws-enemy-not-found       value 'N'.
            01  ws-enemy-found-idx           pic 99.
+
+           01  ws-enemy-temp-pos.
+               05  ws-enemy-temp-y          pic 99.
+               05  ws-enemy-temp-x          pic 99.
 
            01  ws-enemy-draw-pos    occurs 0 to ws-max-num-enemies times
                                     depending on ws-cur-num-enemies.
@@ -377,14 +382,14 @@
                            at end set ws-is-eof to true 
                        end-read
 
-      *                 if ws-teleport-file-status not = 
-      *                 ws-file-status-ok and ws-teleport-file-status 
-      *                 not = ws-file-status-eof then 
-      *                     display "Error reading tele data." at 0101
-      *                     display ws-teleport-file-status at 0201
-      *                     close fd-teleport-data
-      *                     stop run 
-      *                 end-if  
+                       if ws-teleport-file-status not = 
+                       ws-file-status-ok and ws-teleport-file-status 
+                       not = ws-file-status-eof then 
+                           display "Error reading tele data." at 0101
+                           display ws-teleport-file-status at 0201
+                           close fd-teleport-data
+                           stop run 
+                       end-if  
 
                    else 
                        set ws-is-eof to true 
@@ -703,7 +708,7 @@
 
        move-enemy.
 
-      *> TODO : filler code... needs to be actually written out.
+      *> TODO : Add some type of movement randomization or basic pathfinding.
 
            perform varying ws-enemy-idx 
            from 1 by 1 until ws-enemy-idx > ws-cur-num-enemies
@@ -723,21 +728,49 @@
                            set ws-enemy-char-alive(ws-enemy-idx) to true 
                        end-if 
 
-                       if ws-enemy-y(ws-enemy-idx) < 
+                       *> Reset temp positions.
+                       move ws-enemy-pos(ws-enemy-idx) 
+                           to ws-enemy-temp-pos 
+
+                       
+                       *>move temp enemy position to where they "want" to go.
+                       if ws-enemy-y(ws-enemy-idx) not = 
                        ws-player-y + ws-player-scr-y then 
 
-                           add 1 to ws-enemy-y(ws-enemy-idx)
-                       else 
-                           subtract 1 from ws-enemy-y(ws-enemy-idx)
-                       end-if  
+                           if ws-enemy-y(ws-enemy-idx) < 
+                           ws-player-y + ws-player-scr-y then                                                          
+                               add 1 to ws-enemy-temp-y       
+                           else 
+                               subtract 1 from ws-enemy-temp-y
+                           end-if  
 
-                       if ws-enemy-x(ws-enemy-idx) < 
-                       ws-player-x + ws-player-scr-x then 
-               
-                           add 1 to ws-enemy-x(ws-enemy-idx)
-                       else 
-                           subtract 1 from ws-enemy-x(ws-enemy-idx)
+                           *>If new location not blocking, update y pos
+                           if ws-tile-not-blocking(
+                           ws-enemy-temp-y, ws-enemy-x(ws-enemy-idx)) 
+                           then 
+                               move ws-enemy-temp-y 
+                                   to ws-enemy-y(ws-enemy-idx)
+                           end-if 
                        end-if 
+
+                       if ws-enemy-x(ws-enemy-idx) not = 
+                       ws-player-x + ws-player-scr-x then 
+                       
+                           if ws-enemy-x(ws-enemy-idx) < 
+                           ws-player-x + ws-player-scr-x then                
+                               add 1 to ws-enemy-temp-x                                                              
+                           else                            
+                               subtract 1 from ws-enemy-temp-x 
+                           end-if 
+
+                           *> if new location not blocking, update x pos.
+                           if ws-tile-not-blocking(
+                           ws-enemy-y(ws-enemy-idx), ws-enemy-temp-x) 
+                           then 
+                               move ws-enemy-temp-x 
+                                   to ws-enemy-x(ws-enemy-idx)
+                           end-if     
+                       end-if                        
                    end-if 
                end-if 
            end-perform 
