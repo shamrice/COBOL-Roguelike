@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-16
+      *> Last Updated: 2021-04-19
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -25,14 +25,11 @@
                organization is record sequential
                file status is ws-map-file-status.
 
-           select optional fd-teleport-data 
-               assign to dynamic ws-map-tel-file      
-               organization is indexed
-               access is dynamic 
-               record key is f-teleport-pos
-               file status is ws-teleport-file-status.               
+           select optional fd-teleport-data
+               assign to dynamic ws-map-tel-file
+               organization is record sequential.            
 
-               select optional fd-enemy-data
+           select optional fd-enemy-data
                assign to dynamic ws-map-enemy-file
                organization is record sequential
                file status is ws-enemy-file-status.
@@ -52,7 +49,7 @@
                05  f-tile-effect-id        pic 99.
 
 
-           fd  fd-teleport-data.
+       fd  fd-teleport-data.
            01  f-teleport-data-record.
                05  f-teleport-pos.
                    10  f-teleport-y        pic S99.
@@ -122,6 +119,7 @@
            78  ws-max-view-height             value 20.
            78  ws-max-view-width              value 45.
            78  ws-max-num-enemies             value 99.
+           78  ws-max-num-teleports           value 999.
 
            01  ws-player.
                05  ws-player-pos.
@@ -198,6 +196,19 @@
                        15  ws-tile-effect-id            pic 99.      
 
 
+           01  ws-teleport-data.
+               05  ws-cur-num-teleports        pic 999.
+               05  ws-teleport-data-record     occurs 0 
+                                               to ws-max-num-teleports
+                                      depending on ws-cur-num-teleports.
+                   10  ws-teleport-pos.
+                       15  ws-teleport-y        pic S99.
+                       15  ws-teleport-x        pic S99.
+                   10  ws-teleport-dest-pos.
+                       15  ws-teleport-dest-y   pic S99.
+                       15  ws-teleport-dest-x   pic S99.
+                   10  ws-teleport-dest-map     pic x(15).
+
            01  ws-scr-refresh-req           pic a value 'Y'.
                88  ws-scr-refresh           value 'Y'.
                88  ws-scr-no-refresh        value 'N'.
@@ -213,6 +224,7 @@
            01  ws-counter-1                 pic 999.
            01  ws-counter-2                 pic 999.
            01  ws-enemy-idx                 pic 99.
+           01  ws-tele-idx                  pic 999.
 
            01  ws-temp-color                pic 9.
 
@@ -310,7 +322,7 @@
            display ws-player-pos at 0725
            accept ws-filler 
            
-      *> Reset enemy file info.
+      *> Reset and load enemy file info.
            move 0 to ws-cur-num-enemies
            set ws-not-eof to true             
 
@@ -345,6 +357,40 @@
                    display ws-eof at 0301      
                end-perform 
            close fd-enemy-data
+
+
+      *> Reset and load teleport file info.
+           move 0 to ws-cur-num-teleports
+           set ws-not-eof to true             
+
+           open input fd-teleport-data      
+               perform until ws-is-eof 
+                   add 1 to ws-cur-num-teleports        
+                   if ws-cur-num-teleports < ws-max-num-teleports then  
+
+                       initialize 
+                           ws-teleport-data-record(ws-cur-num-teleports)  
+                                              
+                       read fd-teleport-data 
+                           into ws-teleport-data-record(
+                               ws-cur-num-teleports)
+                           at end set ws-is-eof to true 
+                       end-read
+
+      *                 if ws-teleport-file-status not = 
+      *                 ws-file-status-ok and ws-teleport-file-status 
+      *                 not = ws-file-status-eof then 
+      *                     display "Error reading tele data." at 0101
+      *                     display ws-teleport-file-status at 0201
+      *                     close fd-teleport-data
+      *                     stop run 
+      *                 end-if  
+
+                   else 
+                       set ws-is-eof to true 
+                   end-if                    
+               end-perform 
+           close fd-teleport-data
            .
 
        main-procedure.
@@ -603,38 +649,41 @@
       ******************************************************************
       * Checks if player steps on a teleport tile. If so, they are 
       * moved to the teleport destination.
-      *
-      * Todo: clean up a bit. Opening/closing file is excessive.
-      *       load destination map file of teleport as well
       ******************************************************************
        check-teleport.
 
-      *> TODO : Update this to new way teleports are handled.
-           open input fd-teleport-data
-      
-           move ws-player-pos to f-teleport-pos 
-           display f-teleport-pos at 0650
-           read fd-teleport-data
-           key is f-teleport-pos
-               invalid key 
-                   display "No teleport at" at 2201 
-                       f-teleport-pos at 2216
-                   end-display 
-               not invalid key  
-               *> something is up with this not loading correctly...                  
-      *             move f-teleport-dest-y to ws-player-y
-      *             move f-teleport-dest-x to ws-player-x 
-                   move 1020 to ws-player-pos 
+           if ws-cur-num-teleports = 0 then 
+               exit paragraph
+           end-if 
+
+           perform varying ws-tele-idx 
+           from 1 by 1 until ws-tele-idx > ws-cur-num-teleports
+               if ws-teleport-pos(ws-tele-idx) = ws-temp-map-pos then 
+
+                   compute ws-player-y = 
+                       ws-teleport-dest-y(ws-tele-idx) - ws-player-scr-y
+                   end-compute 
+
+                   compute ws-player-x = 
+                       ws-teleport-dest-x(ws-tele-idx) - ws-player-scr-x
+                   end-compute 
+
                    display "Teleport at: " at 2301  
-                       f-teleport-pos at 2317
+                       ws-teleport-pos(ws-tele-idx) at 2317
                        ws-player-pos at 2325
                    end-display  
-                   if f-teleport-dest-map not = ws-map-name then
-                       move f-teleport-dest-map to ws-map-name-temp                        
-                   end-if 
-           end-read 
 
-           close fd-teleport-data
+                   if ws-teleport-dest-map(ws-tele-idx) 
+                   not = ws-map-name then
+                       move ws-teleport-dest-map(ws-tele-idx) 
+                           to ws-map-name-temp                        
+                   end-if 
+                   exit perform 
+               else 
+                   display "No teleport:" at 2201 ws-player-pos at 2216
+               end-if 
+
+           end-perform 
            
            display 
                ws-map-name at 0750 "->" at 0765  
