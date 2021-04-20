@@ -1,4 +1,7 @@
-src/tile_game_editor
-src/tile_game
-src/world*.*
+src/crl_editor
+src/crl_engine
+src/*.bgs
+src/*.dat
+src/*.tel
+
 
