@@ -2,12 +2,12 @@
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
       *> Last Updated: 2021-04-16
-      *> Purpose: Map editor for the tile based console game
+      *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
       *>*****************************************************************
        identification division.
-       program-id. tile-game-world-editor.
+       program-id. cobol-roguelike-editor.
 
        environment division.
 
@@ -278,7 +278,7 @@
                    + COB-ALLOW-MOUSE-MOVE
            set environment "COB_MOUSE_FLAGS" to ws-mouse-flags
 
-           move 1010 to ws-cursor-pos           
+           move '1010' to ws-cursor-pos           
            display space blank screen 
 
            accept ws-temp-time from time 
@@ -883,4 +883,4 @@
            exit paragraph.      
 
 
-       end program tile-game-world-editor.
+       end program cobol-roguelike-editor.

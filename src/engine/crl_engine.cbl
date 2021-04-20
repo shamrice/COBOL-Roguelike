@@ -7,7 +7,7 @@
       *>     cobc -x tile_game.cbl
       *>*****************************************************************
        identification division.
-       program-id. tile-game-test.
+       program-id. cobol-roguelike-engine.
 
        environment division.
 
@@ -267,7 +267,7 @@
            set environment "COB_TIMEOUT_SCALE" to '3'.
 
        init-setup. 
-           move 0505 to ws-player-pos                         
+           move '0505' to ws-player-pos                         
 
            display space blank screen 
 
@@ -827,4 +827,4 @@
            close fd-tile-data
            exit paragraph.       
 
-       end program tile-game-test.
+       end program cobol-roguelike-engine.
