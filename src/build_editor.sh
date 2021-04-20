@@ -1,14 +1,46 @@
 #!/bin/bash
 
-if [[ $1 == "clean" ]]
-then
-    echo Cleaning CRL Editor project...
-    rm -v ./crl_editor
+echo ------------------------------------------------------
+echo  COBOL Roguelike Editor Build Script
+echo  By: Erik Eriksen 
+echo  https://github.com/shamrice/COBOL-Roguelike
+echo ------------------------------------------------------
+echo 
+
+BIN_EXISTS=false
+BIN_DIR=./bin
+
+if [[ -e $BIN_DIR ]]
+then 
+    BIN_EXISTS=true
+fi 
+
+if [[ ! -d $BIN_DIR && $BIN_EXISTS == true ]]
+then 
+    echo Output directory bin is not a directory. Please either delete or rename this existing file and try again.
     exit 
 fi 
 
-echo Building CRL Editor...
+if [[ $1 == "clean" ]]
+then
+    if [[ $BIN_EXISTS == true ]]
+    then 
+        echo Cleaning CRL Editor project...
+        rm -v ./bin/crl_editor
+    else 
+        echo No bin directory to clean. Nothing to do.
+    fi 
 
-cobc -Wall -x ./editor/crl_editor.cbl ./editor/draw_dynamic_screen_data.cbl ./shared/draw_tile_character.cbl ./editor/setup-tile-effect.cbl ./editor/set-tile-effect.cbl
+else 
+    if [[ $BIN_EXISTS == false ]] 
+    then 
+        echo Creating ./bin directory...
+        mkdir ./bin 
+    fi 
 
+    echo Building CRL Editor...
+    cobc -Wall -x -o ./bin/crl_editor ./editor/crl_editor.cbl ./editor/draw_dynamic_screen_data.cbl ./shared/draw_tile_character.cbl ./editor/setup-tile-effect.cbl ./editor/set-tile-effect.cbl
+    
+fi 
 echo Done.
+
