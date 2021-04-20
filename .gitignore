@@ -1,7 +1,3 @@
-src/crl_editor
-src/crl_engine
-src/*.bgs
-src/*.dat
-src/*.tel
+src/bin/**
 
 
