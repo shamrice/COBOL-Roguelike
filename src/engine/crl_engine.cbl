@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-19
+      *> Last Updated: 2021-04-20
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -105,20 +105,8 @@
 
            01  ws-temp-time                pic 9(9).
 
-      *> Color constants:    
-           01  black   constant as 0.
-           01  blue    constant as 1.
-           01  green   constant as 2.
-           01  cyan    constant as 3.
-           01  red     constant as 4.
-           01  magenta constant as 5.
-           01  yellow  constant as 6. 
-           01  white   constant as 7.
-
            78  ws-max-map-height              value 25.
            78  ws-max-map-width               value 80.
-           78  ws-max-view-height             value 20.
-           78  ws-max-view-width              value 45.
            78  ws-max-num-enemies             value 99.
            78  ws-max-num-teleports           value 999.
 
@@ -132,12 +120,11 @@
                05  ws-player-scr-pos.  
                    10  ws-player-scr-y         pic 99 value 10.
                    10  ws-player-scr-x         pic 99 value 20.    
-               78  ws-player-char              value "@".
+               78  ws-player-char              value "@". *> TODO : Make configurable.
 
            
-           01  ws-cur-num-enemies           pic 99 value 0.
-
            01  ws-enemy-data.
+               05  ws-cur-num-enemies           pic 99 value 0.
                05  ws-enemy       occurs 0 to ws-max-num-enemies times
                                   depending on ws-cur-num-enemies.
                    10  ws-enemy-hp.
@@ -147,7 +134,7 @@
                    10  ws-enemy-pos.
                        15  ws-enemy-y           pic 99.
                        15  ws-enemy-x           pic 99.
-                   10  ws-enemy-color           pic 9 value red.                                     
+                   10  ws-enemy-color           pic 9 value 4.                                     
       *>TODO: this isn't configurable will reset after hit.
                    10  ws-enemy-char            pic x value space. 
                        88  ws-enemy-char-alive  value "&".
@@ -214,18 +201,7 @@
                        15  ws-teleport-dest-x   pic S99.
                    10  ws-teleport-dest-map     pic x(15).
 
-           01  ws-scr-refresh-req           pic a value 'Y'.
-               88  ws-scr-refresh           value 'Y'.
-               88  ws-scr-no-refresh        value 'N'.
-
-           01  ws-scr-draw-pos.
-               05  ws-scr-draw-y            pic 99.
-               05  ws-scr-draw-x            pic 99.
-
-           01  ws-map-pos.
-               05  ws-map-pos-y             pic S999.
-               05  ws-map-pos-x             pic S999.
-
+ 
            01  ws-counter-1                 pic 999.
            01  ws-counter-2                 pic 999.
            01  ws-enemy-idx                 pic 99.
@@ -409,128 +385,18 @@
                perform get-input                              
                perform move-player  
                perform move-enemy                       
-
-      *> TODO: Decide if want actual FPS figured out or more like a rouge-like
-      *>       game where there's a steady "tick" unless player has input.         
-      *         move function current-date to ws-current-date-data 
-      *         move ws-current-millisecond to ws-end-frame
-      *         compute ws-frame-diff = ws-end-frame - ws-start-frame 
-
-      
-      *         compute ws-sleep-time =  50 - ws-frame-diff 
-
-      *         display ws-current-millisecond at 0265
-      *         display ws-frame-diff at 0275  
-      *         display ws-sleep-time at 0375                                  
-
-      *         call "CBL_GC_NANOSLEEP" using 025000000 
                
            end-perform
 
            goback.
 
+
        draw-playfield.
+           display "pscrpos: " at 1950 ws-player-scr-pos at 1960      
 
-      *> only redraw if needed.
-      *> Badguy always moves... there will always be a refresh.
-      *>     if ws-scr-no-refresh then 
-      *>         exit paragraph 
-      *>     end-if 
-
-      *> TODO : UPDATE DRAW ROUTINE TO MATCH EDITOR! This is outdated and missing features.
-
-           move zeros to ws-temp-map-pos
-
-           display "pscrpos: " at 1950 ws-player-scr-pos at 1960
-      *     display "enemyHP: " at 0150 ws-enemy-hp-current at 0160
-
-           perform varying ws-counter-1 
-           from 1 by 1 until ws-counter-1 > ws-max-view-height
-               perform varying ws-counter-2 
-               from 1 by 1 until ws-counter-2 > ws-max-view-width
-
-                   compute ws-scr-draw-y =  ws-counter-1 
-                   compute ws-scr-draw-x = ws-counter-2
-
-                   compute ws-map-pos-y = ws-player-y + ws-counter-1 
-                   compute ws-map-pos-x = ws-player-x + ws-counter-2 
-                   
-                   
-      *>  draw world tile:
-              
-                   if ws-map-pos-y < ws-max-map-height
-                       and ws-map-pos-x < ws-max-map-width
-                       and ws-map-pos-y > 0 and ws-map-pos-x > 0 
-                       then 
-                       display 
-                           ws-tile-char(ws-map-pos-y, ws-map-pos-x) 
-                           at ws-scr-draw-pos 
-                           background-color
-                               ws-tile-bg(ws-map-pos-y, ws-map-pos-x) 
-                           foreground-color
-                               ws-tile-fg(ws-map-pos-y, ws-map-pos-x) 
-                           end-display
-                   else 
-      *                 display "♥" 
-                       display space                      
-                           at ws-scr-draw-pos
-                           background-color black
-                           foreground-color red 
-                       end-display
-                   end-if
-
-      *> draw player
-                   if ws-scr-draw-pos = ws-player-scr-pos then
-
-                       display ws-player-char 
-                           at ws-player-scr-pos 
-                           background-color 
-                           ws-tile-bg(ws-map-pos-y, ws-map-pos-x) 
-                           foreground-color yellow highlight
-                       end-display  
-                   end-if  
-
-                end-perform
-           end-perform.
-
-      *> Draw enemies if they exist and are visible.
-           if ws-cur-num-enemies > 0 then 
-               perform varying ws-enemy-idx from 1 by 1 
-               until ws-enemy-idx > ws-cur-num-enemies
-
-                   if ws-enemy-y(ws-enemy-idx) > ws-player-y then                    
-                       compute ws-enemy-draw-y(ws-enemy-idx) = 
-                           ws-enemy-y(ws-enemy-idx) - ws-player-y
-                       end-compute 
-                    end-if 
-
-                   if ws-enemy-x(ws-enemy-idx) > ws-player-x then                    
-                       compute ws-enemy-draw-x(ws-enemy-idx) = 
-                           ws-enemy-x(ws-enemy-idx) - ws-player-x
-                       end-compute 
-                   end-if   
-
-      *>       Draw enemy if in visible view area.
-                   if ws-enemy-draw-y(ws-enemy-idx) > 0 and 
-                   ws-enemy-draw-y(ws-enemy-idx) <= ws-max-view-height
-                   and ws-enemy-draw-x(ws-enemy-idx) > 0 and 
-                   ws-enemy-draw-x(ws-enemy-idx) <= ws-max-view-width
-                   then 
-                       display 
-                           ws-enemy-char(ws-enemy-idx) 
-                           at ws-enemy-draw-pos(ws-enemy-idx)
-                           foreground-color ws-enemy-color(ws-enemy-idx)
-                           background-color ws-tile-bg(
-                               ws-enemy-y(ws-enemy-idx), 
-                               ws-enemy-x(ws-enemy-idx))
-                       end-display
-                   end-if                   
-
-               end-perform 
-           end-if  
-
-           set ws-scr-no-refresh to true
-
+           call "draw-dynamic-screen-data" 
+               using ws-player ws-tile-map-table-matrix ws-enemy-data               
+           end-call 
            exit paragraph.
 
 
@@ -541,9 +407,6 @@
                with auto-skip no-echo 
                time-out after 250
            end-accept 
-
-      *> For debug speed check:
-      *     add 1 to ws-player-pos-delta-x
 
       *> Check special keys being pressed.
            evaluate ws-crt-status 
@@ -638,7 +501,6 @@
                    add ws-player-pos-delta-y to ws-player-y 
                    display "pos-after: " at 0455 ws-player-pos at 0465
                    display "delta: " at 0555 ws-player-pos-delta at 0561
-                   set ws-scr-refresh to true 
                else 
                    display "Blocking: " at 2132 ws-temp-map-pos at 2145                   
                end-if

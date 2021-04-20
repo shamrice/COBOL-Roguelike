@@ -1,15 +1,14 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-04-18
-      *> Purpose: Module to draw data passed to the screen.
+      *> Last Updated: 2021-04-20
+      *> Purpose: Module for engine to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
       *>*****************************************************************
 
-      *> As the editor cursor is more complex than the player in the regular 
-      *> game program, this cannot be re-used in the tile-game program.
-      *> A similar sub-program will need to be created for that implementation.
+      *> TODO: Probably rename this sub program so it's not the same name the 
+      *>       editor uses to avoid accidential mixing up of the two source files.
 
        identification division.
        program-id. draw-dynamic-screen-data.
@@ -53,10 +52,6 @@
                05  ws-map-pos-y             pic S999.
                05  ws-map-pos-x             pic S999.
 
-           01  ws-temp-map-pos.
-               05  ws-temp-map-pos-y        pic S99 value 01.
-               05  ws-temp-map-pos-x        pic S99 value 01.
-
            01  ws-line-mask                 pic x(80) value spaces. 
 
            01  ls-enemy-draw-pos    occurs 0 to ws-max-num-enemies times
@@ -68,47 +63,20 @@
 
        linkage section.
 
-      *> TODO: Copy book... 
-           01  l-cursor.
-               05  l-cursor-pos.
-                   10  l-cursor-pos-y         pic S99.
-                   10  l-cursor-pos-x         pic S99.
-               05  l-cursor-pos-delta.               
-                   10  l-cursor-pos-delta-y   pic S99. 
-                   10  l-cursor-pos-delta-x   pic S99.
-               05  l-cursor-scr-pos.  
-                   10  l-cursor-scr-y         pic 99 value 10.
-                   10  l-cursor-scr-x         pic 99 value 20.                      
-               05  l-cursor-color             pic 9 value yellow.
-               05  l-cursor-draw-color-fg     pic 9 value black.
-               05  l-cursor-draw-color-bg     pic 9 value black.
-               05  l-cursor-draw-char         pic x value space.
-               05  l-cursor-draw-highlight    pic a value 'N'.
-                   88  l-cursor-highlight     value 'Y'.
-                   88  l-cursor-no-highlight  value 'N'.
-               05  l-cursor-draw-blocking     pic a value 'N'.
-                   88  l-cursor-blocking      value 'Y'.
-                   88  l-cursor-not-block     value 'N'.
-               05  l-cursor-draw-blinking     pic a value 'N'.
-                   88  l-cursor-blink         value 'Y'.
-                   88  l-cursor-not-blink     value 'N'. 
-               05  l-cursor-enemy-settings.
-                   10  l-cursor-enemy-hp              pic 999 value 10.                       
-                   10  l-cursor-enemy-attack-damage   pic 999 value 1.
-                   10  l-cursor-enemy-color           pic 9 value red.                                           
-                   10  l-cursor-enemy-char            pic x value "&". 
-                   10  l-cursor-enemy-movement-ticks  pic 999.                   
-               05  l-cursor-teleport-settings.
-                   10  l-cursor-tel-dest-y            pic 99.
-                   10  l-cursor-tel-dest-x            pic 99.
-                   10  l-cursor-tel-dest-map          pic x(15).                       
-               05  l-cursor-draw-effect       pic 99.
-               05  l-cursor-type              pic a value 'T'.
-                   88  l-cursor-type-tile     value 'T'.
-                   88  l-cursor-type-enemy    value 'E'.                     
-               78  l-cursor-char              value "+".
+           01  l-player.
+               05  l-player-pos.
+                   10  l-player-y             pic S99.
+                   10  l-player-x             pic S99.
+               05  l-player-pos-delta.    
+                   10  l-player-pos-delta-y   pic S99.
+                   10  l-player-pos-delta-x   pic S99.
+               05  l-player-scr-pos.  
+                   10  l-player-scr-y         pic 99 value 10.
+                   10  l-player-scr-x         pic 99 value 20.    
+               78  l-player-char              value "@".
 
- 
+
+       *> TODO : Copy book!!
            01  l-tile-map-table-matrix.
                05  l-tile-map           occurs ws-max-map-height times.
                    10  l-tile-map-data  occurs ws-max-map-width times.
@@ -153,13 +121,8 @@
                        15  l-enemy-current-ticks   pic 999.
                        15  l-enemy-max-ticks       pic 999 value 3.           
 
-           01  l-display-mode                     pic a value 'R'.
-               88  l-display-mode-regular         value 'R'.
-               88  l-display-mode-effects         value 'E'.
-
        procedure division using 
-               l-cursor l-tile-map-table-matrix l-enemy-data
-               l-display-mode.
+               l-player l-tile-map-table-matrix l-enemy-data.
 
        main-procedure.
 
@@ -171,30 +134,17 @@
                    move ws-counter-1 to ws-scr-draw-y
                    move ws-counter-2 to ws-scr-draw-x 
 
-                   compute ws-map-pos-y = l-cursor-pos-y + ws-counter-1 
-                   compute ws-map-pos-x = l-cursor-pos-x + ws-counter-2 
+                   compute ws-map-pos-y = l-player-y + ws-counter-1 
+                   compute ws-map-pos-x = l-player-x + ws-counter-2 
                                   
       *>  draw world tile:              
                    if ws-map-pos-y < ws-max-map-height
                        and ws-map-pos-x < ws-max-map-width
                        and ws-map-pos-y > 0 and ws-map-pos-x > 0 
                        then 
-                           if l-display-mode-effects then            
-                               evaluate l-tile-effect-id(
-                                   ws-map-pos-y, ws-map-pos-x)
-
-                                   when 0 
-                                       move '.' to ws-char-to-draw
-                                   when ws-teleport-effect-id 
-                                       move "T" to ws-char-to-draw
-                                   when other 
-                                       move "U" to ws-char-to-draw 
-                                   end-evaluate
-                           else 
-                               move l-tile-char(
-                                   ws-map-pos-y, ws-map-pos-x) 
-                                   to ws-char-to-draw
-                           end-if 
+                           
+                           move l-tile-char(ws-map-pos-y, ws-map-pos-x) 
+                               to ws-char-to-draw                           
 
                            call "draw-tile-character" using
                                ws-scr-draw-pos, 
@@ -211,11 +161,11 @@
                        end-display
                    end-if
 
-                   *> draw cursor
-                   if ws-scr-draw-pos = l-cursor-scr-pos then
+                   *> draw player
+                   if ws-scr-draw-pos = l-player-scr-pos then
 
-                       display l-cursor-char 
-                           at l-cursor-scr-pos 
+                       display l-player-char 
+                           at l-player-scr-pos 
                            background-color 
                            l-tile-bg(ws-map-pos-y, ws-map-pos-x) 
                            foreground-color yellow highlight
@@ -230,15 +180,15 @@
                perform varying ls-enemy-idx from 1 by 1 
                until ls-enemy-idx > l-cur-num-enemies
 
-                   if l-enemy-y(ls-enemy-idx) > l-cursor-pos-y then                    
+                   if l-enemy-y(ls-enemy-idx) > l-player-y then                    
                        compute ls-enemy-draw-y(ls-enemy-idx) = 
-                           l-enemy-y(ls-enemy-idx) - l-cursor-pos-y
+                           l-enemy-y(ls-enemy-idx) - l-player-y
                        end-compute 
                     end-if 
 
-                   if l-enemy-x(ls-enemy-idx) > l-cursor-pos-x then                    
+                   if l-enemy-x(ls-enemy-idx) > l-player-x then                    
                        compute ls-enemy-draw-x(ls-enemy-idx) = 
-                           l-enemy-x(ls-enemy-idx) - l-cursor-pos-x
+                           l-enemy-x(ls-enemy-idx) - l-player-x
                        end-compute 
                    end-if   
 
@@ -261,146 +211,9 @@
                end-perform 
            end-if            
     
-           display ws-line-mask at 2101  
-           
-           if l-cursor-type-tile then 
-               perform display-cursor-info-tile
-           else 
-               perform display-cursor-info-enemy
-           end-if
-
-           perform display-tile-info          
+      *>     display ws-line-mask at 2101                          
 
            goback.
-
-
-
-       display-cursor-info-tile.
-
-           display "Tile to Place: " at 1460 underline highlight           
-           display "  Tile character: " at 1553 
-           if l-cursor-highlight then 
-               display 
-                   l-cursor-draw-char at 1571
-                   foreground-color l-cursor-draw-color-fg
-                   background-color l-cursor-draw-color-bg
-                   highlight
-               end-display 
-           else 
-               display 
-                   l-cursor-draw-char at 1571
-                   foreground-color l-cursor-draw-color-fg
-                   background-color l-cursor-draw-color-bg
-               end-display 
-           end-if 
-           display "Foreground color: " at 1653 
-               l-cursor-draw-color-fg at 1671
-           end-display 
-           display "Background color: " at 1753 
-               l-cursor-draw-color-bg at 1771
-           end-display 
-           display "    Is highlight: " at 1853
-           if l-cursor-highlight then 
-               display "true " at 1871
-           else 
-               display "false" at 1871
-           end-if 
-           display "     Is blocking: " at 1953
-           if l-cursor-blocking then 
-               display "true " at 1971
-           else 
-               display "false" at 1971
-           end-if 
-           display "     Is blinking: " at 2053
-           if l-cursor-blink then 
-               display "true " at 2071
-           else 
-               display "false" at 2071
-           end-if 
-           display "  Tile effect id:" at 2153
-               l-cursor-draw-effect at 2171               
-           end-display 
-
-           if l-cursor-draw-effect > 0 then 
-               evaluate l-cursor-draw-effect
-                   when ws-teleport-effect-id
-                       display "(TELEPORT)" at 2174
-                   
-                   when other 
-                       display "(UNKNOWN)" at 2174
-               end-evaluate
-           else 
-               display "               " at 2174
-           end-if 
-           exit paragraph. 
-
-
-       display-cursor-info-enemy.
-
-           display "Enemy to Place:" at 1460 underline highlight           
-           display " Enemy character: " at 1553 
-           
-           display 
-               l-cursor-enemy-char at 1571
-               foreground-color l-cursor-enemy-color
-               background-color black               
-           end-display 
-           
-           display "           Color:            " at 1653 
-               l-cursor-enemy-color at 1671
-           end-display 
-           display "              HP:            " at 1753 
-               l-cursor-enemy-hp at 1771
-           end-display 
-           display "   Attack Damage:            " at 1853           
-           display l-cursor-enemy-attack-damage at 1871
-           
-           display "  Movement ticks:            " at 1953
-           display l-cursor-enemy-movement-ticks at 1971
-           
-           display ws-line-mask at 2053           
-           display ws-line-mask at 2153               
-
-           exit paragraph. 
-
-
-
-
-       display-tile-info.
-
-      *> TODO : Recalculating this over and over isn't pretty...
-
-           compute ws-temp-map-pos-y = l-cursor-pos-y + l-cursor-scr-y                   
-           compute ws-temp-map-pos-x = l-cursor-pos-x + l-cursor-scr-x                   
-
-           display "Current tile info:" at 2201 underline highlight
-           display 
-               "YX:" at 2302
-               ws-temp-map-pos at 2305
-               "FG: " at 2311 
-               l-tile-fg(ws-temp-map-pos-y, ws-temp-map-pos-x) at 2314
-               "BG: " at 2317
-               l-tile-bg(ws-temp-map-pos-y, ws-temp-map-pos-x) at 2320
-               "CHAR: " at 2323
-               l-tile-char(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2328
-               "HL: " at 2331
-               l-tile-highlight(
-                   ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2334
-               "BLOCK: " at 2337
-               l-tile-blocking(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2343
-               "BLINK:" at 2346
-               l-tile-blinking(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2352
-               "EFFECT: " at 2355
-               l-tile-effect-id(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2363
-           end-display 
-
-           exit paragraph.
-
 
        end program draw-dynamic-screen-data.
        

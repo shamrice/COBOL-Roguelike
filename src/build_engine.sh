@@ -39,6 +39,6 @@ else
     fi 
 
     echo Building CRL Engine...
-    cobc -Wall -x -o ./bin/crl_engine ./engine/crl_engine.cbl 
+    cobc -Wall -x -o ./bin/crl_engine ./engine/crl_engine.cbl ./shared/draw_tile_character.cbl ./engine/draw_dynamic_screen_data.cbl 
 fi 
 echo Done.
