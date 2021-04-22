@@ -64,6 +64,10 @@
        linkage section.
 
            01  l-player.
+               05  l-player-name              pic x(16).
+               05  l-player-hp.
+                   10  l-player-hp-current    pic 999.
+                   10  l-player-hp-max        pic 999.
                05  l-player-pos.
                    10  l-player-y             pic S99.
                    10  l-player-x             pic S99.

@@ -112,6 +112,10 @@
            78  ws-max-num-teleports           value 999.
 
            01  ws-player.
+               05  ws-player-name          pic x(16) value "Adventurer".
+               05  ws-player-hp.
+                   10  ws-player-hp-current        pic 999 value 10.
+                   10  ws-player-hp-max            pic 999 value 10.
                05  ws-player-pos.
                    10  ws-player-y             pic S99.
                    10  ws-player-x             pic S99.
@@ -120,8 +124,17 @@
                    10  ws-player-pos-delta-x   pic S99.
                05  ws-player-scr-pos.  
                    10  ws-player-scr-y         pic 99 value 10.
-                   10  ws-player-scr-x         pic 99 value 20.    
+                   10  ws-player-scr-x         pic 99 value 20. 
+               05  ws-player-status              pic 9 value 0.
+                   88  ws-player-status-alive    value 0.
+                   88  ws-player-status-dead     value 1.
+                   88  ws-player-status-attacked value 2.
+                   88  ws-player-status-other    value 3.
+                      
                78  ws-player-char              value "@". *> TODO : Make configurable.
+
+           
+           01  ws-temp-damage-delt            pic 999 value 0.
 
            
            01  ws-enemy-data.
@@ -154,7 +167,7 @@
            01  ws-enemy-placed-found        pic a value 'N'.
                88  ws-enemy-found           value 'Y'.
                88  ws-enemy-not-found       value 'N'.
-           01  ws-enemy-found-idx           pic 99.
+           01  ws-enemy-found-idx           pic 99.   
 
            01  ws-enemy-temp-pos.
                05  ws-enemy-temp-y          pic 99.
@@ -298,12 +311,12 @@
                    end-if 
                end-perform
            end-perform
-           display "Press enter to close input file" at 0625
-           accept ws-filler 
+      *     display "Press enter to close input file" at 0625
+      *     accept ws-filler 
            close fd-tile-data
-           display "Input file closed" at 0625
-           display ws-player-pos at 0725
-           accept ws-filler 
+      *     display "Input file closed" at 0625
+      *     display ws-player-pos at 0725
+      *     accept ws-filler 
            
       *> Reset and load enemy file info.
            move 0 to ws-cur-num-enemies
@@ -335,9 +348,9 @@
                        set ws-is-eof to true 
                    end-if 
                    
-                   display ws-cur-num-enemies at 0101
-                   display f-enemy at 0201
-                   display ws-eof at 0301      
+      *             display ws-cur-num-enemies at 0101
+      *             display f-enemy at 0201
+      *             display ws-eof at 0301      
                end-perform 
            close fd-enemy-data
 
@@ -378,7 +391,7 @@
 
        main-procedure.
            
-           perform until ws-quit   
+           perform until ws-quit or ws-player-status-dead   
 
       *         move function current-date to ws-current-date-data
       *         move ws-current-millisecond to ws-start-frame
@@ -390,11 +403,22 @@
                
            end-perform
 
+           if ws-player-status-dead then 
+               display 
+                   "You died. Game over." at 1015
+                   foreground-color 7 
+                   background-color 0 
+               end-display 
+               *> TODO : Proper input checking so not to quit when 
+               *> UP or DOWN is pressed. Also highscore, etc.
+               accept ws-kb-input at 1014 no-echo                    
+           end-if 
+              
            goback.
 
 
        draw-playfield.
-           display "pscrpos: " at 1950 ws-player-scr-pos at 1960      
+           display "pscrpos: " at 1960 ws-player-scr-pos at 1970
 
            call "draw-dynamic-screen-data" 
                using ws-player ws-tile-map-table-matrix ws-enemy-data               
@@ -430,7 +454,7 @@
                    set ws-quit to true 
 
                when other 
-                   display "KB INPUT" at 1750 ws-crt-status at 1765
+                   display "KB INPUT" at 1760 ws-crt-status at 1775
 
            end-evaluate
            
@@ -504,13 +528,13 @@
                    display "pos-after: " at 0455 ws-player-pos at 0465
                    display "delta: " at 0555 ws-player-pos-delta at 0561
                else 
-                   display "Blocking: " at 2132 ws-temp-map-pos at 2145                   
+                   display "Blocking: " at 2162 ws-temp-map-pos at 2175                   
                end-if
 
                perform check-teleport
 
            end-if
-           display "Pyx: " at 2101 ws-player-pos at 2105
+           display "Pyx: " at 2301 ws-player-pos at 2305
            display "MAPyx: " at 2240 ws-temp-map-pos at 2246
            move zeros to ws-player-pos-delta
            exit paragraph.
@@ -555,8 +579,11 @@
            end-perform 
            
            display 
-               ws-map-name at 0750 "->" at 0765  
-               ws-map-name-temp at 0770
+               function concatenate(
+                   function trim(ws-map-name), 
+                   " -> ",
+                   function trim(ws-map-name-temp)
+               ) at 0760
                ws-map-dat-file at 0960 
            end-display
 
@@ -580,7 +607,7 @@
                if not ws-enemy-status-dead(ws-enemy-idx) then 
 
                *> magic numbers!
-                   add 20 to ws-enemy-current-ticks(ws-enemy-idx)
+                   add 15 to ws-enemy-current-ticks(ws-enemy-idx)
 
                    if ws-enemy-current-ticks(ws-enemy-idx) >= 
                    ws-enemy-max-ticks(ws-enemy-idx) then 
@@ -591,57 +618,98 @@
                        then 
                            set ws-enemy-char-alive(ws-enemy-idx) to true 
                        end-if 
-
+    
                        *> Reset temp positions.
                        move ws-enemy-pos(ws-enemy-idx) 
                            to ws-enemy-temp-pos 
-
                        
                        *>move temp enemy position to where they "want" to go.
                        if ws-enemy-y(ws-enemy-idx) not = 
                        ws-player-y + ws-player-scr-y then 
-
+                       
                            if ws-enemy-y(ws-enemy-idx) < 
                            ws-player-y + ws-player-scr-y then                                                          
-                               add 1 to ws-enemy-temp-y       
+                               add 1 to ws-enemy-temp-y
                            else 
                                subtract 1 from ws-enemy-temp-y
                            end-if  
-
-                           *>If new location not blocking, update y pos
-                           if ws-tile-not-blocking(
-                           ws-enemy-temp-y, ws-enemy-x(ws-enemy-idx)) 
-                           then 
-                               move ws-enemy-temp-y 
-                                   to ws-enemy-y(ws-enemy-idx)
-                           end-if 
+  
                        end-if 
 
                        if ws-enemy-x(ws-enemy-idx) not = 
                        ws-player-x + ws-player-scr-x then 
-                       
+                             
                            if ws-enemy-x(ws-enemy-idx) < 
                            ws-player-x + ws-player-scr-x then                
                                add 1 to ws-enemy-temp-x                                                              
                            else                            
                                subtract 1 from ws-enemy-temp-x 
                            end-if 
+                       end-if 
 
-                           *> if new location not blocking, update x pos.
+                   *> If new temp location is player location, attack                   
+                       if ws-enemy-temp-x = 
+                       ws-player-x + ws-player-scr-x 
+                       and ws-enemy-temp-y = 
+                       ws-player-y + ws-player-scr-y then 
+
+                           perform enemy-attack
+
+                       else 
+                 *> otherwise check if not blocking tile and move there.
                            if ws-tile-not-blocking(
-                           ws-enemy-y(ws-enemy-idx), ws-enemy-temp-x) 
+                              ws-enemy-y(ws-enemy-idx), ws-enemy-temp-x)
                            then 
-                               move ws-enemy-temp-x 
-                                   to ws-enemy-x(ws-enemy-idx)
-                           end-if     
+                               move ws-enemy-temp-x
+                                   to ws-enemy-x(ws-enemy-idx) 
+                           end-if 
+
+                           if ws-tile-not-blocking(
+                              ws-enemy-temp-y, ws-enemy-x(ws-enemy-idx))
+                           then 
+                               move ws-enemy-temp-y
+                                   to ws-enemy-y(ws-enemy-idx) 
+                           end-if 
+
                        end-if                        
                    end-if 
                end-if 
            end-perform 
 
            exit paragraph.
-               
+
+
+
+      *> This is called from inside the enemy move loop, therefore the 
+      *> enemy index is already set there.
+       enemy-attack.
+
+          *> TODO: Eventually take in player level and defense into this 
+          *>       calculation.
+           compute ws-temp-damage-delt = 
+               ws-enemy-attack-damage(ws-enemy-idx)
+           end-compute 
+
+           if ws-temp-damage-delt > ws-player-hp-current then 
+               set ws-player-status-dead to true 
+               move zero to ws-player-hp-current
+           else        
+               subtract ws-temp-damage-delt from ws-player-hp-current
+           end-if 
            
+           display 
+               function concatenate(
+                   function trim(ws-player-name), 
+                   " is attacked by a ",
+                   function trim(ws-enemy-name(ws-enemy-idx)),
+                   " for ",
+                   ws-temp-damage-delt,
+                   " damange.")
+               at 2101 
+           end-display 
+               
+           exit paragraph.
+
 
        player-attack.
 
