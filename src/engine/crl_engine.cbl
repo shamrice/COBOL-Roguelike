@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-20
+      *> Last Updated: 2021-04-22
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -62,6 +62,7 @@
 
            fd  fd-enemy-data.           
            01  f-enemy.
+               05  f-enemy-name                 pic x(16).
                05  f-enemy-hp.
                    10  f-enemy-hp-total         pic 999.
                    10  f-enemy-hp-current       pic 999.
@@ -127,6 +128,7 @@
                05  ws-cur-num-enemies           pic 99 value 0.
                05  ws-enemy       occurs 0 to ws-max-num-enemies times
                                   depending on ws-cur-num-enemies.
+                   10  ws-enemy-name           pic x(16) value 'NONAME'.
                    10  ws-enemy-hp.
                        15  ws-enemy-hp-total    pic 999 value 10.
                        15  ws-enemy-hp-current  pic 999 value 10.

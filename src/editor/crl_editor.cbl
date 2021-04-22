@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-16
+      *> Last Updated: 2021-04-22
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -49,6 +49,7 @@
 
            fd  fd-enemy-data.           
            01  f-enemy.
+               05  f-enemy-name                 pic x(16).
                05  f-enemy-hp.
                    10  f-enemy-hp-total         pic 999.
                    10  f-enemy-hp-current       pic 999.
@@ -147,6 +148,7 @@
                    88  ws-cursor-blink        value 'Y'.
                    88  ws-cursor-not-blink    value 'N'.
                05  ws-cursor-enemy-settings.
+                   10  ws-cursor-enemy-name    pic x(16) value 'NONAME'.
                    10  ws-cursor-enemy-hp              pic 999 value 10.                       
                    10  ws-cursor-enemy-attack-damage   pic 999 value 1.
                    10  ws-cursor-enemy-color           pic 9 value red.                                           
@@ -178,6 +180,7 @@
                05  ws-cur-num-enemies           pic 99 value 0.
                05  ws-enemy       occurs 0 to ws-max-num-enemies times
                                   depending on ws-cur-num-enemies.
+                   10  ws-enemy-name           pic x(16) value 'NONAME'.
                    10  ws-enemy-hp.
                        15  ws-enemy-hp-total    pic 999 value 10.
                        15  ws-enemy-hp-current  pic 999 value 10.
@@ -624,6 +627,10 @@
 
 
        set-enemy-settings.
+           display "Enter enemy name: " at 2101
+           accept ws-cursor-enemy-name at 2120 update 
+           display ws-line-mask at 2101
+       
            display "Enter enemy max hp:" at 2101
            accept ws-cursor-enemy-hp at 2121 update 
                       
@@ -759,6 +766,9 @@
                and ws-cursor-enemy-movement-ticks not = zeros then 
 
                add 1 to ws-cur-num-enemies
+
+               move ws-cursor-enemy-name 
+                   to ws-enemy-name(ws-cur-num-enemies)
 
                move ws-cursor-enemy-color 
                    to ws-enemy-color(ws-cur-num-enemies)

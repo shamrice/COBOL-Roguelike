@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-04-20
+      *> Last Updated: 2021-04-22
       *> Purpose: Module for engine to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -99,6 +99,7 @@
                05  l-cur-num-enemies           pic 99.
                05  l-enemy       occurs 0 to unbounded times
                                   depending on l-cur-num-enemies.
+                   10  l-enemy-name            pic x(16).
                    10  l-enemy-hp.
                        15  l-enemy-hp-total    pic 999 value 10.
                        15  l-enemy-hp-current  pic 999 value 10.

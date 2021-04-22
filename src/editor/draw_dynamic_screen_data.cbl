@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-04-18
+      *> Last Updated: 2021-04-22
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -93,6 +93,7 @@
                    88  l-cursor-blink         value 'Y'.
                    88  l-cursor-not-blink     value 'N'. 
                05  l-cursor-enemy-settings.
+                   10  l-cursor-enemy-name            pic x(16).
                    10  l-cursor-enemy-hp              pic 999 value 10.                       
                    10  l-cursor-enemy-attack-damage   pic 999 value 1.
                    10  l-cursor-enemy-color           pic 9 value red.                                           
@@ -131,6 +132,7 @@
                05  l-cur-num-enemies           pic 99.
                05  l-enemy       occurs 0 to unbounded times
                                   depending on l-cur-num-enemies.
+                   10  l-enemy-name            pic x(16).
                    10  l-enemy-hp.
                        15  l-enemy-hp-total    pic 999 value 10.
                        15  l-enemy-hp-current  pic 999 value 10.
@@ -277,7 +279,10 @@
 
        display-cursor-info-tile.
 
-           display "Tile to Place: " at 1460 underline highlight           
+           display "Tile to Place: " at 1460 underline highlight  
+
+           display ws-line-mask at 1553          
+
            display "  Tile character: " at 1553 
            if l-cursor-highlight then 
                display 
@@ -338,28 +343,30 @@
        display-cursor-info-enemy.
 
            display "Enemy to Place:" at 1460 underline highlight           
-           display " Enemy character: " at 1553 
-           
+
+           display "      Enemy name: " at 1553 
+           display l-cursor-enemy-name at 1571
+
+           display " Enemy character: " at 1653            
            display 
-               l-cursor-enemy-char at 1571
+               l-cursor-enemy-char at 1671
                foreground-color l-cursor-enemy-color
                background-color black               
            end-display 
            
-           display "           Color:            " at 1653 
-               l-cursor-enemy-color at 1671
+           display "           Color:            " at 1753 
+               l-cursor-enemy-color at 1771
            end-display 
-           display "              HP:            " at 1753 
-               l-cursor-enemy-hp at 1771
+           display "              HP:            " at 1853 
+               l-cursor-enemy-hp at 1871
            end-display 
-           display "   Attack Damage:            " at 1853           
-           display l-cursor-enemy-attack-damage at 1871
+           display "   Attack Damage:            " at 1953           
+           display l-cursor-enemy-attack-damage at 1971
            
-           display "  Movement ticks:            " at 1953
-           display l-cursor-enemy-movement-ticks at 1971
+           display "  Movement ticks:            " at 2053
+           display l-cursor-enemy-movement-ticks at 2071
            
-           display ws-line-mask at 2053           
-           display ws-line-mask at 2153               
+           display ws-line-mask at 2153           
 
            exit paragraph. 
 

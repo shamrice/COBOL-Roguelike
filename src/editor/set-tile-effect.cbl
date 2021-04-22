@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-12
-      *> Last Updated: 2021-04-18
+      *> Last Updated: 2021-04-22
       *> Purpose: Sets up tile effect data based on tile effect id.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -69,6 +69,7 @@
                    88  l-cursor-blink         value 'Y'.
                    88  l-cursor-not-blink     value 'N'. 
                05  l-cursor-enemy-settings.
+                   10  l-cursor-enemy-name            pic x(16).
                    10  l-cursor-enemy-hp              pic 999.
                    10  l-cursor-enemy-attack-damage   pic 999.
                    10  l-cursor-enemy-color           pic 9.   
