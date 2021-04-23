@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-22
+      *> Last Updated: 2021-04-23
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -268,125 +268,10 @@
       *     perform generate-fake-world-data.
            
        load-tile-map.
-
-      *> Set file names based on map name
-           move function concatenate(
-               function trim(ws-map-name), ws-data-file-ext)
-               to ws-map-dat-file
-
-           move function concatenate(
-               function trim(ws-map-name), ws-teleport-file-ext)
-               to ws-map-tel-file
-
-           move function concatenate(
-               function trim(ws-map-name), ws-enemy-file-ext)
-               to ws-map-enemy-file               
-
-      *> Load data from files.
-
-           open input fd-tile-data
-
-           if ws-map-file-status not = ws-file-status-ok then 
-               display 
-                   "Failed to open tile data: " at 0101
-                   ws-map-dat-file at 0130
-               end-display 
-               stop run 
-           end-if     
-                     
-           
-           perform varying ws-counter-1 
-           from 1 by 1 until ws-counter-1 > ws-max-map-height
-               perform varying ws-counter-2 
-               from 1 by 1 until ws-counter-2 > ws-max-map-width
-
-                   read fd-tile-data 
-                       into ws-tile-map-data(ws-counter-1, ws-counter-2)
-                   end-read 
-                   if ws-map-file-status not = ws-file-status-ok then 
-                       display "Error reading tile map data." at 0101
-                       display ws-map-file-status at 0201
-                       close fd-tile-data
-                       stop run 
-                   end-if 
-               end-perform
-           end-perform
-      *     display "Press enter to close input file" at 0625
-      *     accept ws-filler 
-           close fd-tile-data
-      *     display "Input file closed" at 0625
-      *     display ws-player-pos at 0725
-      *     accept ws-filler 
-           
-      *> Reset and load enemy file info.
-           move 0 to ws-cur-num-enemies
-           set ws-not-eof to true             
-
-           open input fd-enemy-data      
-               perform until ws-is-eof 
-                   add 1 to ws-cur-num-enemies        
-                   if ws-cur-num-enemies < ws-max-num-enemies then  
-
-                       initialize ws-enemy(ws-cur-num-enemies)  
-                       initialize ws-enemy-draw-pos(ws-cur-num-enemies)
-
-                       read fd-enemy-data 
-                           into ws-enemy(ws-cur-num-enemies)    
-                           at end set ws-is-eof to true 
-                       end-read
-
-                       if ws-enemy-file-status not = 
-                       ws-file-status-ok and ws-enemy-file-status not = 
-                       ws-file-status-eof then 
-                           display "Error reading enemy data." at 0101
-                           display ws-enemy-file-status at 0201
-                           close fd-enemy-data
-                           stop run 
-                       end-if  
-
-                   else 
-                       set ws-is-eof to true 
-                   end-if 
-                   
-      *             display ws-cur-num-enemies at 0101
-      *             display f-enemy at 0201
-      *             display ws-eof at 0301      
-               end-perform 
-           close fd-enemy-data
-
-
-      *> Reset and load teleport file info.
-           move 0 to ws-cur-num-teleports
-           set ws-not-eof to true             
-
-           open input fd-teleport-data      
-               perform until ws-is-eof 
-                   add 1 to ws-cur-num-teleports        
-                   if ws-cur-num-teleports < ws-max-num-teleports then  
-
-                       initialize 
-                           ws-teleport-data-record(ws-cur-num-teleports)  
-                                              
-                       read fd-teleport-data 
-                           into ws-teleport-data-record(
-                               ws-cur-num-teleports)
-                           at end set ws-is-eof to true 
-                       end-read
-
-                       if ws-teleport-file-status not = 
-                       ws-file-status-ok and ws-teleport-file-status 
-                       not = ws-file-status-eof then 
-                           display "Error reading tele data." at 0101
-                           display ws-teleport-file-status at 0201
-                           close fd-teleport-data
-                           stop run 
-                       end-if  
-
-                   else 
-                       set ws-is-eof to true 
-                   end-if                    
-               end-perform 
-           close fd-teleport-data
+           call "load-map-data" using 
+               ws-map-files ws-tile-map-table-matrix 
+               ws-enemy-data ws-teleport-data
+           end-call 
            .
 
        main-procedure.
@@ -452,6 +337,11 @@
                when COB-SCR-ESC
                    display "QUITING" at 0917 
                    set ws-quit to true 
+
+               when COB-SCR-F1
+                   call "display-debug" using 
+                       ws-player ws-tile-map-table-matrix ws-enemy-data   
+                   end-call                        
 
                when other 
                    display "KB INPUT" at 1760 ws-crt-status at 1775

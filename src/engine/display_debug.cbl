@@ -1,17 +1,13 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
-      *> Create Date: 2021-04-10
-      *> Last Updated: 2021-04-22
-      *> Purpose: Module for engine to draw data passed to the screen.
+      *> Create Date: 2021-04-23
+      *> Last Updated: 2021-04-23
+      *> Purpose: Module for engine to display debug information.
       *> Tectonics:
       *>     ./build_engine.sh
       *>*****************************************************************
-
-      *> TODO: Probably rename this sub program so it's not the same name the 
-      *>       editor uses to avoid accidential mixing up of the two source files.
-
        identification division.
-       program-id. draw-dynamic-screen-data.
+       program-id. display-debug.
 
        environment division.
 
@@ -59,7 +55,13 @@
                05  ls-enemy-draw-y          pic 99.
                05  ls-enemy-draw-x          pic 99.
 
-           01  ws-char-to-draw              pic x.               
+           01  ws-char-to-draw              pic x. 
+
+           01  ws-kb-input                  pic x.
+
+           01  ws-exit-sw                   pic a value 'N'.
+               88  ws-exit                  value 'Y'.
+               88  ws-not-exit              value 'N'.              
 
        linkage section.
 
@@ -131,94 +133,17 @@
 
        main-procedure.
 
-           perform varying ws-counter-1 
-           from 1 by 1 until ws-counter-1 > ws-max-view-height
-               perform varying ws-counter-2 
-               from 1 by 1 until ws-counter-2 > ws-max-view-width
+           display space blank screen
 
-                   move ws-counter-1 to ws-scr-draw-y
-                   move ws-counter-2 to ws-scr-draw-x 
+           display "Debug Info" at 0115 with underline highlight 
 
-                   compute ws-map-pos-y = l-player-y + ws-counter-1 
-                   compute ws-map-pos-x = l-player-x + ws-counter-2 
-                                  
-      *>  draw world tile:              
-                   if ws-map-pos-y < ws-max-map-height
-                       and ws-map-pos-x < ws-max-map-width
-                       and ws-map-pos-y > 0 and ws-map-pos-x > 0 
-                       then 
-                           
-                           move l-tile-char(ws-map-pos-y, ws-map-pos-x) 
-                               to ws-char-to-draw                           
-
-                           call "draw-tile-character" using
-                               ws-scr-draw-pos, 
-                               l-tile-map-data(
-                                   ws-map-pos-y, ws-map-pos-x) 
-                               ws-char-to-draw
-                           end-call
-
-                   else *> OOB void space
-                       display ":"                   
-                           at ws-scr-draw-pos
-                           background-color black
-                           foreground-color red
-                       end-display
-                   end-if
-
-                   *> draw player
-                   if ws-scr-draw-pos = l-player-scr-pos then
-
-                       display l-player-char 
-                           at l-player-scr-pos 
-                           background-color 
-                           l-tile-bg(ws-map-pos-y, ws-map-pos-x) 
-                           foreground-color yellow highlight
-                       end-display  
-                   end-if   
-
-               end-perform
-           end-perform.
-
-      *> Draw enemies if they exist and are visible.
-           if l-cur-num-enemies > 0 then 
-               perform varying ls-enemy-idx from 1 by 1 
-               until ls-enemy-idx > l-cur-num-enemies
-
-                   if l-enemy-y(ls-enemy-idx) > l-player-y then                    
-                       compute ls-enemy-draw-y(ls-enemy-idx) = 
-                           l-enemy-y(ls-enemy-idx) - l-player-y
-                       end-compute 
-                    end-if 
-
-                   if l-enemy-x(ls-enemy-idx) > l-player-x then                    
-                       compute ls-enemy-draw-x(ls-enemy-idx) = 
-                           l-enemy-x(ls-enemy-idx) - l-player-x
-                       end-compute 
-                   end-if   
-
-      *>       Draw enemy if in visible view area.
-                   if ls-enemy-draw-y(ls-enemy-idx) > 0 and 
-                   ls-enemy-draw-y(ls-enemy-idx) <= ws-max-view-height
-                   and ls-enemy-draw-x(ls-enemy-idx) > 0 and 
-                   ls-enemy-draw-x(ls-enemy-idx) <= ws-max-view-width
-                   then 
-                       display 
-                           l-enemy-char(ls-enemy-idx) 
-                           at ls-enemy-draw-pos(ls-enemy-idx)
-                           foreground-color l-enemy-color(ls-enemy-idx)
-                           background-color l-tile-bg(
-                               l-enemy-y(ls-enemy-idx), 
-                               l-enemy-x(ls-enemy-idx))
-                       end-display
-                   end-if                   
-
-               end-perform 
-           end-if            
-    
-      *>     display ws-line-mask at 2101                          
-
+           perform with test after until ws-exit 
+               accept ws-kb-input at 0125
+               if ws-kb-input = 'q' then 
+                   set ws-exit to true 
+               end-if 
+           end-perform 
+               
            goback.
 
-       end program draw-dynamic-screen-data.
-       
+       end program display-debug.
