@@ -36,26 +36,7 @@
            78  ws-max-num-enemies           value 99.
 
        local-storage section.
-           01  ws-counter-1                 pic 999.
-           01  ws-counter-2                 pic 999.
-           01  ls-enemy-idx                 pic 99.
-           
-           01  ws-scr-draw-pos.
-               05  ws-scr-draw-y            pic 99.
-               05  ws-scr-draw-x            pic 99.
-
-           01  ws-map-pos.           
-               05  ws-map-pos-y             pic S999.
-               05  ws-map-pos-x             pic S999.
-
-           01  ws-line-mask                 pic x(80) value spaces. 
-
-           01  ls-enemy-draw-pos    occurs 0 to ws-max-num-enemies times
-                                    depending on l-cur-num-enemies.
-               05  ls-enemy-draw-y          pic 99.
-               05  ls-enemy-draw-x          pic 99.
-
-           01  ws-char-to-draw              pic x. 
+    
 
            01  ws-kb-input                  pic x.
 
@@ -128,14 +109,26 @@
                        15  l-enemy-current-ticks   pic 999.
                        15  l-enemy-max-ticks       pic 999 value 3.           
 
+           01  l-temp-map-pos.
+               05  l-temp-map-pos-y        pic S99.
+               05  l-temp-map-pos-x        pic S99.
+
        procedure division using 
-               l-player l-tile-map-table-matrix l-enemy-data.
+               l-player l-tile-map-table-matrix l-enemy-data
+               l-temp-map-pos.
 
        main-procedure.
 
            display space blank screen
 
            display "Debug Info" at 0115 with underline highlight 
+
+           display "pscrpos: " at 1960 l-player-scr-pos at 1970
+           display "P delta: " at 2101 l-player-pos-delta at 2110
+           display "Pyx: " at 2301 l-player-pos at 2305
+           display "MAPyx: " at 2240 l-temp-map-pos at 2246
+
+       
 
            perform with test after until ws-exit 
                accept ws-kb-input at 0125

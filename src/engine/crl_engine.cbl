@@ -114,8 +114,8 @@
            01  ws-player.
                05  ws-player-name          pic x(16) value "Adventurer".
                05  ws-player-hp.
-                   10  ws-player-hp-current        pic 999 value 10.
-                   10  ws-player-hp-max            pic 999 value 10.
+                   10  ws-player-hp-current        pic 999 value 100.
+                   10  ws-player-hp-max            pic 999 value 100.
                05  ws-player-pos.
                    10  ws-player-y             pic S99.
                    10  ws-player-x             pic S99.
@@ -129,8 +129,7 @@
                    88  ws-player-status-alive    value 0.
                    88  ws-player-status-dead     value 1.
                    88  ws-player-status-attacked value 2.
-                   88  ws-player-status-other    value 3.
-                      
+                   88  ws-player-status-other    value 3.                      
                78  ws-player-char              value "@". *> TODO : Make configurable.
 
            
@@ -302,14 +301,11 @@
            goback.
 
 
-       draw-playfield.
-           display "pscrpos: " at 1960 ws-player-scr-pos at 1970
-
+       draw-playfield.           
            call "draw-dynamic-screen-data" 
                using ws-player ws-tile-map-table-matrix ws-enemy-data               
            end-call 
            exit paragraph.
-
 
 
        get-input.
@@ -340,11 +336,12 @@
 
                when COB-SCR-F1
                    call "display-debug" using 
-                       ws-player ws-tile-map-table-matrix ws-enemy-data   
+                       ws-player ws-tile-map-table-matrix ws-enemy-data
+                       ws-temp-map-pos   
                    end-call                        
 
-               when other 
-                   display "KB INPUT" at 1760 ws-crt-status at 1775
+      *         when other 
+      *             display "KB INPUT" at 1760 ws-crt-status at 1775
 
            end-evaluate
            
@@ -399,33 +396,21 @@
                   or ws-temp-map-pos-x >= ws-max-map-width
                   or ws-temp-map-pos-y <= 0 or ws-temp-map-pos-x <= 0 
                then
-                   display     
-                       "Caught out of bounds: " at 0147 
-                       ws-temp-map-pos-y at 0170
-                       ws-temp-map-pos-x at 0172
-                   end-display
+                   *> Catch out of bounds.
                    move zeros to ws-player-pos-delta
                    exit paragraph
                end-if 
 
-               if 
-              ws-tile-not-blocking(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-               then 
-      *             move ws-temp-map-pos to ws-player-pos
-                   display "pos-before: " at 0355 ws-player-pos at 0366
+               if ws-tile-not-blocking(
+                   ws-temp-map-pos-y, ws-temp-map-pos-x) 
+               then                          
                    add ws-player-pos-delta-x to ws-player-x
-                   add ws-player-pos-delta-y to ws-player-y 
-                   display "pos-after: " at 0455 ws-player-pos at 0465
-                   display "delta: " at 0555 ws-player-pos-delta at 0561
-               else 
-                   display "Blocking: " at 2162 ws-temp-map-pos at 2175                   
+                   add ws-player-pos-delta-y to ws-player-y                                                      
                end-if
 
                perform check-teleport
 
            end-if
-           display "Pyx: " at 2301 ws-player-pos at 2305
-           display "MAPyx: " at 2240 ws-temp-map-pos at 2246
            move zeros to ws-player-pos-delta
            exit paragraph.
 
@@ -451,10 +436,10 @@
                        ws-teleport-dest-x(ws-tele-idx) - ws-player-scr-x
                    end-compute 
 
-                   display "Teleport at: " at 2301  
-                       ws-teleport-pos(ws-tele-idx) at 2317
-                       ws-player-pos at 2325
-                   end-display  
+      *             display "Teleport at: " at 2301  
+      *                 ws-teleport-pos(ws-tele-idx) at 2317
+      *                 ws-player-pos at 2325
+      *             end-display  
 
                    if ws-teleport-dest-map(ws-tele-idx) 
                    not = ws-map-name then
@@ -462,24 +447,24 @@
                            to ws-map-name-temp                        
                    end-if 
                    exit perform 
-               else 
-                   display "No teleport:" at 2201 ws-player-pos at 2216
+               
                end-if 
 
            end-perform 
            
-           display 
-               function concatenate(
-                   function trim(ws-map-name), 
-                   " -> ",
-                   function trim(ws-map-name-temp)
-               ) at 0760
-               ws-map-dat-file at 0960 
-           end-display
+      *     display 
+      *         function concatenate(
+      *             function trim(ws-map-name), 
+      *             " -> ",
+      *             function trim(ws-map-name-temp)
+      *         ) at 0760
+      *         ws-map-dat-file at 0960 
+      *     end-display
 
+           *> Load new map if destination map does not match
            if ws-map-name-temp not = ws-map-name then                
                move ws-map-name-temp to ws-map-name
-               display "New map!" at 1060 ws-map-name at 1070               
+      *         display "New map!" at 1060 ws-map-name at 1070               
                perform load-tile-map                 
            end-if 
 

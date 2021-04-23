@@ -217,8 +217,26 @@
            end-if            
     
       *>     display ws-line-mask at 2101                          
+           perform display-player-info
 
            goback.
+
+       display-player-info.
+
+           *> TODO : Expand upon this with extra player stats and score.
+
+           display 
+               function trim(l-player-name) at 0160 underline highlight           
+           end-display 
+           display 
+               "HP: " at 0256 
+               l-player-hp-current at 0260
+               "/" at 0264
+               l-player-hp-max at 0266
+               "EXP:" at 0356
+           end-display 
+           
+           exit paragraph.
 
        end program draw-dynamic-screen-data.
        
