@@ -1,11 +1,11 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-23
-      *> Last Updated: 2021-04-23
+      *> Last Updated: 2021-04-24
       *> Purpose: Module for engine to load the level data passed into
       *>          the related record structures.
       *> Tectonics:
-      *>     ./build_engine.sh
+      *>     ./build_engine.sh or ./build_editor.sh
       *>*****************************************************************
        identification division.
        program-id. load-map-data.
@@ -89,6 +89,11 @@
            78  ws-max-num-enemies             value 99.
            78  ws-max-num-teleports           value 999.           
 
+           78  ws-load-status-fail        value 9.
+           78  ws-load-status-read-fail   value 8.
+           78  ws-load-status-bad-data    value 7.
+           78  ws-load-status-success     value 0.
+
        local-storage section.
 
            01  ls-counter-1                 pic 999.
@@ -102,8 +107,7 @@
            01  ls-eof-sw                    pic a value 'N'.
                88 ls-is-eof                 value 'Y'.
                88 ls-not-eof                value 'N'.
-          
-
+                     
        linkage section.
 
            01  l-map-files.  
@@ -173,10 +177,12 @@
                        15  l-teleport-dest-x   pic S99.
                    10  l-teleport-dest-map     pic x(15).
 
+           01  l-return-code                   pic 9 value 0.
 
        procedure division using 
                l-map-files l-tile-map-table-matrix 
-               l-enemy-data l-teleport-data.
+               l-enemy-data l-teleport-data
+               l-return-code.
 
        main-procedure.
 
@@ -198,12 +204,14 @@
 
            open input fd-tile-data
 
-           if ls-map-file-status not = ws-file-status-ok then 
+           if ls-map-file-status not = ws-file-status-ok then
+               close fd-tile-data  
                display 
                    "Failed to open tile data: " at 0101
                    l-map-dat-file at 0130
                end-display 
-               stop run 
+               move ws-load-status-fail to l-return-code
+               goback                
            end-if     
                      
            
@@ -219,7 +227,10 @@
                        display "Error reading tile map data." at 0101
                        display ls-map-file-status at 0201
                        close fd-tile-data
-                       stop run 
+                       
+                       move ws-load-status-read-fail 
+                           to l-return-code
+                       goback 
                    end-if 
                end-perform
            end-perform
@@ -248,7 +259,10 @@
                            display "Error reading enemy data." at 0101
                            display ls-enemy-file-status at 0201
                            close fd-enemy-data
-                           stop run 
+                           
+                           move ws-load-status-read-fail 
+                               to l-return-code
+                           goback 
                        end-if  
 
                    else 
@@ -283,7 +297,10 @@
                            display "Error reading tele data." at 0101
                            display ls-teleport-file-status at 0201
                            close fd-teleport-data
-                           stop run 
+                           
+                           move ws-load-status-read-fail 
+                               to l-return-code
+                           goback 
                        end-if  
 
                    else 
@@ -291,7 +308,8 @@
                    end-if                    
                end-perform 
            close fd-teleport-data
-                          
+
+           move ws-load-status-success to l-return-code               
            goback.
 
        end program load-map-data.

@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-22
+      *> Last Updated: 2021-04-24
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -96,8 +96,8 @@
 
 
            01  ws-map-files.  
-               05  ws-map-name             pic x(15) value "world0".
-               05  ws-map-name-temp        pic x(15) value "world0".           
+               05  ws-map-name             pic x(15) value "newmap".
+               05  ws-map-name-temp        pic x(15) value "newmap".           
                05  ws-map-dat-file         pic x(15).               
                05  ws-map-tel-file         pic x(15).
                05  ws-map-enemy-file       pic x(15).
@@ -259,6 +259,7 @@
 
            01  ws-replace-enemy             pic a.
 
+           01  ws-load-return-code          pic 9.
 
        procedure division.
        
@@ -287,6 +288,10 @@
            accept ws-temp-time from time 
            move function random(ws-temp-time) to ws-filler
 
+           perform generate-init-world-data.
+
+
+       set-file-names.
       *> Set file names based on map name
            move function concatenate(
                function trim(ws-map-name), ws-data-file-ext)
@@ -299,26 +304,10 @@
            move function concatenate(
                function trim(ws-map-name), ws-enemy-file-ext)
                to ws-map-enemy-file       
+           
+           exit paragraph.
+         
 
-           perform generate-init-world-data.
-      
-
-      * load-tile-map.
-      *     open input fd-tile-data
-
-      *     perform varying ws-counter-1 
-      *     from 1 by 1 until ws-counter-1 > ws-max-map-height
-      *         perform varying ws-counter-2 
-      *         from 1 by 1 until ws-counter-2 > ws-max-map-width
-
-      *             read fd-tile-data 
-      *                 into ws-tile-map-data(ws-counter-1, ws-counter-2)
-      *             end-read 
-
-      *         end-perform
-      *     end-perform
-
-      *     close fd-tile-data.       
 
        main-procedure.
 
@@ -447,6 +436,9 @@
                
                when ws-kb-input = 'k'
                    perform toggle-blink
+
+               when ws-kb-input = 'l'
+                   perform load-map-data
                
                when ws-kb-input = 'o' 
                    perform write-world-data                   
@@ -623,6 +615,36 @@
            end-if 
 
            set ws-scr-refresh to true 
+           exit paragraph.
+
+
+       load-map-data.
+
+           display "Map name to load: " at 2101
+           display "[Blank to cancel]" at 2135
+           accept ws-map-name at 2120 update 
+           display ws-line-mask at 2101
+           
+           if ws-map-name not = spaces 
+           and ws-map-name not = ws-map-name-temp then 
+               
+                              
+               call "load-map-data" using 
+                   ws-map-files ws-tile-map-table-matrix 
+                   ws-enemy-data ws-teleport-data
+                   ws-load-return-code
+               end-call 
+
+               if ws-load-return-code not = 0 then 
+                   display "Error loading: " at 0201 ws-map-name at 0225
+                   accept ws-kb-input at 2101
+                   move ws-map-name-temp to ws-map-name 
+               else
+                   move ws-map-name to ws-map-name-temp 
+               end-if  
+
+           end-if 
+
            exit paragraph.
 
 
@@ -835,6 +857,17 @@
       
 
        write-world-data.
+           
+           display "Enter map name: " at 2101
+           accept ws-map-name at 2117 update 
+           if ws-map-name = spaces then 
+               move ws-map-name-temp to ws-map-name 
+               exit paragraph 
+           else 
+               move ws-map-name to ws-map-name-temp 
+               perform set-file-names 
+           end-if 
+           
            open output fd-tile-data
 
            perform varying ws-counter-1 
@@ -870,7 +903,11 @@
                end-perform 
            close fd-teleport-data
 
-           display "Saved world data." at 0101
+           display 
+               "Saved map data: " at 2101
+               ws-map-name at 2117
+           end-display 
+           accept ws-kb-input at 2150
 
            exit paragraph. 
 

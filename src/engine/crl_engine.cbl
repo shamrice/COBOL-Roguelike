@@ -233,6 +233,8 @@
                88 ws-is-eof                 value 'Y'.
                88 ws-not-eof                value 'N'.
 
+           01  ws-load-return-code          pic 9.
+
       *> Currently unused.
            01  ws-frame-rate.
                05  ws-start-frame           pic 9(2).
@@ -270,7 +272,19 @@
            call "load-map-data" using 
                ws-map-files ws-tile-map-table-matrix 
                ws-enemy-data ws-teleport-data
+               ws-load-return-code
            end-call 
+
+           if ws-load-return-code > 0 then 
+               display space blank screen 
+               display 
+                   "FATAL ERROR :: Failed to load area data: " at 0101
+                   ws-map-name at 0143 
+                   "Please make sure related DAT, BGS, TEL files exist"
+                   & " in level data directory." at 0201
+               end-display 
+               stop run 
+           end-if
            .
 
        main-procedure.
