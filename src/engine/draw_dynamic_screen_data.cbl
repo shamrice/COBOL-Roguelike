@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-04-22
+      *> Last Updated: 2021-04-25
       *> Purpose: Module for engine to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -126,8 +126,14 @@
                        15  l-enemy-current-ticks   pic 999.
                        15  l-enemy-max-ticks       pic 999 value 3.           
 
+
+           01  l-action-history.
+               05  l-action-history-item    occurs 10 times.
+                   10  l-action-history-text pic x(50).
+
        procedure division using 
-               l-player l-tile-map-table-matrix l-enemy-data.
+               l-player l-tile-map-table-matrix l-enemy-data
+               l-action-history.
 
        main-procedure.
 
@@ -218,6 +224,8 @@
     
       *>     display ws-line-mask at 2101                          
            perform display-player-info
+
+           call "display-action-history" using l-action-history
 
            goback.
 

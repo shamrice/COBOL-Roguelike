@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-23
+      *> Last Updated: 2021-04-25
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -235,6 +235,13 @@
 
            01  ws-load-return-code          pic 9.
 
+
+           01  ws-action-history.
+               05  ws-action-history-item     occurs 10 times.
+                   10  ws-action-history-text pic x(50).
+
+           01  ws-action-history-temp       pic x(50).
+
       *> Currently unused.
            01  ws-frame-rate.
                05  ws-start-frame           pic 9(2).
@@ -316,15 +323,16 @@
 
 
        draw-playfield.           
-           call "draw-dynamic-screen-data" 
-               using ws-player ws-tile-map-table-matrix ws-enemy-data               
+           call "draw-dynamic-screen-data" using 
+               ws-player ws-tile-map-table-matrix ws-enemy-data
+               ws-action-history               
            end-call 
            exit paragraph.
 
 
        get-input.
 
-           accept ws-kb-input at 2401 
+           accept ws-kb-input at 2051 
                with auto-skip no-echo 
                time-out after 250
            end-accept 
@@ -586,7 +594,7 @@
                subtract ws-temp-damage-delt from ws-player-hp-current
            end-if 
            
-           display 
+           move 
                function concatenate(
                    function trim(ws-player-name), 
                    " is attacked by a ",
@@ -594,8 +602,12 @@
                    " for ",
                    ws-temp-damage-delt,
                    " damange.")
-               at 2101 
-           end-display 
+               to ws-action-history-temp
+           
+           call "add-action-history-item" using 
+               ws-action-history-temp
+               ws-action-history
+           end-call 
                
            exit paragraph.
 
