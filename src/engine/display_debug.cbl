@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-23
-      *> Last Updated: 2021-04-23
+      *> Last Updated: 2021-04-25
       *> Purpose: Module for engine to display debug information.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -60,6 +60,7 @@
                05  l-player-scr-pos.  
                    10  l-player-scr-y         pic 99 value 10.
                    10  l-player-scr-x         pic 99 value 20.    
+               05  l-player-attack-damage     pic 999.                   
                78  l-player-char              value "@".
 
 

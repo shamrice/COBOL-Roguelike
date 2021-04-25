@@ -129,7 +129,8 @@
                    88  ws-player-status-alive    value 0.
                    88  ws-player-status-dead     value 1.
                    88  ws-player-status-attacked value 2.
-                   88  ws-player-status-other    value 3.                      
+                   88  ws-player-status-other    value 3.
+               05  ws-player-attack-damage     pic 999 value 1.                      
                78  ws-player-char              value "@". *> TODO : Make configurable.
 
            
@@ -276,6 +277,14 @@
       *     perform generate-fake-world-data.
            
        load-tile-map.
+           move function concatenate("Entering ",
+               function trim(ws-map-name), "...")
+               to ws-action-history-temp
+           
+           call "add-action-history-item" using 
+               ws-action-history-temp ws-action-history
+           end-call 
+
            call "load-map-data" using 
                ws-map-files ws-tile-map-table-matrix 
                ws-enemy-data ws-teleport-data
@@ -614,9 +623,23 @@
 
        player-attack.
 
+           move 1 to ws-enemy-idx *> Debug, attack first enemy.
+
+           move function concatenate(
+               function trim(ws-player-name), " attacks ", 
+               function trim(ws-enemy-name(ws-enemy-idx)), " for ",
+               ws-player-attack-damage, " damage."
+           ) to ws-action-history-temp
+
+           call "add-action-history-item" using
+               ws-action-history-temp ws-action-history
+           end-call 
+
       *> TODO : filler paragraph attacks bad guy regardless where he is.           
            if ws-enemy-hp-current(ws-enemy-idx) > 0 then 
-               subtract 1 from ws-enemy-hp-current(ws-enemy-idx)
+               subtract ws-player-attack-damage 
+                   from ws-enemy-hp-current(ws-enemy-idx)
+               end-subtract
                set ws-enemy-char-hurt(ws-enemy-idx) to true
            else 
                set ws-enemy-char-dead(ws-enemy-idx) to true 
