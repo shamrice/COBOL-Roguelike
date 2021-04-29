@@ -395,12 +395,17 @@
                when ws-kb-input = 'a'
                    subtract 1 from ws-player-pos-delta-x
 
-               when ws-kb-input = space 
+
+           *> TODO : maybe this is for ranged attack (if they have it)
+           *>        as moving the player into an enemy causes them to attack.
+           *>   DISABLING FOR NOW...
+
+      *         when ws-kb-input = space 
                   *> space is assumed input on timeout. have to check if it's not space becuase of timeout
-                   if ws-crt-status not = COB-SCR-TIME-OUT 
-                       and ws-player-pos-delta = zeros then 
-                       perform player-attack                       
-                   end-if 
+      *             if ws-crt-status not = COB-SCR-TIME-OUT 
+      *                 and ws-player-pos-delta = zeros then 
+      *                 perform player-attack                       
+      *             end-if 
 
       *>         when other   
       *>             display "KB INPUT: " at 0101 ws-kb-input at 0110
@@ -608,6 +613,9 @@
 
           *> TODO: Eventually take in player level and defense into this 
           *>       calculation.
+
+          *> TODO: Add randomization on if they hit or not instead of 
+          *>       assuming all attacks hit.
            compute ws-temp-damage-delt = 
                ws-enemy-attack-damage(ws-enemy-idx)
            end-compute 
@@ -640,7 +648,10 @@
        *> Called from player-move paragraph. Enemy IDX is set when 
        *> collision is found.
        player-attack.
-                   
+
+          *> TODO: Add randomization on if they hit or not instead of 
+          *>       assuming all attacks hit.
+
            if ws-enemy-hp-current(ws-enemy-idx) > 0
            and not ws-enemy-status-dead(ws-enemy-idx) then 
                subtract ws-player-attack-damage 
