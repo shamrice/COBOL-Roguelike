@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-25
+      *> Last Updated: 2021-04-29
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -625,26 +625,43 @@
 
            move 1 to ws-enemy-idx *> Debug, attack first enemy.
 
-           move function concatenate(
-               function trim(ws-player-name), " attacks ", 
-               function trim(ws-enemy-name(ws-enemy-idx)), " for ",
-               ws-player-attack-damage, " damage."
-           ) to ws-action-history-temp
-
-           call "add-action-history-item" using
-               ws-action-history-temp ws-action-history
-           end-call 
 
       *> TODO : filler paragraph attacks bad guy regardless where he is.           
-           if ws-enemy-hp-current(ws-enemy-idx) > 0 then 
+           if ws-enemy-hp-current(ws-enemy-idx) > 0
+           and not ws-enemy-status-dead(ws-enemy-idx) then 
                subtract ws-player-attack-damage 
                    from ws-enemy-hp-current(ws-enemy-idx)
                end-subtract
                set ws-enemy-char-hurt(ws-enemy-idx) to true
-           else 
-               set ws-enemy-char-dead(ws-enemy-idx) to true 
-               set ws-enemy-status-dead(ws-enemy-idx) to true 
+
+               move function concatenate(
+                   function trim(ws-player-name), " attacks ", 
+                   function trim(ws-enemy-name(ws-enemy-idx)), " for ",
+                   ws-player-attack-damage, " damage."
+               ) to ws-action-history-temp
+
+               call "add-action-history-item" using
+                   ws-action-history-temp ws-action-history
+               end-call 
+
+           *> If enemy dies from attack, set char and log it.
+               if ws-enemy-hp-current(ws-enemy-idx) <= 0 then  
+                   set ws-enemy-char-dead(ws-enemy-idx) to true 
+                   set ws-enemy-status-dead(ws-enemy-idx) to true 
+
+                   move function concatenate(                       
+                       function trim(ws-enemy-name(ws-enemy-idx)), 
+                       " expires."                   
+                   ) to ws-action-history-temp
+
+                   call "add-action-history-item" using
+                       ws-action-history-temp ws-action-history
+                   end-call 
+               end-if 
            end-if 
+
+
+     
 
            exit paragraph.
            
