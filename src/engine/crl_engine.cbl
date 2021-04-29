@@ -432,8 +432,23 @@
                    exit paragraph
                end-if 
 
-               if ws-tile-not-blocking(
-                   ws-temp-map-pos-y, ws-temp-map-pos-x) 
+               move zero to ws-enemy-found-idx
+
+           *>Check if enemy is there, if so attack it.
+               perform varying ws-enemy-idx 
+               from 1 by 1 until ws-enemy-idx > ws-cur-num-enemies
+                   if ws-enemy-y(ws-enemy-idx) = ws-temp-map-pos-y 
+                   and ws-enemy-x(ws-enemy-idx) = ws-temp-map-pos-x 
+                   then 
+                       move ws-enemy-idx to ws-enemy-found-idx
+                       perform player-attack
+                       exit perform
+                   end-if 
+               end-perform 
+
+           *>If no enemy and tile isn't blocking. move player there.
+               if ws-enemy-found-idx = 0 and ws-tile-not-blocking(
+                   ws-temp-map-pos-y, ws-temp-map-pos-x)                
                then                          
                    add ws-player-pos-delta-x to ws-player-x
                    add ws-player-pos-delta-y to ws-player-y                                                      
@@ -506,6 +521,7 @@
        move-enemy.
 
       *> TODO : Add some type of movement randomization or basic pathfinding.
+      *> TODO : keep enemies from walking on top of eachother!
 
            perform varying ws-enemy-idx 
            from 1 by 1 until ws-enemy-idx > ws-cur-num-enemies
@@ -621,12 +637,10 @@
            exit paragraph.
 
 
+       *> Called from player-move paragraph. Enemy IDX is set when 
+       *> collision is found.
        player-attack.
-
-           move 1 to ws-enemy-idx *> Debug, attack first enemy.
-
-
-      *> TODO : filler paragraph attacks bad guy regardless where he is.           
+                   
            if ws-enemy-hp-current(ws-enemy-idx) > 0
            and not ws-enemy-status-dead(ws-enemy-idx) then 
                subtract ws-player-attack-damage 
