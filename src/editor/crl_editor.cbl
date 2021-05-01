@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-24
+      *> Last Updated: 2021-05-01
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -96,15 +96,15 @@
 
 
            01  ws-map-files.  
-               05  ws-map-name             pic x(15) value "newmap".
-               05  ws-map-name-temp        pic x(15) value "newmap".           
+               05  ws-map-name             pic x(15) value "NEWMAP".
+               05  ws-map-name-temp        pic x(15) value "NEWMAP".
                05  ws-map-dat-file         pic x(15).               
                05  ws-map-tel-file         pic x(15).
                05  ws-map-enemy-file       pic x(15).
                           
-           78  ws-data-file-ext            value ".dat".
-           78  ws-teleport-file-ext        value ".tel".
-           78  ws-enemy-file-ext           value ".bgs".
+           78  ws-data-file-ext            value ".DAT".
+           78  ws-teleport-file-ext        value ".TEL".
+           78  ws-enemy-file-ext           value ".BGS".
 
 
       *> Color constants:    
@@ -340,7 +340,7 @@
 
        get-input.
                               
-           accept ws-kb-input at 2601 with auto-skip no-echo
+           accept ws-kb-input at 2601 with auto-skip no-echo upper
                      
 
       *> Check special keys being pressed.
@@ -405,7 +405,7 @@
       *> Non-special key input handling.
            evaluate true
 
-               when ws-kb-input = 'q'
+               when ws-kb-input = 'Q'
                    display "QUITING" at 0917
                    set ws-quit to true              
       
@@ -413,34 +413,34 @@
                when ws-kb-input = '0' 
                    move zero to ws-cursor-draw-color-fg
 
-               when ws-kb-input = 'b'
+               when ws-kb-input = 'B'
                    perform toggle-blocking-mode
 
-               when ws-kb-input = 'c'
+               when ws-kb-input = 'C'
                    perform set-tile-char
                
-               when ws-kb-input = 'd'
+               when ws-kb-input = 'D'
                    perform set-enemy-settings
 
-               when ws-kb-input = 'e'
+               when ws-kb-input = 'E'
                    perform set-effect-id
 
-               when ws-kb-input = 'f'
+               when ws-kb-input = 'F'
                    perform set-foreground-color
 
-               when ws-kb-input = 'g'
+               when ws-kb-input = 'G'
                    perform set-background-color
 
-               when ws-kb-input = 'h'
+               when ws-kb-input = 'H'
                    perform toggle-fg-highlight
                
-               when ws-kb-input = 'k'
+               when ws-kb-input = 'K'
                    perform toggle-blink
 
-               when ws-kb-input = 'l'
+               when ws-kb-input = 'L'
                    perform load-map-data
                
-               when ws-kb-input = 'o' 
+               when ws-kb-input = 'O' 
                    perform write-world-data                   
 
                when ws-kb-input = space
@@ -622,7 +622,7 @@
 
            display "Map name to load: " at 2101
            display "[Blank to cancel]" at 2135
-           accept ws-map-name at 2120 update 
+           accept ws-map-name at 2120 update upper
            display ws-line-mask at 2101
            
            if ws-map-name not = spaces 
@@ -766,8 +766,8 @@
 
            if ws-enemy-found then 
                display "Remove placed enemy? [y/n] " at 2101                
-               accept ws-replace-enemy at 2128 with auto-skip 
-               if ws-replace-enemy = 'y' then 
+               accept ws-replace-enemy at 2128 with auto-skip upper
+               if ws-replace-enemy = 'Y' then 
       *>           Shift whole array down one element, replacing deleted enemy               
                    perform varying ws-counter-1 
                        from ws-enemy-found-idx by 1 
@@ -859,7 +859,7 @@
        write-world-data.
            
            display "Enter map name: " at 2101
-           accept ws-map-name at 2117 update 
+           accept ws-map-name at 2117 update upper
            if ws-map-name = spaces then 
                move ws-map-name-temp to ws-map-name 
                exit paragraph 

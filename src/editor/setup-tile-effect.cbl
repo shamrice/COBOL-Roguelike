@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-12
-      *> Last Updated: 2021-04-18
+      *> Last Updated: 2021-05-01
       *> Purpose: Sets up tile effect data based on tile effect id.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -65,7 +65,7 @@
 
        setup-teleport.
            display "Enter teleport destination map: " at 2101
-           accept l-cursor-tel-dest-map at 2133 update            
+           accept l-cursor-tel-dest-map at 2133 update upper           
            display "Enter teleport destination Y position: " at 2101
            accept l-cursor-tel-dest-y at 2140 update 
            display "Enter teleport destination X position: " at 2101

@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-04-29
+      *> Last Updated: 2021-05-01
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -86,8 +86,8 @@
                05  ws-crt-status-key-2     pic 99.
 
            01  ws-map-files.  
-               05  ws-map-name             pic x(15) value "world0".
-               05  ws-map-name-temp        pic x(15) value "world0".           
+               05  ws-map-name             pic x(15) value "WORLD0".
+               05  ws-map-name-temp        pic x(15) value "WORLD0".           
                05  ws-map-dat-file         pic x(15).               
                05  ws-map-tel-file         pic x(15).
                05  ws-map-enemy-file       pic x(15).
@@ -100,9 +100,9 @@
            78  ws-file-status-ok           value "00".
            78  ws-file-status-eof          value "10".
 
-           78  ws-data-file-ext            value ".dat".
-           78  ws-teleport-file-ext        value ".tel".
-           78  ws-enemy-file-ext           value ".bgs".
+           78  ws-data-file-ext            value ".DAT".
+           78  ws-teleport-file-ext        value ".TEL".
+           78  ws-enemy-file-ext           value ".BGS".
 
            01  ws-temp-time                pic 9(9).
 
@@ -344,6 +344,7 @@
            accept ws-kb-input at 2051 
                with auto-skip no-echo 
                time-out after 250
+               upper
            end-accept 
 
       *> Check special keys being pressed.
@@ -379,20 +380,20 @@
       *> Check when key pressed is not a special key.     
            evaluate true
 
-               when ws-kb-input = 'q'
+               when ws-kb-input = 'Q'
                    display "QUITING" at 0917 
                    set ws-quit to true 
 
-               when ws-kb-input = 's' 
+               when ws-kb-input = 'S' 
                    add 1 to ws-player-pos-delta-y
 
-               when ws-kb-input = 'w' 
+               when ws-kb-input = 'W' 
                    subtract 1 from ws-player-pos-delta-y
 
-               when ws-kb-input = 'd'
+               when ws-kb-input = 'D'
                    add 1 to ws-player-pos-delta-x
 
-               when ws-kb-input = 'a'
+               when ws-kb-input = 'A'
                    subtract 1 from ws-player-pos-delta-x
 
 

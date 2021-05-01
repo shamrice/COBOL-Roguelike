@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-23
-      *> Last Updated: 2021-04-24
+      *> Last Updated: 2021-05-01
       *> Purpose: Module for engine to load the level data passed into
       *>          the related record structures.
       *> Tectonics:
@@ -80,9 +80,9 @@
            78  ws-file-status-ok           value "00".
            78  ws-file-status-eof          value "10".
 
-           78  ws-data-file-ext            value ".dat".
-           78  ws-teleport-file-ext        value ".tel".
-           78  ws-enemy-file-ext           value ".bgs".
+           78  ws-data-file-ext            value ".DAT".
+           78  ws-teleport-file-ext        value ".TEL".
+           78  ws-enemy-file-ext           value ".BGS".
 
            78  ws-max-map-height              value 25.
            78  ws-max-map-width               value 80.
@@ -111,8 +111,8 @@
        linkage section.
 
            01  l-map-files.  
-               05  l-map-name             pic x(15) value "world0".
-               05  l-map-name-temp        pic x(15) value "world0".           
+               05  l-map-name             pic x(15) value "WORLD0".
+               05  l-map-name-temp        pic x(15) value "WORLD0".           
                05  l-map-dat-file         pic x(15).               
                05  l-map-tel-file         pic x(15).
                05  l-map-enemy-file       pic x(15).   

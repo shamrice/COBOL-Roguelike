@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-12
-      *> Last Updated: 2021-04-22
+      *> Last Updated: 2021-05-01
       *> Purpose: Sets up tile effect data based on tile effect id.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -140,8 +140,8 @@
 
            if ls-teleport-is-found then 
                display "Remove placed teleport? [y/n] " at 2101                
-               accept ws-temp-input at 2130 with auto-skip 
-               if ws-temp-input = 'y' then                    
+               accept ws-temp-input at 2130 with auto-skip upper
+               if ws-temp-input = 'Y' then                    
       *>           Shift whole array down one element, replacing deleted               
                    perform varying ws-counter-1 
                        from ls-found-idx by 1 
