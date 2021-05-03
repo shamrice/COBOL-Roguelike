@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-04-25
+      *> Last Updated: 2021-05-03
       *> Purpose: Module for engine to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -40,26 +40,36 @@
            78  ws-max-num-enemies           value 99.
 
        local-storage section.
-           01  ws-counter-1                 pic 999.
-           01  ws-counter-2                 pic 999.
+           01  ls-counter-1                 pic 999.
+           01  ls-counter-2                 pic 999.
            01  ls-enemy-idx                 pic 99.
            
-           01  ws-scr-draw-pos.
-               05  ws-scr-draw-y            pic 99.
-               05  ws-scr-draw-x            pic 99.
+           01  ls-scr-draw-pos.
+               05  ls-scr-draw-y            pic 99.
+               05  ls-scr-draw-x            pic 99.
 
-           01  ws-map-pos.           
-               05  ws-map-pos-y             pic S999.
-               05  ws-map-pos-x             pic S999.
+           01  ls-map-pos.           
+               05  ls-map-pos-y             pic S999.
+               05  ls-map-pos-x             pic S999.
 
-           01  ws-line-mask                 pic x(80) value spaces. 
+           01  ls-line-mask                 pic x(80) value spaces. 
 
            01  ls-enemy-draw-pos    occurs 0 to ws-max-num-enemies times
                                     depending on l-cur-num-enemies.
                05  ls-enemy-draw-y          pic 99.
                05  ls-enemy-draw-x          pic 99.
 
-           01  ws-char-to-draw              pic x.               
+           01  ls-char-to-draw              pic x.      
+
+           01  ls-player-disp-stats.               
+               05  ls-player-disp-hp.
+                   10  ls-player-disp-hp-cur  pic zz9 value 0.
+                   10  ls-player-disp-hp-max  pic zz9 value 0.
+               05  ls-player-disp-attack-dmg  pic zz9 value 0.
+               05  ls-player-disp-level       pic zz9 value 0.
+               05  ls-player-disp-exp.
+                   10  ls-player-disp-exp-cur pic z(6)9 value 0.
+                   10  ls-player-disp-exp-nxt pic z(6)9 value 0.
 
        linkage section.
 
@@ -76,8 +86,17 @@
                    10  l-player-pos-delta-x   pic S99.
                05  l-player-scr-pos.  
                    10  l-player-scr-y         pic 99 value 10.
-                   10  l-player-scr-x         pic 99 value 20.    
-               05  l-player-attack-damage     pic 999.                   
+                   10  l-player-scr-x         pic 99 value 20.
+               05  l-player-status              pic 9 value 0.
+                   88  l-player-status-alive    value 0.
+                   88  l-player-status-dead     value 1.
+                   88  l-player-status-attacked value 2.
+                   88  l-player-status-other    value 3.                   
+               05  l-player-attack-damage     pic 999.
+               05  l-player-level             pic 999.
+               05  l-player-experience.
+                   10  l-player-exp-total     pic 9(7).                   
+                   10  l-player-exp-next-lvl  pic 9(7).    
                78  l-player-char              value "@".
 
 
@@ -138,48 +157,48 @@
 
        main-procedure.
 
-           perform varying ws-counter-1 
-           from 1 by 1 until ws-counter-1 > ws-max-view-height
-               perform varying ws-counter-2 
-               from 1 by 1 until ws-counter-2 > ws-max-view-width
+           perform varying ls-counter-1 
+           from 1 by 1 until ls-counter-1 > ws-max-view-height
+               perform varying ls-counter-2 
+               from 1 by 1 until ls-counter-2 > ws-max-view-width
 
-                   move ws-counter-1 to ws-scr-draw-y
-                   move ws-counter-2 to ws-scr-draw-x 
+                   move ls-counter-1 to ls-scr-draw-y
+                   move ls-counter-2 to ls-scr-draw-x 
 
-                   compute ws-map-pos-y = l-player-y + ws-counter-1 
-                   compute ws-map-pos-x = l-player-x + ws-counter-2 
+                   compute ls-map-pos-y = l-player-y + ls-counter-1 
+                   compute ls-map-pos-x = l-player-x + ls-counter-2 
                                   
       *>  draw world tile:              
-                   if ws-map-pos-y < ws-max-map-height
-                       and ws-map-pos-x < ws-max-map-width
-                       and ws-map-pos-y > 0 and ws-map-pos-x > 0 
+                   if ls-map-pos-y < ws-max-map-height
+                       and ls-map-pos-x < ws-max-map-width
+                       and ls-map-pos-y > 0 and ls-map-pos-x > 0 
                        then 
                            
-                           move l-tile-char(ws-map-pos-y, ws-map-pos-x) 
-                               to ws-char-to-draw                           
+                           move l-tile-char(ls-map-pos-y, ls-map-pos-x) 
+                               to ls-char-to-draw                           
 
                            call "draw-tile-character" using
-                               ws-scr-draw-pos, 
+                               ls-scr-draw-pos, 
                                l-tile-map-data(
-                                   ws-map-pos-y, ws-map-pos-x) 
-                               ws-char-to-draw
+                                   ls-map-pos-y, ls-map-pos-x) 
+                               ls-char-to-draw
                            end-call
 
                    else *> OOB void space
                        display ":"                   
-                           at ws-scr-draw-pos
+                           at ls-scr-draw-pos
                            background-color black
                            foreground-color red
                        end-display
                    end-if
 
                    *> draw player
-                   if ws-scr-draw-pos = l-player-scr-pos then
+                   if ls-scr-draw-pos = l-player-scr-pos then
 
                        display l-player-char 
                            at l-player-scr-pos 
                            background-color 
-                           l-tile-bg(ws-map-pos-y, ws-map-pos-x) 
+                           l-tile-bg(ls-map-pos-y, ls-map-pos-x) 
                            foreground-color yellow highlight
                        end-display  
                    end-if   
@@ -234,15 +253,34 @@
 
            *> TODO : Expand upon this with extra player stats and score.
 
+           move l-player-hp-current to ls-player-disp-hp-cur
+           move l-player-hp-max to ls-player-disp-hp-max
+           move l-player-attack-damage to ls-player-disp-attack-dmg
+           move l-player-level to ls-player-disp-level
+           move l-player-exp-total to ls-player-disp-exp-cur
+           move l-player-exp-next-lvl to ls-player-disp-exp-nxt
+
            display 
                function trim(l-player-name) at 0160 underline highlight           
            end-display 
            display 
-               "HP: " at 0256 
-               l-player-hp-current at 0260
-               "/" at 0264
-               l-player-hp-max at 0266
-               "EXP:" at 0356
+               function concatenate(
+                   "Level: ", 
+                   function trim(ls-player-disp-level)) at 0356
+               function concatenate(
+                   "HP: ",
+                   function trim(ls-player-disp-hp-cur),
+                   "/",function trim(ls-player-disp-hp-max)
+                   , "    ") at 0459
+               function concatenate(
+                   "Attack: ",
+                   function trim(ls-player-disp-attack-dmg)) at 0555                              
+               function concatenate(
+                   "Exp next: ",
+                   function trim(ls-player-disp-exp-nxt)) at 0653
+               function concatenate(
+                   "Total Exp: "
+                   function trim(ls-player-disp-exp-cur)) at 0752                                               
            end-display 
            
            exit paragraph.

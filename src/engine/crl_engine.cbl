@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-01
+      *> Last Updated: 2021-05-03
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -130,7 +130,11 @@
                    88  ws-player-status-dead     value 1.
                    88  ws-player-status-attacked value 2.
                    88  ws-player-status-other    value 3.
-               05  ws-player-attack-damage     pic 999 value 1.                      
+               05  ws-player-attack-damage     pic 999 value 1.    
+               05  ws-player-level             pic 999 value 1.
+               05  ws-player-experience.
+                   10  ws-player-exp-total     pic 9(7).
+                   10  ws-player-exp-next-lvl  pic 9(7) value 75.
                78  ws-player-char              value "@". *> TODO : Make configurable.
 
            
@@ -265,6 +269,7 @@
            set environment "COB_SCREEN_EXCEPTIONS" to 'Y'.
            set environment "COB_SCREEN_ESC" to 'Y'.
            set environment "COB_TIMEOUT_SCALE" to '3'.
+      *     set environment "COB_EXIT_WAIT" to "NO".
 
        init-setup. 
            move '0505' to ws-player-pos                         
@@ -319,13 +324,17 @@
 
            if ws-player-status-dead then 
                display 
-                   "You died. Game over." at 1015
+                   "You died. Game over. Press 'Q' to continue" at 1005
                    foreground-color 7 
                    background-color 0 
                end-display 
                *> TODO : Proper input checking so not to quit when 
                *> UP or DOWN is pressed. Also highscore, etc.
-               accept ws-kb-input at 1014 no-echo                    
+               perform  with test after until ws-kb-input = 'Q'
+                   accept ws-kb-input 
+                       with auto-skip no-echo upper at 1004
+                   end-accept 
+               end-perform 
            end-if 
               
            goback.
