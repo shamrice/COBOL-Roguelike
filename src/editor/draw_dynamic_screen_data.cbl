@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-04-22
+      *> Last Updated: 2021-05-03
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -98,7 +98,8 @@
                    10  l-cursor-enemy-attack-damage   pic 999 value 1.
                    10  l-cursor-enemy-color           pic 9 value red.                                           
                    10  l-cursor-enemy-char            pic x value "&". 
-                   10  l-cursor-enemy-movement-ticks  pic 999.                   
+                   10  l-cursor-enemy-movement-ticks  pic 999.   
+                   10  l-cursor-enemy-exp-worth       pic 9(4) value 1.                                   
                05  l-cursor-teleport-settings.
                    10  l-cursor-tel-dest-y            pic 99.
                    10  l-cursor-tel-dest-x            pic 99.
@@ -153,7 +154,8 @@
                        88  l-enemy-status-other    value 3.
                    10  l-enemy-movement-ticks.
                        15  l-enemy-current-ticks   pic 999.
-                       15  l-enemy-max-ticks       pic 999 value 3.           
+                       15  l-enemy-max-ticks       pic 999 value 3.
+                   10  l-enemy-exp-worth           pic 9(4).                                  
 
            01  l-display-mode                     pic a value 'R'.
                88  l-display-mode-regular         value 'R'.
@@ -366,7 +368,8 @@
            display "  Movement ticks:            " at 2053
            display l-cursor-enemy-movement-ticks at 2071
            
-           display ws-line-mask at 2153           
+           display "       Exp Worth:            " at 2153
+           display l-cursor-enemy-exp-worth at 2171
 
            exit paragraph. 
 

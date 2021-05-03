@@ -74,7 +74,8 @@
                    10  l-cursor-enemy-attack-damage   pic 999.
                    10  l-cursor-enemy-color           pic 9.   
                    10  l-cursor-enemy-char            pic x.
-                   10  l-cursor-enemy-movement-ticks  pic 999.                   
+                   10  l-cursor-enemy-movement-ticks  pic 999.    
+                   10  l-cursor-enemy-exp-worth       pic 9(4). 
                05  l-cursor-teleport-settings.
                    10  l-cursor-tel-dest-y            pic 99.
                    10  l-cursor-tel-dest-x            pic 99.

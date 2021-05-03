@@ -117,7 +117,8 @@
                        88  l-enemy-status-other    value 3.
                    10  l-enemy-movement-ticks.
                        15  l-enemy-current-ticks   pic 999.
-                       15  l-enemy-max-ticks       pic 999 value 3.           
+                       15  l-enemy-max-ticks       pic 999 value 3.  
+                   10  l-enemy-exp-worth           pic 9(4).                                
 
            01  l-temp-map-pos.
                05  l-temp-map-pos-y        pic S99.

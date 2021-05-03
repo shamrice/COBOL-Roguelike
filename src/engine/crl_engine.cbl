@@ -50,7 +50,7 @@
                05  f-tile-effect-id        pic 99.
 
 
-       fd  fd-teleport-data.
+           fd  fd-teleport-data.
            01  f-teleport-data-record.
                05  f-teleport-pos.
                    10  f-teleport-y        pic S99.
@@ -76,6 +76,7 @@
                05  f-enemy-movement-ticks.
                    10  f-enemy-current-ticks    pic 999.
                    10  f-enemy-max-ticks        pic 999.
+               05  f-enemy-exp-worth            pic 9(4).                   
 
        working-storage section.
 
@@ -133,7 +134,7 @@
                05  ws-player-attack-damage     pic 999 value 1.    
                05  ws-player-level             pic 999 value 1.
                05  ws-player-experience.
-                   10  ws-player-exp-total     pic 9(7).
+                   10  ws-player-exp-total     pic 9(7) value 0.
                    10  ws-player-exp-next-lvl  pic 9(7) value 75.
                78  ws-player-char              value "@". *> TODO : Make configurable.
 
@@ -167,11 +168,14 @@
                    10  ws-enemy-movement-ticks.
                        15  ws-enemy-current-ticks   pic 999.
                        15  ws-enemy-max-ticks       pic 999.
+                   10  ws-enemy-exp-worth           pic 9(4).
 
            01  ws-enemy-placed-found        pic a value 'N'.
                88  ws-enemy-found           value 'Y'.
                88  ws-enemy-not-found       value 'N'.
            01  ws-enemy-found-idx           pic 99.   
+
+           01  ws-enemy-exp-temp            pic 9(7).
 
            01  ws-enemy-temp-pos.
                05  ws-enemy-temp-y          pic 99.
@@ -686,12 +690,54 @@
 
                    move function concatenate(                       
                        function trim(ws-enemy-name(ws-enemy-idx)), 
-                       " expires."                   
+                       " expires giving ",
+                       ws-enemy-exp-worth(ws-enemy-idx), 
+                       " experience points."
                    ) to ws-action-history-temp
 
                    call "add-action-history-item" using
                        ws-action-history-temp ws-action-history
                    end-call 
+
+           *>Add exp and level up as needed.
+           *> TODO : Move this to its own thing...
+           *> TODO : Temp not needed
+
+                   move ws-enemy-exp-worth(ws-enemy-idx) 
+                       to ws-enemy-exp-temp
+
+      *             display ws-player-exp-next-lvl at 2360
+                   if ws-enemy-exp-temp <= ws-player-exp-next-lvl then 
+                       subtract ws-enemy-exp-temp from 
+                           ws-player-exp-next-lvl
+                       end-subtract
+      *                 display ws-player-exp-next-lvl at 2560
+                   else 
+                       move zero to ws-player-exp-next-lvl
+      *                 display " ZEROS!" at 2460
+      *                 display ws-player-exp-next-lvl at 2560
+      *                 display ws-enemy-exp-worth(ws-enemy-idx) at 2660
+      *                 display ws-enemy-exp-temp at 2760
+                   end-if 
+
+                   add ws-enemy-exp-temp to ws-player-exp-total                   
+
+                   if ws-player-exp-next-lvl = 0 then 
+                       compute ws-player-exp-next-lvl = 
+                           ws-player-level * 20 + 75
+                       end-compute 
+                       add 1 to ws-player-level 
+
+                       move function concatenate(                       
+                           function trim(ws-player-name), 
+                           " has leveled up to level ",
+                           ws-player-level, "!"
+                       ) to ws-action-history-temp
+
+                       call "add-action-history-item" using
+                           ws-action-history-temp ws-action-history
+                       end-call 
+                   end-if                        
                end-if 
            end-if 
 

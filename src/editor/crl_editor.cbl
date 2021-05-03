@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-01
+      *> Last Updated: 2021-05-03
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -63,6 +63,7 @@
                05  f-enemy-movement-ticks.
                    10  f-enemy-current-ticks    pic 999.
                    10  f-enemy-max-ticks        pic 999.
+               05  f-enemy-exp-worth            pic 9(4).
 
            fd  fd-teleport-data.
            01  f-teleport-data-record.
@@ -154,6 +155,7 @@
                    10  ws-cursor-enemy-color           pic 9 value red.                                           
                    10  ws-cursor-enemy-char            pic x value "&". 
                    10  ws-cursor-enemy-movement-ticks  pic 999 value 3.
+                   10  ws-cursor-enemy-exp-worth       pic 9(4) value 1.
                05  ws-cursor-teleport-settings.
                    10  ws-cursor-tel-dest-y            pic 99.
                    10  ws-cursor-tel-dest-x            pic 99.
@@ -202,6 +204,7 @@
                    10  ws-enemy-movement-ticks.
                        15  ws-enemy-current-ticks   pic 999.
                        15  ws-enemy-max-ticks       pic 999 value 3.
+                   10  ws-enemy-exp-worth           pic 9(4) value 1.
 
 
            01  ws-tile-map-table-matrix.
@@ -673,6 +676,10 @@
 
            display "Enter enemy ticks to move: " at 2101
            accept ws-cursor-enemy-movement-ticks at 2128 update 
+
+           display ws-line-mask at 2101
+           display "Enter enemy exp worth: " at 2101
+           accept ws-cursor-enemy-exp-worth at 2124
 
            exit paragraph.
 

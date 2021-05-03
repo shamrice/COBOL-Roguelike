@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-23
-      *> Last Updated: 2021-05-01
+      *> Last Updated: 2021-05-03
       *> Purpose: Module for engine to load the level data passed into
       *>          the related record structures.
       *> Tectonics:
@@ -72,6 +72,7 @@
                05  f-enemy-movement-ticks.
                    10  f-enemy-current-ticks    pic 999.
                    10  f-enemy-max-ticks        pic 999.
+               10  l-cursor-enemy-exp-worth     pic 9(4).                    
 
 
        working-storage section.
@@ -162,7 +163,8 @@
                        88  l-enemy-status-other    value 3.
                    10  l-enemy-movement-ticks.
                        15  l-enemy-current-ticks   pic 999.
-                       15  l-enemy-max-ticks       pic 999 value 3.           
+                       15  l-enemy-max-ticks       pic 999 value 3. 
+                   10  l-enemy-exp-worth           pic 9(4).                                  
 
            01  l-teleport-data.
                05  l-cur-num-teleports        pic 999.
