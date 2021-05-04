@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-03
+      *> Last Updated: 2021-05-04
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -237,6 +237,8 @@
                05  ws-temp-map-pos-x        pic S99.
 
            01  ws-filler                    pic 9(9).
+
+           01  ws-attack-attempt            pic 9(9).
 
            01  ws-eof                       pic a value 'N'.
                88 ws-is-eof                 value 'Y'.
@@ -663,15 +665,38 @@
        *> collision is found.
        player-attack.
 
-          *> TODO: Add randomization on if they hit or not instead of 
-          *>       assuming all attacks hit.
-
            if ws-enemy-hp-current(ws-enemy-idx) > 0
-           and not ws-enemy-status-dead(ws-enemy-idx) then 
-               subtract ws-player-attack-damage 
-                   from ws-enemy-hp-current(ws-enemy-idx)
-               end-subtract
-               set ws-enemy-char-hurt(ws-enemy-idx) to true
+           and not ws-enemy-status-dead(ws-enemy-idx) then
+
+          *> random roll to see if attack hits.
+               compute ws-attack-attempt = function random * 100 + 1
+               display ws-attack-attempt at 2560
+
+               *> for some reason this doesn't always roll high enough??
+
+               *> if they miss, note it in the log and leave paragraph
+               if ws-attack-attempt > 80 then *>magic numbers...
+                   move function concatenate(
+                       function trim(ws-player-name), " missed ", 
+                       function trim(ws-enemy-name(ws-enemy-idx)), "."
+                   ) to ws-action-history-temp
+
+                   call "add-action-history-item" using
+                       ws-action-history-temp ws-action-history
+                   end-call 
+                   exit paragraph
+               end-if 
+          
+           *> proceed to attack enemy
+               if ws-player-attack-damage <= 
+               ws-enemy-hp-current(ws-enemy-idx) then 
+                   subtract ws-player-attack-damage 
+                       from ws-enemy-hp-current(ws-enemy-idx)
+                   end-subtract
+                   set ws-enemy-char-hurt(ws-enemy-idx) to true
+               else 
+                   move zero to ws-enemy-hp-current(ws-enemy-idx)
+               end-if 
 
                move function concatenate(
                    function trim(ws-player-name), " attacks ", 
@@ -702,6 +727,7 @@
            *>Add exp and level up as needed.
            *> TODO : Move this to its own thing...
            *> TODO : Temp not needed
+           *> TODO : Keep track of kill total?
 
                    move ws-enemy-exp-worth(ws-enemy-idx) 
                        to ws-enemy-exp-temp
@@ -727,6 +753,16 @@
                            ws-player-level * 20 + 75
                        end-compute 
                        add 1 to ws-player-level 
+
+                       compute ws-player-hp-max = 
+                           ws-player-hp-max + (ws-player-level * 5)
+                       end-compute 
+
+                       move ws-player-hp-max to ws-player-hp-current
+
+                       compute ws-player-attack-damage = 
+                           ws-player-level * 1.5
+                       end-compute 
 
                        move function concatenate(                       
                            function trim(ws-player-name), 
