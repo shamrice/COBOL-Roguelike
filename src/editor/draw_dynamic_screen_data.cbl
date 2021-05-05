@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-05-03
+      *> Last Updated: 2021-05-05
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -142,11 +142,7 @@
                        15  l-enemy-y           pic 99.
                        15  l-enemy-x           pic 99.
                    10  l-enemy-color           pic 9 value red.                                     
-      *>TODO: this isn't configurable once enemy is hit.
-                   10  l-enemy-char            pic x value "&". 
-                       88  l-enemy-char-alive  value "&".
-                       88  l-enemy-char-dead   value "X".
-                       88  l-enemy-char-hurt   value "#".
+                   10  l-enemy-char            pic x.
                    10  l-enemy-status              pic 9 value 0.
                        88  l-enemy-status-alive    value 0.
                        88  l-enemy-status-dead     value 1.

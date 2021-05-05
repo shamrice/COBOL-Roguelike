@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-03
+      *> Last Updated: 2021-05-05
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -58,7 +58,7 @@
                    10  f-enemy-y                pic 99.
                    10  f-enemy-x                pic 99.
                05  f-enemy-color                pic 9. 
-               05  f-enemy-char                 pic x. 
+               05  f-enemy-char                 pic x.
                05  f-enemy-status               pic 9.
                05  f-enemy-movement-ticks.
                    10  f-enemy-current-ticks    pic 999.
@@ -191,11 +191,7 @@
                        15  ws-enemy-y           pic 99.
                        15  ws-enemy-x           pic 99.
                    10  ws-enemy-color           pic 9 value red.                                     
-      *>TODO: this isn't configurable will reset after hit.
-                   10  ws-enemy-char            pic x value "&". 
-                       88  ws-enemy-char-alive  value "&".
-                       88  ws-enemy-char-dead   value "X".
-                       88  ws-enemy-char-hurt   value "#".
+                   10  ws-enemy-char            pic x.
                    10  ws-enemy-status              pic 9 value 0.
                        88  ws-enemy-status-alive    value 0.
                        88  ws-enemy-status-dead     value 1.
@@ -816,8 +812,12 @@
 
                move ws-cursor-enemy-movement-ticks 
                    to ws-enemy-max-ticks(ws-cur-num-enemies) 
+
                move ws-cursor-enemy-movement-ticks
                    to ws-enemy-current-ticks(ws-cur-num-enemies)              
+
+               move ws-cursor-enemy-exp-worth 
+                   to ws-enemy-exp-worth(ws-cur-num-enemies)
 
                move ws-temp-map-pos-y to ws-enemy-y(ws-cur-num-enemies) 
                move ws-temp-map-pos-x to ws-enemy-x(ws-cur-num-enemies)

@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-05-03
+      *> Last Updated: 2021-05-05
       *> Purpose: Module for engine to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -132,11 +132,7 @@
                        15  l-enemy-y           pic 99.
                        15  l-enemy-x           pic 99.
                    10  l-enemy-color           pic 9 value red.                                     
-      *>TODO: this isn't configurable once enemy is hit.
-                   10  l-enemy-char            pic x value "&". 
-                       88  l-enemy-char-alive  value "&".
-                       88  l-enemy-char-dead   value "X".
-                       88  l-enemy-char-hurt   value "#".
+                   10  l-enemy-char            pic x.
                    10  l-enemy-status              pic 9 value 0.
                        88  l-enemy-status-alive    value 0.
                        88  l-enemy-status-dead     value 1.
@@ -230,8 +226,20 @@
                    and ls-enemy-draw-x(ls-enemy-idx) > 0 and 
                    ls-enemy-draw-x(ls-enemy-idx) <= ws-max-view-width
                    then 
+
+                       move l-enemy-char(ls-enemy-idx) 
+                           to ls-char-to-draw
+
+                       if l-enemy-status-attacked(ls-enemy-idx) then 
+                           move "#" to ls-char-to-draw
+                       end-if 
+                       
+                       if l-enemy-status-dead(ls-enemy-idx) then 
+                           move "X" to ls-char-to-draw
+                       end-if 
+
                        display 
-                           l-enemy-char(ls-enemy-idx) 
+                           ls-char-to-draw
                            at ls-enemy-draw-pos(ls-enemy-idx)
                            foreground-color l-enemy-color(ls-enemy-idx)
                            background-color l-tile-bg(
@@ -275,10 +283,12 @@
                    , "    ") at 0459
                function concatenate(
                    "Attack: ",
-                   function trim(ls-player-disp-attack-dmg)) at 0555                              
+                   function trim(ls-player-disp-attack-dmg),
+                   "    ") at 0555                              
                function concatenate(
                    "Exp next: ",
-                   function trim(ls-player-disp-exp-nxt)) at 0653
+                   function trim(ls-player-disp-exp-nxt),
+                   "    ") at 0653
                function concatenate(
                    "Total Exp: "
                    function trim(ls-player-disp-exp-cur)) at 0752                                               

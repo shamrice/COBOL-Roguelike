@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-04
+      *> Last Updated: 2021-05-05
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -154,12 +154,8 @@
                    10  ws-enemy-pos.
                        15  ws-enemy-y           pic 99.
                        15  ws-enemy-x           pic 99.
-                   10  ws-enemy-color           pic 9 value 4.                                     
-      *>TODO: this isn't configurable will reset after hit.
-                   10  ws-enemy-char            pic x value space. 
-                       88  ws-enemy-char-alive  value "&".
-                       88  ws-enemy-char-dead   value "X".
-                       88  ws-enemy-char-hurt   value "#".
+                   10  ws-enemy-color           pic 9 value 4.                                           
+                   10  ws-enemy-char            pic x.
                    10  ws-enemy-status              pic 9 value 3.
                        88  ws-enemy-status-alive    value 0.
                        88  ws-enemy-status-dead     value 1.
@@ -228,6 +224,7 @@
            01  ws-counter-1                 pic 999.
            01  ws-counter-2                 pic 999.
            01  ws-enemy-idx                 pic 99.
+           01  ws-enemy-search-idx          pic 99.
            01  ws-tele-idx                  pic 999.
 
            01  ws-temp-color                pic 9.
@@ -455,11 +452,12 @@
 
                move zero to ws-enemy-found-idx
 
-           *>Check if enemy is there, if so attack it.
+           *>Check if enemy is there and not dead, if so attack it.
                perform varying ws-enemy-idx 
                from 1 by 1 until ws-enemy-idx > ws-cur-num-enemies
                    if ws-enemy-y(ws-enemy-idx) = ws-temp-map-pos-y 
-                   and ws-enemy-x(ws-enemy-idx) = ws-temp-map-pos-x 
+                   and ws-enemy-x(ws-enemy-idx) = ws-temp-map-pos-x
+                   and not ws-enemy-status-dead(ws-enemy-idx) 
                    then 
                        move ws-enemy-idx to ws-enemy-found-idx
                        perform player-attack
@@ -542,7 +540,7 @@
        move-enemy.
 
       *> TODO : Add some type of movement randomization or basic pathfinding.
-      *> TODO : keep enemies from walking on top of eachother!
+      *> TODO : move this to its own sub program as it is getting large.
 
            perform varying ws-enemy-idx 
            from 1 by 1 until ws-enemy-idx > ws-cur-num-enemies
@@ -557,9 +555,10 @@
 
                        move 0 to ws-enemy-current-ticks(ws-enemy-idx)
                        
-                       if ws-enemy-char-hurt(ws-enemy-idx) 
+                       if ws-enemy-status-attacked(ws-enemy-idx) 
                        then 
-                           set ws-enemy-char-alive(ws-enemy-idx) to true 
+                           set ws-enemy-status-alive(ws-enemy-idx) 
+                               to true 
                        end-if 
     
                        *> Reset temp positions.
@@ -598,22 +597,44 @@
 
                            perform enemy-attack
 
-                       else 
+                       else                        
+                       *>Check to make sure another enemy isn't already 
+                       *>in that position.
+                           move zero to ws-enemy-found-idx 
+                           perform varying ws-enemy-search-idx
+                           from 1 by 1 until 
+                           ws-enemy-search-idx > ws-cur-num-enemies
+
+                               if ws-enemy-search-idx not = ws-enemy-idx 
+                               then 
+                                   if ws-enemy-temp-x = 
+                                   ws-enemy-x(ws-enemy-search-idx) and
+                                   ws-enemy-temp-y = 
+                                   ws-enemy-y(ws-enemy-search-idx) then
+                                       move ws-enemy-search-idx
+                                           to ws-enemy-found-idx 
+                                       exit perform 
+                                   end-if 
+                               end-if
+                           end-perform 
+                                       
+                           if ws-enemy-found-idx = 0 then 
+
                  *> otherwise check if not blocking tile and move there.
-                           if ws-tile-not-blocking(
-                              ws-enemy-y(ws-enemy-idx), ws-enemy-temp-x)
-                           then 
-                               move ws-enemy-temp-x
-                                   to ws-enemy-x(ws-enemy-idx) 
-                           end-if 
+                               if ws-tile-not-blocking(
+                               ws-enemy-y(ws-enemy-idx), 
+                               ws-enemy-temp-x) then 
+                                   move ws-enemy-temp-x
+                                       to ws-enemy-x(ws-enemy-idx) 
+                               end-if 
 
-                           if ws-tile-not-blocking(
-                              ws-enemy-temp-y, ws-enemy-x(ws-enemy-idx))
-                           then 
-                               move ws-enemy-temp-y
-                                   to ws-enemy-y(ws-enemy-idx) 
+                               if ws-tile-not-blocking(
+                               ws-enemy-temp-y, 
+                               ws-enemy-x(ws-enemy-idx)) then 
+                                   move ws-enemy-temp-y
+                                       to ws-enemy-y(ws-enemy-idx) 
+                               end-if 
                            end-if 
-
                        end-if                        
                    end-if 
                end-if 
@@ -630,8 +651,27 @@
           *> TODO: Eventually take in player level and defense into this 
           *>       calculation.
 
-          *> TODO: Add randomization on if they hit or not instead of 
-          *>       assuming all attacks hit.
+
+          *> random roll to see if attack hits.
+           compute ws-attack-attempt = function random * 100 + 1
+           display function concatenate("Enemy attack roll: ", 
+               ws-attack-attempt) at 2660
+           end-display
+             
+           *> if they miss, note it in the log and leave paragraph
+           if ws-attack-attempt > 65 then *>magic numbers...
+               move function concatenate(
+                   function trim(ws-enemy-name(ws-enemy-idx)), 
+                   " missed ", 
+                   function trim(ws-player-name), "."
+               ) to ws-action-history-temp
+
+               call "add-action-history-item" using
+                   ws-action-history-temp ws-action-history
+               end-call 
+               exit paragraph
+           end-if 
+
            compute ws-temp-damage-delt = 
                ws-enemy-attack-damage(ws-enemy-idx)
            end-compute 
@@ -670,7 +710,9 @@
 
           *> random roll to see if attack hits.
                compute ws-attack-attempt = function random * 100 + 1
-               display ws-attack-attempt at 2560
+               display function concatenate("Player attack roll: ",
+                   ws-attack-attempt) at 2560
+               end-display
 
                *> for some reason this doesn't always roll high enough??
 
@@ -693,7 +735,7 @@
                    subtract ws-player-attack-damage 
                        from ws-enemy-hp-current(ws-enemy-idx)
                    end-subtract
-                   set ws-enemy-char-hurt(ws-enemy-idx) to true
+                   set ws-enemy-status-attacked(ws-enemy-idx) to true
                else 
                    move zero to ws-enemy-hp-current(ws-enemy-idx)
                end-if 
@@ -709,8 +751,7 @@
                end-call 
 
            *> If enemy dies from attack, set char and log it.
-               if ws-enemy-hp-current(ws-enemy-idx) <= 0 then  
-                   set ws-enemy-char-dead(ws-enemy-idx) to true 
+               if ws-enemy-hp-current(ws-enemy-idx) <= 0 then                     
                    set ws-enemy-status-dead(ws-enemy-idx) to true 
 
                    move function concatenate(                       
@@ -732,25 +773,20 @@
                    move ws-enemy-exp-worth(ws-enemy-idx) 
                        to ws-enemy-exp-temp
 
-      *             display ws-player-exp-next-lvl at 2360
-                   if ws-enemy-exp-temp <= ws-player-exp-next-lvl then 
+                   if ws-enemy-exp-temp >= ws-player-exp-next-lvl then 
+                       move zero to ws-player-exp-next-lvl
+                   else
                        subtract ws-enemy-exp-temp from 
                            ws-player-exp-next-lvl
                        end-subtract
-      *                 display ws-player-exp-next-lvl at 2560
-                   else 
-                       move zero to ws-player-exp-next-lvl
-      *                 display " ZEROS!" at 2460
-      *                 display ws-player-exp-next-lvl at 2560
-      *                 display ws-enemy-exp-worth(ws-enemy-idx) at 2660
-      *                 display ws-enemy-exp-temp at 2760
                    end-if 
 
                    add ws-enemy-exp-temp to ws-player-exp-total                   
 
+               *>If leveled up, update stats and log it.
                    if ws-player-exp-next-lvl = 0 then 
                        compute ws-player-exp-next-lvl = 
-                           ws-player-level * 20 + 75
+                           (ws-player-level * 20) + 75
                        end-compute 
                        add 1 to ws-player-level 
 
