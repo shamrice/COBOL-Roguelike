@@ -6,7 +6,7 @@ The title of "Rogue-ish" would probably fit better as the levels are created usi
 
 
 
-**Early demo of current state of the game engine as of 2021-05-07** (Click to view on YouTube)
+**Early video demo of current state of the game engine as of 2021-05-07** (Click to view on YouTube)
 
 [![Video demo of current state](https://img.youtube.com/vi/ihjPkzn5iD8/0.jpg)](https://www.youtube.com/watch?v=ihjPkzn5iD8)
 
