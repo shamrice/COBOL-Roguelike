@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-05-05
+      *> Last Updated: 2021-05-07
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -9,7 +9,6 @@
 
       *> As the editor cursor is more complex than the player in the regular 
       *> game program, this cannot be re-used in the tile-game program.
-      *> A similar sub-program will need to be created for that implementation.
 
        identification division.
        program-id. draw-dynamic-screen-data.
@@ -20,138 +19,42 @@
 
        working-storage section.
 
-      *> Color constants:    
-           01  black   constant as 0.
-           01  blue    constant as 1.
-           01  green   constant as 2.
-           01  cyan    constant as 3.
-           01  red     constant as 4.
-           01  magenta constant as 5.
-           01  yellow  constant as 6.  
-           01  white   constant as 7.
-
-      *> Tile effect ids           
-           01  ws-teleport-effect-id  constant as 01.
-
-
-           78  ws-max-map-height            value 25.
-           78  ws-max-map-width             value 80.
-           78  ws-max-view-height           value 20.
-           78  ws-max-view-width            value 50.
-           78  ws-max-num-enemies           value 99.
+       copy "shared/copybooks/ws-constants.cpy".
 
        local-storage section.
-           01  ws-counter-1                 pic 999.
-           01  ws-counter-2                 pic 999.
-           01  ls-enemy-idx                 pic 99.
+       
+       01  ws-counter-1                 pic 999.
+       01  ws-counter-2                 pic 999.
+       01  ls-enemy-idx                 pic 99.
            
-           01  ws-scr-draw-pos.
-               05  ws-scr-draw-y            pic 99.
-               05  ws-scr-draw-x            pic 99.
+       01  ws-scr-draw-pos.
+           05  ws-scr-draw-y            pic 99.
+           05  ws-scr-draw-x            pic 99.
 
-           01  ws-map-pos.           
-               05  ws-map-pos-y             pic S999.
-               05  ws-map-pos-x             pic S999.
+       01  ws-map-pos.           
+           05  ws-map-pos-y             pic S999.
+           05  ws-map-pos-x             pic S999.
 
-           01  ws-temp-map-pos.
-               05  ws-temp-map-pos-y        pic S99 value 01.
-               05  ws-temp-map-pos-x        pic S99 value 01.
+       01  ws-temp-map-pos.
+           05  ws-temp-map-pos-y        pic S99 value 01.
+           05  ws-temp-map-pos-x        pic S99 value 01.
 
-           01  ws-line-mask                 pic x(80) value spaces. 
+       01  ws-line-mask                 pic x(80) value spaces. 
 
-           01  ls-enemy-draw-pos    occurs 0 to ws-max-num-enemies times
+       01  ls-enemy-draw-pos    occurs 0 to ws-max-num-enemies times
                                     depending on l-cur-num-enemies.
-               05  ls-enemy-draw-y          pic 99.
-               05  ls-enemy-draw-x          pic 99.
+           05  ls-enemy-draw-y          pic 99.
+           05  ls-enemy-draw-x          pic 99.
 
-           01  ws-char-to-draw              pic x.               
+       01  ws-char-to-draw              pic x.               
 
        linkage section.
 
-      *> TODO: Copy book... 
-           01  l-cursor.
-               05  l-cursor-pos.
-                   10  l-cursor-pos-y         pic S99.
-                   10  l-cursor-pos-x         pic S99.
-               05  l-cursor-pos-delta.               
-                   10  l-cursor-pos-delta-y   pic S99. 
-                   10  l-cursor-pos-delta-x   pic S99.
-               05  l-cursor-scr-pos.  
-                   10  l-cursor-scr-y         pic 99 value 10.
-                   10  l-cursor-scr-x         pic 99 value 20.                      
-               05  l-cursor-color             pic 9 value yellow.
-               05  l-cursor-draw-color-fg     pic 9 value black.
-               05  l-cursor-draw-color-bg     pic 9 value black.
-               05  l-cursor-draw-char         pic x value space.
-               05  l-cursor-draw-highlight    pic a value 'N'.
-                   88  l-cursor-highlight     value 'Y'.
-                   88  l-cursor-no-highlight  value 'N'.
-               05  l-cursor-draw-blocking     pic a value 'N'.
-                   88  l-cursor-blocking      value 'Y'.
-                   88  l-cursor-not-block     value 'N'.
-               05  l-cursor-draw-blinking     pic a value 'N'.
-                   88  l-cursor-blink         value 'Y'.
-                   88  l-cursor-not-blink     value 'N'. 
-               05  l-cursor-enemy-settings.
-                   10  l-cursor-enemy-name            pic x(16).
-                   10  l-cursor-enemy-hp              pic 999 value 10.                       
-                   10  l-cursor-enemy-attack-damage   pic 999 value 1.
-                   10  l-cursor-enemy-color           pic 9 value red.                                           
-                   10  l-cursor-enemy-char            pic x value "&". 
-                   10  l-cursor-enemy-movement-ticks  pic 999.   
-                   10  l-cursor-enemy-exp-worth       pic 9(4) value 1.                                   
-               05  l-cursor-teleport-settings.
-                   10  l-cursor-tel-dest-y            pic 99.
-                   10  l-cursor-tel-dest-x            pic 99.
-                   10  l-cursor-tel-dest-map          pic x(15).                       
-               05  l-cursor-draw-effect       pic 99.
-               05  l-cursor-type              pic a value 'T'.
-                   88  l-cursor-type-tile     value 'T'.
-                   88  l-cursor-type-enemy    value 'E'.                     
-               78  l-cursor-char              value "+".
+       copy "editor/copybooks/l-cursor.cpy".
 
- 
-           01  l-tile-map-table-matrix.
-               05  l-tile-map           occurs ws-max-map-height times.
-                   10  l-tile-map-data  occurs ws-max-map-width times.
-                       15  l-tile-fg                   pic 9.   
-                       15  l-tile-bg                   pic 9.
-                       15  l-tile-char                 pic x.
-                       15  l-tile-highlight            pic a value 'N'.
-                           88 l-tile-is-highlight      value 'Y'.
-                           88 l-tile-not-highlight     value 'N'.
-                       15  l-tile-blocking             pic a value 'N'.
-                           88  l-tile-is-blocking      value 'Y'.
-                           88  l-tile-not-blocking     value 'N'.  
-                       15  l-tile-blinking             pic a value 'N'.
-                           88  l-tile-is-blinking      value 'Y'.
-                           88  l-tile-not-blinking     value 'N'.
-                       15  l-tile-effect-id            pic 99.       
+       copy "shared/copybooks/l-tile-map-table-matrix.cpy".
 
-
-           01  l-enemy-data.
-               05  l-cur-num-enemies           pic 99.
-               05  l-enemy       occurs 0 to unbounded times
-                                  depending on l-cur-num-enemies.
-                   10  l-enemy-name            pic x(16).
-                   10  l-enemy-hp.
-                       15  l-enemy-hp-total    pic 999 value 10.
-                       15  l-enemy-hp-current  pic 999 value 10.
-                   10  l-enemy-attack-damage   pic 999 value 1.
-                   10  l-enemy-pos.
-                       15  l-enemy-y           pic 99.
-                       15  l-enemy-x           pic 99.
-                   10  l-enemy-color           pic 9 value red.                                     
-                   10  l-enemy-char            pic x.
-                   10  l-enemy-status              pic 9 value 0.
-                       88  l-enemy-status-alive    value 0.
-                       88  l-enemy-status-dead     value 1.
-                       88  l-enemy-status-attacked value 2.
-                       88  l-enemy-status-other    value 3.
-                   10  l-enemy-movement-ticks.
-                       15  l-enemy-current-ticks   pic 999.
-                       15  l-enemy-max-ticks       pic 999 value 3.
-                   10  l-enemy-exp-worth           pic 9(4).                                  
+       copy "shared/copybooks/l-enemy-data.cpy".
 
            01  l-display-mode                     pic a value 'R'.
                88  l-display-mode-regular         value 'R'.

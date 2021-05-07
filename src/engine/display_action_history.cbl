@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-25
-      *> Last Updated: 2021-05-06
+      *> Last Updated: 2021-05-07
       *> Purpose: Module for engine to display action history to the 
       *>          screen. (Called from display-dynamic-screen-data)
       *> Tectonics:
@@ -29,9 +29,7 @@
 
        linkage section.
 
-       01  l-action-history.
-           05  l-action-history-item    occurs ws-max-entries times.
-               10  l-action-history-text pic x(50).
+       copy "engine/copybooks/l-action-history.cpy".
 
        procedure division using l-action-history.
 

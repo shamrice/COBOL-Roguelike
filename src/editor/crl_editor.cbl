@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-05
+      *> Last Updated: 2021-05-07
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -19,15 +19,15 @@
        input-output section.
 
        file-control.
-               select optional fd-tile-data 
+           select optional fd-tile-data 
                assign to dynamic ws-map-dat-file 
                organization is record sequential.         
           
-               select optional fd-enemy-data
+           select optional fd-enemy-data
                assign to dynamic ws-map-enemy-file
                organization is record sequential.
 
-               select optional fd-teleport-data
+           select optional fd-teleport-data
                assign to dynamic ws-map-tel-file
                organization is record sequential.
 
@@ -37,228 +37,122 @@
 
       * TODO : copy book for shared file stuff      
 
-           fd  fd-tile-data.
-           01  f-tile-data-record.
-               05  f-tile-fg               pic 9.   
-               05  f-tile-bg               pic 9.
-               05  f-tile-char             pic x.
-               05  f-tile-highlight        pic a.
-               05  f-tile-blocking         pic a.
-               05  f-tile-blinking         pic a.
-               05  f-tile-effect-id        pic 99.
+       copy "shared/copybooks/fd-tile-data.cpy".
 
-           fd  fd-enemy-data.           
-           01  f-enemy.
-               05  f-enemy-name                 pic x(16).
-               05  f-enemy-hp.
-                   10  f-enemy-hp-total         pic 999.
-                   10  f-enemy-hp-current       pic 999.
-               05  f-enemy-attack-damage        pic 999.
-               05  f-enemy-pos.
-                   10  f-enemy-y                pic 99.
-                   10  f-enemy-x                pic 99.
-               05  f-enemy-color                pic 9. 
-               05  f-enemy-char                 pic x.
-               05  f-enemy-status               pic 9.
-               05  f-enemy-movement-ticks.
-                   10  f-enemy-current-ticks    pic 999.
-                   10  f-enemy-max-ticks        pic 999.
-               05  f-enemy-exp-worth            pic 9(4).
+       copy "shared/copybooks/fd-enemy-data.cpy".
 
-           fd  fd-teleport-data.
-           01  f-teleport-data-record.
-               05  f-teleport-pos.
-                   10  f-teleport-y        pic S99.
-                   10  f-teleport-x        pic S99.
-               05  f-teleport-dest-pos.
-                   10  f-teleport-dest-y   pic S99.
-                   10  f-teleport-dest-x   pic S99.
-               05  f-teleport-dest-map     pic x(15).                   
+       copy "shared/copybooks/fd-teleport-data.cpy".
 
        working-storage section.
 
-           copy screenio.
+       copy screenio.
 
-           01  ws-mouse-flags              pic 9(4).
+       copy "shared/copybooks/ws-file-info.cpy".
 
-           01  ws-crt-status.
-               05  ws-crt-status-key-1     pic 99.
-               05  ws-crt-status-key-2     pic 99.
+       copy "shared/copybooks/ws-constants.cpy".      
 
-           01  ws-mouse-position.
-               05  ws-mouse-row            pic 99.
-               05  ws-mouse-col            pic 99.
+       copy "shared/copybooks/ws-enemy-data.cpy".
 
-           01  ws-mouse-click-status       pic a value 'N'.
-               88  ws-mouse-clicked        value 'Y'.
-               88  ws-mouse-not-clicked    value 'N'.
+       copy "shared/copybooks/ws-tile-map-table-matrix.cpy".
 
-           01  ws-temp-time                pic 9(9).
+       copy "shared/copybooks/ws-teleport-data.cpy".
 
 
-           01  ws-map-files.  
-               05  ws-map-name             pic x(15) value "NEWMAP".
-               05  ws-map-name-temp        pic x(15) value "NEWMAP".
-               05  ws-map-dat-file         pic x(15).               
-               05  ws-map-tel-file         pic x(15).
-               05  ws-map-enemy-file       pic x(15).
-                          
-           78  ws-data-file-ext            value ".DAT".
-           78  ws-teleport-file-ext        value ".TEL".
-           78  ws-enemy-file-ext           value ".BGS".
+       01  ws-mouse-flags              pic 9(4).
+
+       01  ws-crt-status.
+           05  ws-crt-status-key-1     pic 99.
+           05  ws-crt-status-key-2     pic 99.
+
+       01  ws-mouse-position.
+           05  ws-mouse-row            pic 99.
+           05  ws-mouse-col            pic 99.
+
+       01  ws-mouse-click-status       pic a value 'N'.
+           88  ws-mouse-clicked        value 'Y'.
+           88  ws-mouse-not-clicked    value 'N'.
+
+       01  ws-temp-time                pic 9(9).
+
+       01  ws-line-mask                   pic x(50) value spaces.
+
+       01  ws-cursor.
+           05  ws-cursor-pos.
+               10  ws-cursor-pos-y        pic S99.
+               10  ws-cursor-pos-x        pic S99.
+           05  ws-cursor-pos-delta.               
+               10  ws-cursor-pos-delta-y  pic S99. 
+               10  ws-cursor-pos-delta-x  pic S99.
+           05  ws-cursor-scr-pos.  
+               10  ws-cursor-scr-y         pic 99 value 10.
+               10  ws-cursor-scr-x         pic 99 value 20.                      
+           05  ws-cursor-color            pic 9 value yellow.
+           05  ws-cursor-draw-color-fg    pic 9 value black.
+           05  ws-cursor-draw-color-bg    pic 9 value black.
+           05  ws-cursor-draw-char        pic x value space.
+           05  ws-cursor-draw-highlight   pic a value 'N'.
+               88  ws-cursor-highlight    value 'Y'.
+               88  ws-cursor-no-highlight value 'N'.
+           05  ws-cursor-draw-blocking    pic a value 'N'.
+               88  ws-cursor-blocking     value 'Y'.
+               88  ws-cursor-not-block    value 'N'.
+           05  ws-cursor-draw-blinking    pic a value 'N'.
+               88  ws-cursor-blink        value 'Y'.
+               88  ws-cursor-not-blink    value 'N'.
+           05  ws-cursor-enemy-settings.
+               10  ws-cursor-enemy-name    pic x(16) value 'NONAME'.
+               10  ws-cursor-enemy-hp              pic 999 value 10.                       
+               10  ws-cursor-enemy-attack-damage   pic 999 value 1.
+               10  ws-cursor-enemy-color           pic 9 value red.                                           
+               10  ws-cursor-enemy-char            pic x value "&". 
+               10  ws-cursor-enemy-movement-ticks  pic 999 value 3.
+               10  ws-cursor-enemy-exp-worth       pic 9(4) value 1.
+           05  ws-cursor-teleport-settings.
+               10  ws-cursor-tel-dest-y            pic 99.
+               10  ws-cursor-tel-dest-x            pic 99.
+               10  ws-cursor-tel-dest-map          pic x(15).    
+           05  ws-cursor-draw-effect               pic 99.                   
+           05  ws-cursor-type                      pic a value 'T'.
+               88  ws-cursor-type-tile             value 'T'.
+               88  ws-cursor-type-enemy            value 'E'.                                                      
+           78  ws-cursor-char             value "+".
 
 
-      *> Color constants:    
-           01  black   constant as 0.
-           01  blue    constant as 1.
-           01  green   constant as 2.
-           01  cyan    constant as 3.
-           01  red     constant as 4.
-           01  magenta constant as 5.
-           01  yellow  constant as 6.  
-           01  white   constant as 7.
+       01  ws-kb-input                    pic x.
 
-           78  ws-max-map-height              value 25.
-           78  ws-max-map-width               value 80.
-           78  ws-max-num-enemies             value 99.
-           78  ws-max-num-teleports           value 999.
+       01  ws-is-quit                     pic a value 'N'.
+           88  ws-quit                    value 'Y'.
+           88  ws-not-quit                value 'N'.
 
-           01  ws-line-mask                   pic x(50) value spaces.
+       01  ws-display-mode                     pic a value 'R'.
+           88  ws-display-mode-regular         value 'R'.
+           88  ws-display-mode-effects         value 'E'.
+                    
 
-           01  ws-cursor.
-               05  ws-cursor-pos.
-                   10  ws-cursor-pos-y        pic S99.
-                   10  ws-cursor-pos-x        pic S99.
-               05  ws-cursor-pos-delta.               
-                   10  ws-cursor-pos-delta-y  pic S99. 
-                   10  ws-cursor-pos-delta-x  pic S99.
-               05  ws-cursor-scr-pos.  
-                   10  ws-cursor-scr-y         pic 99 value 10.
-                   10  ws-cursor-scr-x         pic 99 value 20.                      
-               05  ws-cursor-color            pic 9 value yellow.
-               05  ws-cursor-draw-color-fg    pic 9 value black.
-               05  ws-cursor-draw-color-bg    pic 9 value black.
-               05  ws-cursor-draw-char        pic x value space.
-               05  ws-cursor-draw-highlight   pic a value 'N'.
-                   88  ws-cursor-highlight    value 'Y'.
-                   88  ws-cursor-no-highlight value 'N'.
-               05  ws-cursor-draw-blocking    pic a value 'N'.
-                   88  ws-cursor-blocking     value 'Y'.
-                   88  ws-cursor-not-block    value 'N'.
-               05  ws-cursor-draw-blinking    pic a value 'N'.
-                   88  ws-cursor-blink        value 'Y'.
-                   88  ws-cursor-not-blink    value 'N'.
-               05  ws-cursor-enemy-settings.
-                   10  ws-cursor-enemy-name    pic x(16) value 'NONAME'.
-                   10  ws-cursor-enemy-hp              pic 999 value 10.                       
-                   10  ws-cursor-enemy-attack-damage   pic 999 value 1.
-                   10  ws-cursor-enemy-color           pic 9 value red.                                           
-                   10  ws-cursor-enemy-char            pic x value "&". 
-                   10  ws-cursor-enemy-movement-ticks  pic 999 value 3.
-                   10  ws-cursor-enemy-exp-worth       pic 9(4) value 1.
-               05  ws-cursor-teleport-settings.
-                   10  ws-cursor-tel-dest-y            pic 99.
-                   10  ws-cursor-tel-dest-x            pic 99.
-                   10  ws-cursor-tel-dest-map          pic x(15).    
-               05  ws-cursor-draw-effect               pic 99.                   
-               05  ws-cursor-type                      pic a value 'T'.
-                   88  ws-cursor-type-tile             value 'T'.
-                   88  ws-cursor-type-enemy            value 'E'.                                                      
-               78  ws-cursor-char             value "+".
+       01  ws-temp-input                pic x.
 
+       01  ws-scr-refresh-req           pic a value 'Y'.
+           88  ws-scr-refresh           value 'Y'.
+           88  ws-scr-no-refresh        value 'N'.
 
-           01  ws-kb-input                    pic x.
+       01  ws-counter-1                 pic 999.
+       01  ws-counter-2                 pic 999.
 
-           01  ws-is-quit                     pic a value 'N'.
-               88  ws-quit                    value 'Y'.
-               88  ws-not-quit                value 'N'.
+       01  ws-temp-map-pos.
+           05  ws-temp-map-pos-y        pic S99 value 01.
+           05  ws-temp-map-pos-x        pic S99 value 01.
 
-           01  ws-display-mode                     pic a value 'R'.
-               88  ws-display-mode-regular         value 'R'.
-               88  ws-display-mode-effects         value 'E'.
-                     
+       01  ws-filler                    pic 9(9).
 
-           01  ws-enemy-data.
-               05  ws-cur-num-enemies           pic 99 value 0.
-               05  ws-enemy       occurs 0 to ws-max-num-enemies times
-                                  depending on ws-cur-num-enemies.
-                   10  ws-enemy-name           pic x(16) value 'NONAME'.
-                   10  ws-enemy-hp.
-                       15  ws-enemy-hp-total    pic 999 value 10.
-                       15  ws-enemy-hp-current  pic 999 value 10.
-                   10  ws-enemy-attack-damage   pic 999 value 1.
-                   10  ws-enemy-pos.
-                       15  ws-enemy-y           pic 99.
-                       15  ws-enemy-x           pic 99.
-                   10  ws-enemy-color           pic 9 value red.                                     
-                   10  ws-enemy-char            pic x.
-                   10  ws-enemy-status              pic 9 value 0.
-                       88  ws-enemy-status-alive    value 0.
-                       88  ws-enemy-status-dead     value 1.
-                       88  ws-enemy-status-attacked value 2.
-                       88  ws-enemy-status-other    value 3.
-                   10  ws-enemy-movement-ticks.
-                       15  ws-enemy-current-ticks   pic 999.
-                       15  ws-enemy-max-ticks       pic 999 value 3.
-                   10  ws-enemy-exp-worth           pic 9(4) value 1.
+       01  ws-enemy-placed-found        pic a value 'N'.
+           88  ws-enemy-found           value 'Y'.
+           88  ws-enemy-not-found       value 'N'.
 
+       01  ws-enemy-found-idx           pic 99.
 
-           01  ws-tile-map-table-matrix.
-               05  ws-tile-map           occurs ws-max-map-height times.
-                   10  ws-tile-map-data   occurs ws-max-map-width times.
-                       15  ws-tile-fg                   pic 9.   
-                       15  ws-tile-bg                   pic 9.
-                       15  ws-tile-char                 pic x.
-                       15  ws-tile-highlight            pic a value 'N'.
-                           88 ws-tile-is-highlight      value 'Y'.
-                           88 ws-tile-not-highlight     value 'N'.
-                       15  ws-tile-blocking             pic a value 'N'.
-                           88  ws-tile-is-blocking      value 'Y'.
-                           88  ws-tile-not-blocking     value 'N'.  
-                       15  ws-tile-blinking             pic a value 'N'.
-                           88  ws-tile-is-blinking      value 'Y'.
-                           88  ws-tile-not-blinking     value 'N'.
-                       15  ws-tile-effect-id            pic 99.       
+       01  ws-replace-enemy             pic a.
 
-
-           01  ws-teleport-data.
-               05  ws-cur-num-teleports        pic 999.
-               05  ws-teleport-data-record     occurs 0 
-                                               to ws-max-num-teleports
-                                      depending on ws-cur-num-teleports.
-                   10  ws-teleport-pos.
-                       15  ws-teleport-y        pic S99.
-                       15  ws-teleport-x        pic S99.
-                   10  ws-teleport-dest-pos.
-                       15  ws-teleport-dest-y   pic S99.
-                       15  ws-teleport-dest-x   pic S99.
-                   10  ws-teleport-dest-map     pic x(15).
-       
-           
-
-           01  ws-temp-input                pic x.
-
-           01  ws-scr-refresh-req           pic a value 'Y'.
-               88  ws-scr-refresh           value 'Y'.
-               88  ws-scr-no-refresh        value 'N'.
-
-           01  ws-counter-1                 pic 999.
-           01  ws-counter-2                 pic 999.
-
-           01  ws-temp-map-pos.
-               05  ws-temp-map-pos-y        pic S99 value 01.
-               05  ws-temp-map-pos-x        pic S99 value 01.
-
-           01  ws-filler                    pic 9(9).
-
-           01  ws-enemy-placed-found        pic a value 'N'.
-               88  ws-enemy-found           value 'Y'.
-               88  ws-enemy-not-found       value 'N'.
-           01  ws-enemy-found-idx           pic 99.
-
-           01  ws-replace-enemy             pic a.
-
-           01  ws-load-return-code          pic 9.
+       01  ws-load-return-code          pic 9.
 
        procedure division.
        

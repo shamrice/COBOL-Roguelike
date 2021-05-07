@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-12
-      *> Last Updated: 2021-05-01
+      *> Last Updated: 2021-05-07
       *> Purpose: Sets up tile effect data based on tile effect id.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -24,23 +24,22 @@
 
        working-storage section.
 
-           copy screenio.
+       copy screenio.
 
-           01  ws-filler                   pic a.
+       copy "shared/copybooks/ws-constants.cpy".
 
-           01  ws-blank-line               pic a(50) value spaces.
+       01  ws-filler                   pic a.
 
-      *> Tile effect ids           
-           01  ws-teleport-effect-id constant as 01.
-
+       01  ws-blank-line               pic a(50) value spaces.
 
        linkage section.
-           01  l-tile-effect-id             pic 99.
 
-           01  l-cursor-teleport-settings.
-               05  l-cursor-tel-dest-y            pic 99.
-               05  l-cursor-tel-dest-x            pic 99.
-               05  l-cursor-tel-dest-map          pic x(15).              
+       01  l-tile-effect-id             pic 99.
+
+       01  l-cursor-teleport-settings.
+           05  l-cursor-tel-dest-y            pic 99.
+           05  l-cursor-tel-dest-x            pic 99.
+           05  l-cursor-tel-dest-map          pic x(15).              
 
        procedure division using 
            l-tile-effect-id l-cursor-teleport-settings.

@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-11
-      *> Last Updated: 2021-04-16
+      *> Last Updated: 2021-05-07
       *> Purpose: Module to draw individual character with correct display 
       *>          attributes.
       *> Tectonics:
@@ -20,15 +20,7 @@
 
        working-storage section.
 
-      *> Color constants:    
-           01  black   constant as 0.
-           01  blue    constant as 1.
-           01  green   constant as 2.
-           01  cyan    constant as 3.
-           01  red     constant as 4.
-           01  magenta constant as 5.
-           01  yellow  constant as 6.  
-           01  white   constant as 7.
+       copy "shared/copybooks/ws-constants.cpy".
 
        linkage section.
            01  l-scr-draw-pos.
