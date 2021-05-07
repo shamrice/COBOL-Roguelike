@@ -6,7 +6,7 @@
       *>          player data record and related variables.
       *> Tectonics:
       *>     ./build_editor.sh 
-      *>     ./build_game.sh
+      *>     ./build_engine.sh
       *>****************************************************************
 
        01  l-player.
@@ -34,5 +34,4 @@
                10  l-player-exp-total     pic 9(7).                   
                10  l-player-exp-next-lvl  pic 9(7).    
            78  l-player-char              value "@".
-           
-                 
+

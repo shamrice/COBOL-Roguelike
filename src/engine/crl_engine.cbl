@@ -93,7 +93,15 @@
            05  ws-player-experience.
                10  ws-player-exp-total     pic 9(7) value 0.
                10  ws-player-exp-next-lvl  pic 9(7) value 75.
-           78  ws-player-char              value "@". *> TODO : Make configurable.
+           78  ws-player-char               value "@". *> TODO : Make configurable.
+           
+           
+       01  ws-map-explored-data.
+           05  ws-map-explored-y         occurs ws-max-map-height times.
+               10  ws-map-explored-x     occurs ws-max-map-width times.
+                   15  ws-map-explored        pic a value 'N'.
+                       88  ws-is-explored     value 'Y'.
+                       88  ws-is-not-explored value 'N'.
 
            
        01  ws-temp-damage-delt            pic 999 value 0.
@@ -213,6 +221,9 @@
                end-display 
                stop run 
            end-if
+
+           *> reset explored areas on loaded map.
+           initialize ws-map-explored-data
            .
 
        main-procedure.
@@ -250,7 +261,7 @@
        draw-playfield.           
            call "draw-dynamic-screen-data" using 
                ws-player ws-tile-map-table-matrix ws-enemy-data
-               ws-action-history               
+               ws-action-history ws-map-explored-data             
            end-call 
            exit paragraph.
 
@@ -374,7 +385,13 @@
                    ws-temp-map-pos-y, ws-temp-map-pos-x)                
                then                          
                    add ws-player-pos-delta-x to ws-player-x
-                   add ws-player-pos-delta-y to ws-player-y                                                      
+                   add ws-player-pos-delta-y to ws-player-y
+
+                   *>set area as explored.
+                   call "set-map-exploration" using 
+                       ws-map-explored-data, ws-temp-map-pos
+                   end-call 
+
                end-if
 
                perform check-teleport

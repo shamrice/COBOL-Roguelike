@@ -21,6 +21,17 @@
 
        copy "shared/copybooks/ws-constants.cpy".
 
+       *> Tile data to use when area is not explored.
+       01  ws-unexplored-tile-map-data.
+           05  ws-unexplored-tile-fg                 pic 9 value black.   
+           05  ws-unexplored-tile-bg                 pic 9 value black.
+           05  ws-unexplored-tile-char               pic x value space.
+           05  ws-unexplored-tile-highlight          pic a value 'N'.
+           05  ws-unexplored-tile-blocking           pic a value 'N'.
+           05  ws-unexplored-tile-blinking           pic a value 'N'.
+           05  ws-unexplored-tile-effect-id          pic 99 value zeros.       
+
+
        local-storage section.
        
        01  ls-counter-1                 pic 999.
@@ -64,10 +75,12 @@
 
        copy "engine/copybooks/l-action-history.cpy".
 
+       copy "engine/copybooks/l-map-explored-data.cpy".
+
 
        procedure division using 
                l-player l-tile-map-table-matrix l-enemy-data
-               l-action-history.
+               l-action-history l-map-explored-data.
 
        main-procedure.
 
@@ -87,16 +100,32 @@
                        and ls-map-pos-x < ws-max-map-width
                        and ls-map-pos-y > 0 and ls-map-pos-x > 0 
                        then 
-                           
-                           move l-tile-char(ls-map-pos-y, ls-map-pos-x) 
-                               to ls-char-to-draw                           
 
-                           call "draw-tile-character" using
-                               ls-scr-draw-pos, 
-                               l-tile-map-data(
-                                   ls-map-pos-y, ls-map-pos-x) 
-                               ls-char-to-draw
-                           end-call
+                       *> Only draw tile if it's been explored before.
+                           if l-is-explored(ls-map-pos-y, ls-map-pos-x)
+                           then 
+
+                               move l-tile-char(
+                                   ls-map-pos-y, ls-map-pos-x)                            
+                                   to ls-char-to-draw                                                    
+
+                               call "draw-tile-character" using
+                                   ls-scr-draw-pos, 
+                                   l-tile-map-data(
+                                          ls-map-pos-y, ls-map-pos-x) 
+                                   ls-char-to-draw
+                               end-call
+                           else 
+                               move l-tile-blocking(
+                                   ls-map-pos-y, ls-map-pos-x)
+                                   to ws-unexplored-tile-blocking
+
+                               call "draw-tile-character" using
+                                   ls-scr-draw-pos, 
+                                   ws-unexplored-tile-map-data 
+                                   ws-unexplored-tile-char
+                               end-call
+                           end-if   
 
                    else *> OOB void space
                        display ":"                   
@@ -137,11 +166,13 @@
                        end-compute 
                    end-if   
 
-      *>       Draw enemy if in visible view area.
+      *>       Draw enemy if in visible view area that is explored.
                    if ls-enemy-draw-y(ls-enemy-idx) > 0 and 
                    ls-enemy-draw-y(ls-enemy-idx) <= ws-max-view-height
                    and ls-enemy-draw-x(ls-enemy-idx) > 0 and 
-                   ls-enemy-draw-x(ls-enemy-idx) <= ws-max-view-width
+                   ls-enemy-draw-x(ls-enemy-idx) <= ws-max-view-width                   
+                   and l-is-explored(l-enemy-y(ls-enemy-idx), 
+                   l-enemy-x(ls-enemy-idx))
                    then 
 
                        move l-enemy-char(ls-enemy-idx) 

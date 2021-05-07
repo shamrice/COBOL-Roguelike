@@ -6,7 +6,7 @@
       *>          action history data record and related variables.
       *> Tectonics:
       *>     ./build_editor.sh 
-      *>     ./build_game.sh
+      *>     ./build_engine.sh
       *>****************************************************************
 
        01  ws-action-history.
