@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-25
-      *> Last Updated: 2021-04-25
+      *> Last Updated: 2021-05-06
       *> Purpose: Module for engine to display action history to the 
       *>          screen. (Called from display-dynamic-screen-data)
       *> Tectonics:
@@ -16,23 +16,22 @@
 
        working-storage section.
        
-           78  ws-max-entries               value 10.
-           78  ws-draw-row-start            value 21.
+       78  ws-max-entries               value 10.
+       78  ws-draw-row-start            value 21.
 
        local-storage section.
 
-           01  ls-counter                   pic 99.
+       01  ls-counter                   pic 99.
 
-           01  ls-draw-pos.
-               05  ls-draw-y                pic 99.
-               05  ls-draw-x                pic 99.
+       01  ls-draw-pos.
+           05  ls-draw-y                pic 99.
+           05  ls-draw-x                pic 99.
 
        linkage section.
 
-           01  l-action-history.
-               05  l-action-history-item    occurs ws-max-entries times.
-                   10  l-action-history-text pic x(50).
-
+       01  l-action-history.
+           05  l-action-history-item    occurs ws-max-entries times.
+               10  l-action-history-text pic x(50).
 
        procedure division using l-action-history.
 

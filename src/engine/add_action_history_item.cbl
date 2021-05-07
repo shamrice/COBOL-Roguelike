@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-25
-      *> Last Updated: 2021-04-25
+      *> Last Updated: 2021-05-06
       *> Purpose: Module for engine to add action history text to action 
       *>          history items. Oldest entries will be bumped off list.
       *> Tectonics:
@@ -16,20 +16,19 @@
 
        working-storage section.
  
-           78  ws-max-entries                value 10.
+       78  ws-max-entries                value 10.
 
-           01  ws-counter                    pic 99.
+       01  ws-counter                    pic 99.
 
-           01  ws-current-idx                pic 99 value 1.
+       01  ws-current-idx                pic 99 value 1.
 
        linkage section.
 
-           01  l-new-history-text            pic x(50).
+       01  l-new-history-text            pic x(50).
 
-           01  l-action-history.
-               05  l-action-history-item    occurs ws-max-entries times.
-                   10  l-action-history-text pic x(50).
-
+       01  l-action-history.
+           05  l-action-history-item    occurs ws-max-entries times.
+               10  l-action-history-text pic x(50).
 
        procedure division using 
                l-new-history-text l-action-history.
@@ -49,8 +48,7 @@
                end-perform 
                
                move l-new-history-text to 
-                   l-action-history-text(ws-current-idx)
-      *       
+                   l-action-history-text(ws-current-idx)      
            end-if 
                
            goback.

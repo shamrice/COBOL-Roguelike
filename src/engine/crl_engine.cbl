@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-05
+      *> Last Updated: 2021-05-06
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -39,234 +39,234 @@
 
        file section.
 
-           fd  fd-tile-data.
-           01  f-tile-data-record.
-               05  f-tile-fg               pic 9.   
-               05  f-tile-bg               pic 9.
-               05  f-tile-char             pic x.
-               05  f-tile-highlight        pic a.
-               05  f-tile-blocking         pic a.
-               05  f-tile-blinking         pic a.
-               05  f-tile-effect-id        pic 99.
+       fd  fd-tile-data.
+       01  f-tile-data-record.
+           05  f-tile-fg               pic 9.   
+           05  f-tile-bg               pic 9.
+           05  f-tile-char             pic x.
+           05  f-tile-highlight        pic a.
+           05  f-tile-blocking         pic a.
+           05  f-tile-blinking         pic a.
+           05  f-tile-effect-id        pic 99.
 
 
-           fd  fd-teleport-data.
-           01  f-teleport-data-record.
-               05  f-teleport-pos.
-                   10  f-teleport-y        pic S99.
-                   10  f-teleport-x        pic S99.
-               05  f-teleport-dest-pos.
-                   10  f-teleport-dest-y   pic S99.
-                   10  f-teleport-dest-x   pic S99.
-               05  f-teleport-dest-map     pic x(15).
+       fd  fd-teleport-data.
+       01  f-teleport-data-record.
+           05  f-teleport-pos.
+               10  f-teleport-y        pic S99.
+               10  f-teleport-x        pic S99.
+           05  f-teleport-dest-pos.
+               10  f-teleport-dest-y   pic S99.
+               10  f-teleport-dest-x   pic S99.
+           05  f-teleport-dest-map     pic x(15).
 
-           fd  fd-enemy-data.           
-           01  f-enemy.
-               05  f-enemy-name                 pic x(16).
-               05  f-enemy-hp.
-                   10  f-enemy-hp-total         pic 999.
-                   10  f-enemy-hp-current       pic 999.
-               05  f-enemy-attack-damage        pic 999.
-               05  f-enemy-pos.
-                   10  f-enemy-y                pic 99.
-                   10  f-enemy-x                pic 99.
-               05  f-enemy-color                pic 9. 
-               05  f-enemy-char                 pic x. 
-               05  f-enemy-status               pic 9.
-               05  f-enemy-movement-ticks.
-                   10  f-enemy-current-ticks    pic 999.
-                   10  f-enemy-max-ticks        pic 999.
-               05  f-enemy-exp-worth            pic 9(4).                   
+       fd  fd-enemy-data.           
+       01  f-enemy.
+           05  f-enemy-name                 pic x(16).
+           05  f-enemy-hp.
+               10  f-enemy-hp-total         pic 999.
+               10  f-enemy-hp-current       pic 999.
+           05  f-enemy-attack-damage        pic 999.
+           05  f-enemy-pos.
+               10  f-enemy-y                pic 99.
+               10  f-enemy-x                pic 99.
+           05  f-enemy-color                pic 9. 
+           05  f-enemy-char                 pic x. 
+           05  f-enemy-status               pic 9.
+           05  f-enemy-movement-ticks.
+               10  f-enemy-current-ticks    pic 999.
+               10  f-enemy-max-ticks        pic 999.
+           05  f-enemy-exp-worth            pic 9(4).                   
 
        working-storage section.
 
        copy screenio.
 
-           01  ws-crt-status.
-               05  ws-crt-status-key-1     pic 99.
-               05  ws-crt-status-key-2     pic 99.
+       01  ws-crt-status.
+           05  ws-crt-status-key-1     pic 99.
+           05  ws-crt-status-key-2     pic 99.
 
-           01  ws-map-files.  
-               05  ws-map-name             pic x(15) value "WORLD0".
-               05  ws-map-name-temp        pic x(15) value "WORLD0".           
-               05  ws-map-dat-file         pic x(15).               
-               05  ws-map-tel-file         pic x(15).
-               05  ws-map-enemy-file       pic x(15).
+       01  ws-map-files.  
+           05  ws-map-name             pic x(15) value "WORLD0".
+           05  ws-map-name-temp        pic x(15) value "WORLD0".           
+           05  ws-map-dat-file         pic x(15).               
+           05  ws-map-tel-file         pic x(15).
+           05  ws-map-enemy-file       pic x(15).
 
-           01  ws-map-file-statuses.
-               05  ws-map-file-status      pic xx.
-               05  ws-teleport-file-status pic xx.
-               05  ws-enemy-file-status    pic xx.
+       01  ws-map-file-statuses.
+           05  ws-map-file-status      pic xx.
+           05  ws-teleport-file-status pic xx.
+           05  ws-enemy-file-status    pic xx.
 
-           78  ws-file-status-ok           value "00".
-           78  ws-file-status-eof          value "10".
+       78  ws-file-status-ok           value "00".
+       78  ws-file-status-eof          value "10".
 
-           78  ws-data-file-ext            value ".DAT".
-           78  ws-teleport-file-ext        value ".TEL".
-           78  ws-enemy-file-ext           value ".BGS".
+       78  ws-data-file-ext            value ".DAT".
+       78  ws-teleport-file-ext        value ".TEL".
+       78  ws-enemy-file-ext           value ".BGS".
 
-           01  ws-temp-time                pic 9(9).
+       01  ws-temp-time                pic 9(9).
 
-           78  ws-max-map-height              value 25.
-           78  ws-max-map-width               value 80.
-           78  ws-max-num-enemies             value 99.
-           78  ws-max-num-teleports           value 999.
+       78  ws-max-map-height              value 25.
+       78  ws-max-map-width               value 80.
+       78  ws-max-num-enemies             value 99.
+       78  ws-max-num-teleports           value 999.
 
-           01  ws-player.
-               05  ws-player-name          pic x(16) value "Adventurer".
-               05  ws-player-hp.
-                   10  ws-player-hp-current        pic 999 value 100.
-                   10  ws-player-hp-max            pic 999 value 100.
-               05  ws-player-pos.
-                   10  ws-player-y             pic S99.
-                   10  ws-player-x             pic S99.
-               05  ws-player-pos-delta.    
-                   10  ws-player-pos-delta-y   pic S99.
-                   10  ws-player-pos-delta-x   pic S99.
-               05  ws-player-scr-pos.  
-                   10  ws-player-scr-y         pic 99 value 10.
-                   10  ws-player-scr-x         pic 99 value 20. 
-               05  ws-player-status              pic 9 value 0.
-                   88  ws-player-status-alive    value 0.
-                   88  ws-player-status-dead     value 1.
-                   88  ws-player-status-attacked value 2.
-                   88  ws-player-status-other    value 3.
-               05  ws-player-attack-damage     pic 999 value 1.    
-               05  ws-player-level             pic 999 value 1.
-               05  ws-player-experience.
-                   10  ws-player-exp-total     pic 9(7) value 0.
-                   10  ws-player-exp-next-lvl  pic 9(7) value 75.
-               78  ws-player-char              value "@". *> TODO : Make configurable.
-
-           
-           01  ws-temp-damage-delt            pic 999 value 0.
+       01  ws-player.
+           05  ws-player-name          pic x(16) value "Adventurer".
+           05  ws-player-hp.
+               10  ws-player-hp-current        pic 999 value 100.
+               10  ws-player-hp-max            pic 999 value 100.
+           05  ws-player-pos.
+               10  ws-player-y             pic S99.
+               10  ws-player-x             pic S99.
+           05  ws-player-pos-delta.    
+               10  ws-player-pos-delta-y   pic S99.
+               10  ws-player-pos-delta-x   pic S99.
+           05  ws-player-scr-pos.  
+               10  ws-player-scr-y         pic 99 value 10.
+               10  ws-player-scr-x         pic 99 value 20. 
+           05  ws-player-status              pic 9 value 0.
+               88  ws-player-status-alive    value 0.
+               88  ws-player-status-dead     value 1.
+               88  ws-player-status-attacked value 2.
+               88  ws-player-status-other    value 3.
+           05  ws-player-attack-damage     pic 999 value 1.    
+           05  ws-player-level             pic 999 value 1.
+           05  ws-player-experience.
+               10  ws-player-exp-total     pic 9(7) value 0.
+               10  ws-player-exp-next-lvl  pic 9(7) value 75.
+           78  ws-player-char              value "@". *> TODO : Make configurable.
 
            
-           01  ws-enemy-data.
-               05  ws-cur-num-enemies           pic 99 value 0.
-               05  ws-enemy       occurs 0 to ws-max-num-enemies times
-                                  depending on ws-cur-num-enemies.
-                   10  ws-enemy-name           pic x(16) value 'NONAME'.
-                   10  ws-enemy-hp.
-                       15  ws-enemy-hp-total    pic 999 value 10.
-                       15  ws-enemy-hp-current  pic 999 value 10.
-                   10  ws-enemy-attack-damage   pic 999 value 1.
-                   10  ws-enemy-pos.
-                       15  ws-enemy-y           pic 99.
-                       15  ws-enemy-x           pic 99.
-                   10  ws-enemy-color           pic 9 value 4.                                           
-                   10  ws-enemy-char            pic x.
-                   10  ws-enemy-status              pic 9 value 3.
-                       88  ws-enemy-status-alive    value 0.
-                       88  ws-enemy-status-dead     value 1.
-                       88  ws-enemy-status-attacked value 2.
-                       88  ws-enemy-status-other    value 3.
-                   10  ws-enemy-movement-ticks.
-                       15  ws-enemy-current-ticks   pic 999.
-                       15  ws-enemy-max-ticks       pic 999.
-                   10  ws-enemy-exp-worth           pic 9(4).
+       01  ws-temp-damage-delt            pic 999 value 0.
 
-           01  ws-enemy-placed-found        pic a value 'N'.
-               88  ws-enemy-found           value 'Y'.
-               88  ws-enemy-not-found       value 'N'.
-           01  ws-enemy-found-idx           pic 99.   
-
-           01  ws-enemy-exp-temp            pic 9(7).
-
-           01  ws-enemy-temp-pos.
-               05  ws-enemy-temp-y          pic 99.
-               05  ws-enemy-temp-x          pic 99.
-
-           01  ws-enemy-draw-pos    occurs 0 to ws-max-num-enemies times
+           
+       01  ws-enemy-data.
+           05  ws-cur-num-enemies           pic 99 value 0.
+           05  ws-enemy             occurs 0 to ws-max-num-enemies times
                                     depending on ws-cur-num-enemies.
-               05  ws-enemy-draw-y          pic 99.
-               05  ws-enemy-draw-x          pic 99.
+               10  ws-enemy-name           pic x(16) value 'NONAME'.
+               10  ws-enemy-hp.
+                   15  ws-enemy-hp-total    pic 999 value 10.
+                   15  ws-enemy-hp-current  pic 999 value 10.
+               10  ws-enemy-attack-damage   pic 999 value 1.
+               10  ws-enemy-pos.
+                   15  ws-enemy-y           pic 99.
+                   15  ws-enemy-x           pic 99.
+               10  ws-enemy-color           pic 9 value 4.                                           
+               10  ws-enemy-char            pic x.
+               10  ws-enemy-status              pic 9 value 3.
+                   88  ws-enemy-status-alive    value 0.
+                   88  ws-enemy-status-dead     value 1.
+                   88  ws-enemy-status-attacked value 2.
+                   88  ws-enemy-status-other    value 3.
+               10  ws-enemy-movement-ticks.
+                   15  ws-enemy-current-ticks   pic 999.
+                   15  ws-enemy-max-ticks       pic 999.
+               10  ws-enemy-exp-worth           pic 9(4).
+
+       01  ws-enemy-placed-found        pic a value 'N'.
+           88  ws-enemy-found           value 'Y'.
+           88  ws-enemy-not-found       value 'N'.
+       
+       01  ws-enemy-found-idx           pic 99.   
+
+       01  ws-enemy-exp-temp            pic 9(7).
+
+       01  ws-enemy-temp-pos.
+           05  ws-enemy-temp-y          pic 99.
+           05  ws-enemy-temp-x          pic 99.
+
+       01  ws-enemy-draw-pos        occurs 0 to ws-max-num-enemies times
+                                    depending on ws-cur-num-enemies.
+           05  ws-enemy-draw-y          pic 99.
+           05  ws-enemy-draw-x          pic 99.
 
 
-           01  ws-kb-input                  pic x.
+       01  ws-kb-input                  pic x.
 
-           01  ws-is-quit                   pic a value 'N'.
-               88  ws-quit                  value 'Y'.
-               88  ws-not-quit              value 'N'.
+       01  ws-is-quit                   pic a value 'N'.
+           88  ws-quit                  value 'Y'.
+           88  ws-not-quit              value 'N'.
 
-           01  ws-tile-map-table-matrix.
-               05  ws-tile-map           occurs ws-max-map-height times.
-                   10  ws-tile-map-data   occurs ws-max-map-width times.
-                       15  ws-tile-fg                   pic 9.   
-                       15  ws-tile-bg                   pic 9.
-                       15  ws-tile-char                 pic x.
-                       15  ws-tile-highlight            pic a value 'N'.
-                           88 ws-tile-is-highlight      value 'Y'.
-                           88 ws-tile-not-highlight     value 'N'.
-                       15  ws-tile-blocking             pic a value 'N'.
-                           88  ws-tile-is-blocking      value 'Y'.
-                           88  ws-tile-not-blocking     value 'N'.  
-                       15  ws-tile-blinking             pic a value 'N'.
-                           88  ws-tile-is-blinking      value 'Y'.
-                           88  ws-tile-not-blinking     value 'N'.
-                       15  ws-tile-effect-id            pic 99.      
+       01  ws-tile-map-table-matrix.
+           05  ws-tile-map           occurs ws-max-map-height times.
+               10  ws-tile-map-data   occurs ws-max-map-width times.
+                   15  ws-tile-fg                   pic 9.   
+                   15  ws-tile-bg                   pic 9.
+                   15  ws-tile-char                 pic x.
+                   15  ws-tile-highlight            pic a value 'N'.
+                       88 ws-tile-is-highlight      value 'Y'.
+                       88 ws-tile-not-highlight     value 'N'.
+                   15  ws-tile-blocking             pic a value 'N'.
+                       88  ws-tile-is-blocking      value 'Y'.
+                       88  ws-tile-not-blocking     value 'N'.  
+                   15  ws-tile-blinking             pic a value 'N'.
+                       88  ws-tile-is-blinking      value 'Y'.
+                       88  ws-tile-not-blinking     value 'N'.
+                   15  ws-tile-effect-id            pic 99.      
 
 
-           01  ws-teleport-data.
-               05  ws-cur-num-teleports        pic 999.
-               05  ws-teleport-data-record     occurs 0 
-                                               to ws-max-num-teleports
+       01  ws-teleport-data.
+           05  ws-cur-num-teleports        pic 999.
+           05  ws-teleport-data-record  occurs 0 to ws-max-num-teleports
                                       depending on ws-cur-num-teleports.
-                   10  ws-teleport-pos.
-                       15  ws-teleport-y        pic S99.
-                       15  ws-teleport-x        pic S99.
-                   10  ws-teleport-dest-pos.
-                       15  ws-teleport-dest-y   pic S99.
-                       15  ws-teleport-dest-x   pic S99.
-                   10  ws-teleport-dest-map     pic x(15).
+               10  ws-teleport-pos.
+                   15  ws-teleport-y        pic S99.
+                   15  ws-teleport-x        pic S99.
+               10  ws-teleport-dest-pos.
+                   15  ws-teleport-dest-y   pic S99.
+                   15  ws-teleport-dest-x   pic S99.
+               10  ws-teleport-dest-map     pic x(15).
 
  
-           01  ws-counter-1                 pic 999.
-           01  ws-counter-2                 pic 999.
-           01  ws-enemy-idx                 pic 99.
-           01  ws-enemy-search-idx          pic 99.
-           01  ws-tele-idx                  pic 999.
+       01  ws-counter-1                 pic 999.
+       01  ws-counter-2                 pic 999.
+       01  ws-enemy-idx                 pic 99.
+       01  ws-enemy-search-idx          pic 99.
+       01  ws-tele-idx                  pic 999.
 
-           01  ws-temp-color                pic 9.
+       01  ws-temp-color                pic 9.
 
-           01  ws-temp-map-pos.
-               05  ws-temp-map-pos-y        pic S99.
-               05  ws-temp-map-pos-x        pic S99.
+       01  ws-temp-map-pos.
+           05  ws-temp-map-pos-y        pic S99.
+           05  ws-temp-map-pos-x        pic S99.
 
-           01  ws-filler                    pic 9(9).
+       01  ws-filler                    pic 9(9).
 
-           01  ws-attack-attempt            pic 9(9).
+       01  ws-attack-attempt            pic 9(9).
 
-           01  ws-eof                       pic a value 'N'.
-               88 ws-is-eof                 value 'Y'.
-               88 ws-not-eof                value 'N'.
+       01  ws-eof                       pic a value 'N'.
+           88 ws-is-eof                 value 'Y'.
+           88 ws-not-eof                value 'N'.
 
-           01  ws-load-return-code          pic 9.
+       01  ws-load-return-code          pic 9.
 
 
-           01  ws-action-history.
-               05  ws-action-history-item     occurs 10 times.
-                   10  ws-action-history-text pic x(50).
+       01  ws-action-history.
+           05  ws-action-history-item     occurs 10 times.
+               10  ws-action-history-text pic x(50).
 
-           01  ws-action-history-temp       pic x(50).
+       01  ws-action-history-temp       pic x(50).
 
       *> Currently unused.
-           01  ws-frame-rate.
-               05  ws-start-frame           pic 9(2).
-               05  ws-end-frame             pic 9(2).
-               05  ws-frame-diff            pic 9(2).
-               05  ws-sleep-time            pic 9(2).
+       01  ws-frame-rate.
+           05  ws-start-frame           pic 9(2).
+           05  ws-end-frame             pic 9(2).
+           05  ws-frame-diff            pic 9(2).
+           05  ws-sleep-time            pic 9(2).
       *> Currently unused.
-           01 ws-current-date-data.
-               05  ws-current-date.
-                   10  ws-current-year         PIC 9(04).
-                   10  ws-current-month        PIC 9(02).
-                   10  ws-current-day          PIC 9(02).
-               05  ws-current-time.
-                   10  ws-current-hour         PIC 9(02).
-                   10  ws-current-minute       PIC 9(02).
-                   10  ws-current-second       PIC 9(02).
-                   10  ws-current-millisecond  PIC 9(02).
+       01 ws-current-date-data.
+           05  ws-current-date.
+               10  ws-current-year         PIC 9(04).
+               10  ws-current-month        PIC 9(02).
+               10  ws-current-day          PIC 9(02).
+           05  ws-current-time.
+               10  ws-current-hour         PIC 9(02).
+               10  ws-current-minute       PIC 9(02).
+               10  ws-current-second       PIC 9(02).
+               10  ws-current-millisecond  PIC 9(02).
 
        procedure division.
            set environment "COB_SCREEN_EXCEPTIONS" to 'Y'.
