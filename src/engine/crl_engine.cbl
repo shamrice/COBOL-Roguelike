@@ -160,6 +160,9 @@
                10  ws-current-second       PIC 9(02).
                10  ws-current-millisecond  PIC 9(02).
 
+       01  ws-command-line-buffer         pic x(1024).
+
+
        procedure division.
            set environment "COB_SCREEN_EXCEPTIONS" to 'Y'.
            set environment "COB_SCREEN_ESC" to 'Y'.
@@ -172,9 +175,18 @@
            display space blank screen 
 
            accept ws-temp-time from time 
-           move function random(ws-temp-time) to ws-filler.
+           move function random(ws-temp-time) to ws-filler
 
       *     perform generate-fake-world-data.
+
+           *> load map passed to command line if one is present.
+           accept ws-command-line-buffer from command-line 
+           if ws-command-line-buffer not = spaces then 
+               move function upper-case(
+                   function trim(ws-command-line-buffer)) to 
+                   ws-map-name
+               move ws-map-name to ws-map-name-temp                
+           end-if .
            
        load-tile-map.
            move function concatenate("Entering ",
