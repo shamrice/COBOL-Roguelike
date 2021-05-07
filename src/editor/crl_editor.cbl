@@ -734,14 +734,16 @@
                    move white to 
                        ws-tile-fg(ws-counter-1, ws-counter-2)
                                       
-                   move green to 
+                   move black to 
                        ws-tile-bg(ws-counter-1, ws-counter-2)
 
                    set ws-tile-not-highlight(ws-counter-1, ws-counter-2)
                        to true 
 
-                   set ws-tile-not-blocking(ws-counter-1, ws-counter-2) 
+                   set ws-tile-is-blocking(ws-counter-1, ws-counter-2)
                        to true 
+      *             set ws-tile-not-blocking(ws-counter-1, ws-counter-2) 
+      *                 to true 
                    
                    set ws-tile-not-blinking(ws-counter-1, ws-counter-2) 
                        to true 
