@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-08
       *> Purpose: Module for engine to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -166,13 +166,16 @@
                        end-compute 
                    end-if   
 
-      *>       Draw enemy if in visible view area that is explored.
+      *>       Draw enemy if in visible view area that is explored
+      *>       and not currently occupied by the player... oof.
                    if ls-enemy-draw-y(ls-enemy-idx) > 0 and 
                    ls-enemy-draw-y(ls-enemy-idx) <= ws-max-view-height
                    and ls-enemy-draw-x(ls-enemy-idx) > 0 and 
                    ls-enemy-draw-x(ls-enemy-idx) <= ws-max-view-width                   
                    and l-is-explored(l-enemy-y(ls-enemy-idx), 
-                   l-enemy-x(ls-enemy-idx))
+                   l-enemy-x(ls-enemy-idx)) and 
+                   ls-enemy-draw-pos(ls-enemy-idx) 
+                   not = l-player-scr-pos 
                    then 
 
                        move l-enemy-char(ls-enemy-idx) 
