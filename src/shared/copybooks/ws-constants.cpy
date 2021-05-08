@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-08
       *> Purpose: Shared copy book with working storage definition of
       *>          variable constants.
       *> Tectonics:
@@ -21,6 +21,8 @@
 
       *> Tile effect ids           
        01  ws-teleport-effect-id          constant as 01.
+
+       78  ws-load-map-return-code        value 1.
 
        78  ws-max-view-height             value 20.
        78  ws-max-view-width              value 50.

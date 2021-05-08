@@ -149,6 +149,8 @@
 
        01  ws-load-return-code          pic 9.
 
+       01  ws-tile-effect-return-code   pic 99.
+
 
       *> Currently unused.
        01  ws-frame-rate.
@@ -394,70 +396,29 @@
 
                end-if
 
-               perform check-teleport
+               perform check-tile-effect
 
            end-if
            move zeros to ws-player-pos-delta
            exit paragraph.
 
-      ******************************************************************
-      * Checks if player steps on a teleport tile. If so, they are 
-      * moved to the teleport destination.
-      ******************************************************************
-       check-teleport.
 
-           if ws-cur-num-teleports = 0 then 
-               exit paragraph
-           end-if 
+       check-tile-effect.
 
-           perform varying ws-tele-idx 
-           from 1 by 1 until ws-tele-idx > ws-cur-num-teleports
-               if ws-teleport-pos(ws-tele-idx) = ws-temp-map-pos then 
+           call "tile-effect-handler" using
+               ws-tile-effect-id(ws-temp-map-pos-y, ws-temp-map-pos-x) 
+               ws-player ws-temp-map-pos ws-teleport-data ws-map-files 
+               ws-tile-effect-return-code
+           end-call
 
-                   compute ws-player-y = 
-                       ws-teleport-dest-y(ws-tele-idx) - ws-player-scr-y
-                   end-compute 
-
-                   compute ws-player-x = 
-                       ws-teleport-dest-x(ws-tele-idx) - ws-player-scr-x
-                   end-compute 
-
-      *             display "Teleport at: " at 2301  
-      *                 ws-teleport-pos(ws-tele-idx) at 2317
-      *                 ws-player-pos at 2325
-      *             end-display  
-
-                   if ws-teleport-dest-map(ws-tele-idx) 
-                   not = ws-map-name then
-                       move ws-teleport-dest-map(ws-tele-idx) 
-                           to ws-map-name-temp                        
-                   end-if 
-                   exit perform 
-               
-               end-if 
-
-           end-perform 
-           
-      *     display 
-      *         function concatenate(
-      *             function trim(ws-map-name), 
-      *             " -> ",
-      *             function trim(ws-map-name-temp)
-      *         ) at 0760
-      *         ws-map-dat-file at 0960 
-      *     end-display
-
-           *> Load new map if destination map does not match
-           if ws-map-name-temp not = ws-map-name then                
-               move ws-map-name-temp to ws-map-name
-      *         display "New map!" at 1060 ws-map-name at 1070               
-               perform load-tile-map                 
-           end-if 
+           evaluate ws-tile-effect-return-code
+               when ws-load-map-return-code 
+                   perform load-tile-map
+           end-evaluate
 
            exit paragraph.
 
-
-
+  
        move-enemy.
 
       *> TODO : Add some type of movement randomization or basic pathfinding.
