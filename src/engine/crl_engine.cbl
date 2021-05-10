@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-10
       *> Purpose: Tile based console game
       *> Tectonics:
       *>     cobc -x tile_game.cbl
@@ -88,13 +88,36 @@
                88  ws-player-status-dead     value 1.
                88  ws-player-status-attacked value 2.
                88  ws-player-status-other    value 3.
-           05  ws-player-attack-damage     pic 999 value 1.    
+           05  ws-player-attack-damage.    
+               10  ws-player-atk-cur       pic 999 value 1.
+               10  ws-player-atk-base      pic 999 value 1.
+           05  ws-player-defense-power.
+               10  ws-player-def-cur       pic 999 value 1.
+               10  ws-player-def-base      pic 999 value 1.
            05  ws-player-level             pic 999 value 1.
            05  ws-player-experience.
                10  ws-player-exp-total     pic 9(7) value 0.
                10  ws-player-exp-next-lvl  pic 9(7) value 75.
            78  ws-player-char               value "@". *> TODO : Make configurable.
            
+       
+       01  ws-equiped-items.
+           05  ws-equiped-weapon.
+               10  ws-equip-weapon-name        pic x(16) value "None".
+               10  ws-equip-weapon-atk         pic 999 value 0.
+               10  ws-equip-weapon-status      pic x value "0".
+                   88  ws-equip-weapon-curse   value "-".
+                   88  ws-equip-weapon-normal  value "0".
+                   88  ws-equip-weapon-bless   value "+".                   
+           05  ws-equiped-armor.
+               10  ws-equip-armor-name         pic x(16) value "None".
+               10  ws-equip-armor-def          pic 999 value 0.
+               10  ws-equip-armor-status       pic x value "0".
+                   88  ws-equip-armor-curse    value "-".
+                   88  ws-equip-armor-normal   value "0".
+                   88  ws-equip-armor-bless    value "+".                   
+
+
            
        01  ws-map-explored-data.
            05  ws-map-explored-y         occurs ws-max-map-height times.
@@ -104,7 +127,7 @@
                        88  ws-is-not-explored value 'N'.
 
            
-       01  ws-temp-damage-delt            pic 999 value 0.
+       01  ws-temp-damage-delt            pic S999 value 0.
 
            
        01  ws-enemy-placed-found        pic a value 'N'.
@@ -263,7 +286,8 @@
        draw-playfield.           
            call "draw-dynamic-screen-data" using 
                ws-player ws-tile-map-table-matrix ws-enemy-data
-               ws-action-history ws-map-explored-data             
+               ws-action-history ws-map-explored-data 
+               ws-equiped-items             
            end-call 
            exit paragraph.
 
@@ -273,7 +297,7 @@
            accept ws-kb-input at 2051 
                with auto-skip no-echo 
                time-out after 250
-               upper
+               upper 
            end-accept 
 
       *> Check special keys being pressed.
@@ -555,8 +579,22 @@
            end-if 
 
            compute ws-temp-damage-delt = 
-               ws-enemy-attack-damage(ws-enemy-idx)
+               ws-enemy-attack-damage(ws-enemy-idx) - ws-player-def-cur
            end-compute 
+
+           *> if enemy is too weak to hurt player, log it and exit paragraph.
+           if ws-temp-damage-delt <= 0 then 
+               move function concatenate(
+                   function trim(ws-enemy-name(ws-enemy-idx)), 
+                   " attacks but does no damage to ", 
+                   function trim(ws-player-name), "."
+               ) to ws-action-history-temp
+
+               call "add-action-history-item" using
+                   ws-action-history-temp ws-action-history
+               end-call 
+               exit paragraph     
+           end-if       
 
            if ws-temp-damage-delt > ws-player-hp-current then 
                set ws-player-status-dead to true 
@@ -614,7 +652,7 @@
            *> proceed to attack enemy
                if ws-player-attack-damage <= 
                ws-enemy-hp-current(ws-enemy-idx) then 
-                   subtract ws-player-attack-damage 
+                   subtract ws-player-atk-cur 
                        from ws-enemy-hp-current(ws-enemy-idx)
                    end-subtract
                    set ws-enemy-status-attacked(ws-enemy-idx) to true
@@ -625,7 +663,7 @@
                move function concatenate(
                    function trim(ws-player-name), " attacks ", 
                    function trim(ws-enemy-name(ws-enemy-idx)), " for ",
-                   ws-player-attack-damage, " damage."
+                   ws-player-atk-cur, " damage."
                ) to ws-action-history-temp
 
                call "add-action-history-item" using
@@ -678,10 +716,22 @@
 
                        move ws-player-hp-max to ws-player-hp-current
 
-                       compute ws-player-attack-damage = 
+                       compute ws-player-atk-base = 
                            ws-player-level * 1.5
                        end-compute 
 
+                       compute ws-player-atk-cur = 
+                           ws-player-atk-base + ws-equip-weapon-atk
+                       end-compute 
+
+                       compute ws-player-def-base = 
+                           ws-player-level * 1.25
+                       end-compute 
+
+                       compute ws-player-def-cur = 
+                           ws-player-def-base + ws-equip-armor-def
+                       end-compute 
+                      
                        move function concatenate(                       
                            function trim(ws-player-name), 
                            " has leveled up to level ",

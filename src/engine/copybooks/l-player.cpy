@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-10
       *> Purpose: Shared copy book with linkage section definition of
       *>          player data record and related variables.
       *> Tectonics:
@@ -28,7 +28,12 @@
                88  l-player-status-dead     value 1.
                88  l-player-status-attacked value 2.
                88  l-player-status-other    value 3.                   
-           05  l-player-attack-damage     pic 999.
+           05  l-player-attack-damage.    
+               10  l-player-atk-cur       pic 999.
+               10  l-player-atk-base      pic 999.
+           05  l-player-defense-power.
+               10  l-player-def-cur       pic 999.
+               10  l-player-def-base      pic 999.
            05  l-player-level             pic 999.
            05  l-player-experience.
                10  l-player-exp-total     pic 9(7).                   

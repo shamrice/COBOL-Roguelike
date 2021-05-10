@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-05-08
+      *> Last Updated: 2021-05-10
       *> Purpose: Module for engine to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -57,13 +57,18 @@
 
        01  ls-player-disp-stats.               
            05  ls-player-disp-hp.
-               10  ls-player-disp-hp-cur  pic zz9 value 0.
-               10  ls-player-disp-hp-max  pic zz9 value 0.
-           05  ls-player-disp-attack-dmg  pic zz9 value 0.
-           05  ls-player-disp-level       pic zz9 value 0.
+               10  ls-player-disp-hp-cur     pic zz9 value 0.
+               10  ls-player-disp-hp-max     pic zz9 value 0.
+           05  ls-player-disp-attack-dmg.
+               10  ls-player-disp-atk-cur    pic zz9 value 0.
+               10  ls-player-disp-atk-base   pic zz9 value 0.
+           05  ls-player-disp-defense.
+               10  ls-player-disp-def-cur    pic zz9 value 0.
+               10  ls-player-disp-def-base   pic zz9 value 0.
+           05  ls-player-disp-level          pic zz9 value 0.
            05  ls-player-disp-exp.
-               10  ls-player-disp-exp-cur pic z(6)9 value 0.
-               10  ls-player-disp-exp-nxt pic z(6)9 value 0.
+               10  ls-player-disp-exp-cur    pic z(6)9 value 0.
+               10  ls-player-disp-exp-nxt    pic z(6)9 value 0.
 
        linkage section.
 
@@ -77,10 +82,12 @@
 
        copy "engine/copybooks/l-map-explored-data.cpy".
 
+       copy "engine/copybooks/l-equiped-items.cpy".
+
 
        procedure division using 
                l-player l-tile-map-table-matrix l-enemy-data
-               l-action-history l-map-explored-data.
+               l-action-history l-map-explored-data l-equiped-items.
 
        main-procedure.
 
@@ -215,7 +222,10 @@
 
            move l-player-hp-current to ls-player-disp-hp-cur
            move l-player-hp-max to ls-player-disp-hp-max
-           move l-player-attack-damage to ls-player-disp-attack-dmg
+           move l-player-atk-cur to ls-player-disp-atk-cur
+           move l-player-atk-base to ls-player-disp-atk-base
+           move l-player-def-cur to ls-player-disp-def-cur
+           move l-player-def-base to ls-player-disp-def-base 
            move l-player-level to ls-player-disp-level
            move l-player-exp-total to ls-player-disp-exp-cur
            move l-player-exp-next-lvl to ls-player-disp-exp-nxt
@@ -234,17 +244,56 @@
                    , "    ") at 0459
                function concatenate(
                    "Attack: ",
-                   function trim(ls-player-disp-attack-dmg),
-                   "    ") at 0555                              
+                   function trim(ls-player-disp-atk-cur), "(",
+                   function trim(ls-player-disp-atk-base), ")   ") 
+                   at 0555     
+               function concatenate(
+                   "Defense: ",
+                   function trim(ls-player-disp-def-cur), "(",
+                   function trim(ls-player-disp-def-base), ")   ") 
+                   at 0654                                                 
                function concatenate(
                    "Exp next: ",
                    function trim(ls-player-disp-exp-nxt),
-                   "    ") at 0653
+                   "    ") at 0753
                function concatenate(
                    "Total Exp: "
-                   function trim(ls-player-disp-exp-cur)) at 0752                                               
-           end-display 
+                   function trim(ls-player-disp-exp-cur)) at 0852
+           end-display  
+          
+           display "Equiped:" at 1060 with highlight underline 
            
+           if not l-equip-weapon-normal then            
+               display
+                   function concatenate(
+                       "Weapon: ",
+                       function trim(l-equip-weapon-name), " (",
+                       l-equip-weapon-status, ") ") at 1155
+               end-display 
+           else 
+               display
+                   function concatenate(
+                       "Weapon: ",
+                       function trim(l-equip-weapon-name)) at 1155
+               end-display 
+           end-if 
+
+           if not l-equip-armor-normal then               
+               display 
+                   function concatenate(
+                       " Armor: ",
+                       function trim(l-equip-armor-name), " (",
+                       l-equip-armor-status, ") ") at 1255
+               end-display
+
+           else 
+               display 
+                   function concatenate(
+                       " Armor: ",
+                       function trim(l-equip-armor-name)) at 1255
+               end-display
+           end-if            
+
            exit paragraph.
 
        end program draw-dynamic-screen-data.
