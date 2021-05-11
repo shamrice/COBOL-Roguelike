@@ -1,10 +1,10 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-10
-      *> Purpose: Tile based console game
+      *> Last Updated: 2021-05-11
+      *> Purpose: COBOL Rogulike engine main entry point.
       *> Tectonics:
-      *>     cobc -x tile_game.cbl
+      *>     ./build_engine.sh
       *>*****************************************************************
        identification division.
        program-id. cobol-roguelike-engine.
@@ -20,32 +20,12 @@
        input-output section.
 
        file-control.
-           select optional fd-tile-data 
-               assign to dynamic ws-map-dat-file 
-               organization is record sequential
-               file status is ws-map-file-status.
-
-           select optional fd-teleport-data
-               assign to dynamic ws-map-tel-file
-               organization is record sequential
-               file status is ws-teleport-file-status.            
-
-           select optional fd-enemy-data
-               assign to dynamic ws-map-enemy-file
-               organization is record sequential
-               file status is ws-enemy-file-status.
 
        data division.
 
        file section.
 
-       copy "shared/copybooks/fd-tile-data.cpy".
-
-       copy "shared/copybooks/fd-teleport-data.cpy".
-
-       copy "shared/copybooks/fd-enemy-data.cpy".  
-
-       working-storage section.
+        working-storage section.
 
        copy screenio.
 
@@ -60,6 +40,8 @@
        copy "shared/copybooks/ws-tile-map-table-matrix.cpy".
 
        copy "engine/copybooks/ws-action-history.cpy".
+
+       copy "shared/copybooks/ws-item-data.cpy".
 
        01  ws-crt-status.
            05  ws-crt-status-key-1     pic 99.
@@ -81,7 +63,7 @@
                10  ws-player-pos-delta-y   pic S99.
                10  ws-player-pos-delta-x   pic S99.
            05  ws-player-scr-pos.  
-               10  ws-player-scr-y         pic 99 value 10.
+               10  ws-player-scr-y         pic 99 value 12. *> TODO : This should be configurable on map level
                10  ws-player-scr-x         pic 99 value 20. 
            05  ws-player-status              pic 9 value 0.
                88  ws-player-status-alive    value 0.
@@ -210,8 +192,6 @@
            accept ws-temp-time from time 
            move function random(ws-temp-time) to ws-filler
 
-      *     perform generate-fake-world-data.
-
            *> load map passed to command line if one is present.
            accept ws-command-line-buffer from command-line 
            if ws-command-line-buffer not = spaces then 
@@ -233,6 +213,7 @@
            call "load-map-data" using 
                ws-map-files ws-tile-map-table-matrix 
                ws-enemy-data ws-teleport-data
+               ws-item-data 
                ws-load-return-code
            end-call 
 
@@ -750,39 +731,5 @@
 
            exit paragraph.
            
-
-       generate-fake-world-data.
-      *> generate temp world tile data.
-
-           open output fd-tile-data
-
-           perform varying ws-counter-1 
-           from 1 by 1 until ws-counter-1 > ws-max-map-height
-               perform varying ws-counter-2 
-               from 1 by 1 until ws-counter-2 > ws-max-map-width
-
-                  compute ws-temp-color = function random * 7
-                   move ws-temp-color to f-tile-fg 
-                   
-                   compute ws-temp-color = function random * 7
-                   move ws-temp-color to f-tile-bg                       
-
-                   compute ws-filler = function random * 10 + 1
-                   if ws-filler > 8 then  
-                       move 'Y' to f-tile-blocking                       
-                       move "B" to f-tile-char
-                       move zero to f-tile-fg
-                   else
-                       move 'N' to f-tile-blocking
-                       move space to f-tile-char
-                   end-if 
-
-                   write f-tile-data-record                                                                      
-
-               end-perform
-           end-perform
-
-           close fd-tile-data
-           exit paragraph.       
 
        end program cobol-roguelike-engine.

@@ -236,29 +236,29 @@
            display 
                function concatenate(
                    "Level: ", 
-                   function trim(ls-player-disp-level)) at 0356
+                   function trim(ls-player-disp-level)) at 0256
                function concatenate(
                    "HP: ",
                    function trim(ls-player-disp-hp-cur),
                    "/",function trim(ls-player-disp-hp-max)
-                   , "    ") at 0459
+                   , "    ") at 0359
                function concatenate(
                    "Attack: ",
                    function trim(ls-player-disp-atk-cur), "(",
                    function trim(ls-player-disp-atk-base), ")   ") 
-                   at 0555     
+                   at 0455     
                function concatenate(
                    "Defense: ",
                    function trim(ls-player-disp-def-cur), "(",
                    function trim(ls-player-disp-def-base), ")   ") 
-                   at 0654                                                 
+                   at 0554                                                 
                function concatenate(
                    "Exp next: ",
                    function trim(ls-player-disp-exp-nxt),
-                   "    ") at 0753
+                   "    ") at 0653
                function concatenate(
                    "Total Exp: "
-                   function trim(ls-player-disp-exp-cur)) at 0852
+                   function trim(ls-player-disp-exp-cur)) at 0752
            end-display  
           
            display "Equiped:" at 1060 with highlight underline 

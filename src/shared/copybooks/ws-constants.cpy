@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-08
+      *> Last Updated: 2021-05-11
       *> Purpose: Shared copy book with working storage definition of
       *>          variable constants.
       *> Tectonics:
@@ -34,6 +34,8 @@
 
        78  ws-max-num-teleports           value 999.
 
+       78  ws-max-num-items               value 999.
+
        78  ws-file-status-ok              value "00".
        78  ws-file-status-eof             value "10".
 
@@ -42,7 +44,11 @@
        78  ws-load-status-bad-data    value 7.
        78  ws-load-status-success     value 0.       
 
+       78  ws-save-status-fail        value 9.
+       78  ws-save-status-success     value 0.
+
        78  ws-data-file-ext               value ".DAT".
        78  ws-teleport-file-ext           value ".TEL".
-       78  ws-enemy-file-ext              value ".BGS".       
+       78  ws-enemy-file-ext              value ".BGS".
+       78  ws-item-file-ext               value ".ITM".
 

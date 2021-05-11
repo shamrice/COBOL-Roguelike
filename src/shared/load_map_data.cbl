@@ -30,6 +30,11 @@
                organization is record sequential
                file status is ls-enemy-file-status.
 
+           select optional fd-item-data
+               assign to dynamic l-map-item-file
+               organization is record sequential
+               file status is ls-item-file-status.
+
 
        data division.
 
@@ -40,6 +45,8 @@
        copy "shared/copybooks/fd-teleport-data.cpy".
 
        copy "shared/copybooks/fd-enemy-data.cpy".
+
+       copy "shared/copybooks/fd-item-data.cpy".
 
 
        working-storage section.
@@ -56,6 +63,7 @@
            05  ls-map-file-status      pic xx.
            05  ls-teleport-file-status pic xx.
            05  ls-enemy-file-status    pic xx.
+           05  ls-item-file-status     pic xx.
 
        01  ls-eof-sw                    pic a value 'N'.
            88 ls-is-eof                 value 'Y'.
@@ -65,11 +73,12 @@
        linkage section.
 
        01  l-map-files.  
-           05  l-map-name             pic x(15) value "WORLD0".
-           05  l-map-name-temp        pic x(15) value "WORLD0".           
+           05  l-map-name             pic x(15).
+           05  l-map-name-temp        pic x(15). 
            05  l-map-dat-file         pic x(15).               
            05  l-map-tel-file         pic x(15).
            05  l-map-enemy-file       pic x(15).   
+           05  l-map-item-file        pic x(15).
 
        copy "shared/copybooks/l-tile-map-table-matrix.cpy".
 
@@ -77,12 +86,15 @@
 
        copy "shared/copybooks/l-teleport-data.cpy".
 
+       copy "shared/copybooks/l-item-data.cpy".
+
        01  l-return-code                   pic 9 value 0.
 
 
        procedure division using 
                l-map-files l-tile-map-table-matrix 
                l-enemy-data l-teleport-data
+               l-item-data
                l-return-code.
 
        main-procedure.
@@ -99,7 +111,12 @@
 
            move function concatenate(
                function trim(l-map-name), ws-enemy-file-ext)
-               to l-map-enemy-file               
+               to l-map-enemy-file    
+
+           move function concatenate(
+               function trim(l-map-name), ws-item-file-ext)
+               to l-map-item-file    
+               
 
       *> Load data from files.
 
@@ -209,6 +226,43 @@
                    end-if                    
                end-perform 
            close fd-teleport-data
+
+
+      *> Reset and load item file info.
+           move 0 to l-cur-num-items
+           set ls-not-eof to true             
+
+           open input fd-item-data      
+               perform until ls-is-eof 
+                   add 1 to l-cur-num-items
+                   if l-cur-num-items < ws-max-num-items then  
+
+                       initialize 
+                           l-item-data-record(l-cur-num-items)  
+                                              
+                       read fd-item-data 
+                           into l-item-data-record(
+                               l-cur-num-items)
+                           at end set ls-is-eof to true 
+                       end-read
+
+                       if ls-item-file-status not = 
+                       ws-file-status-ok and ls-item-file-status 
+                       not = ws-file-status-eof then 
+                           display "Error reading item data." at 0101
+                           display ls-item-file-status at 0201
+                           close fd-item-data
+                           
+                           move ws-load-status-read-fail 
+                               to l-return-code
+                           goback 
+                       end-if  
+
+                   else 
+                       set ls-is-eof to true 
+                   end-if                    
+               end-perform 
+           close fd-item-data
 
            move ws-load-status-success to l-return-code               
            goback.

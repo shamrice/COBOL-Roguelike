@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-11
       *> Purpose: Shared copy book with working storage definition of
       *>          file names, file statuses, etc.
       *> Tectonics:
@@ -15,11 +15,13 @@
            05  ws-map-dat-file         pic x(15).               
            05  ws-map-tel-file         pic x(15).
            05  ws-map-enemy-file       pic x(15).
+           05  ws-map-item-file        pic x(15).
 
        01  ws-map-file-statuses.
            05  ws-map-file-status      pic xx.
            05  ws-teleport-file-status pic xx.
            05  ws-enemy-file-status    pic xx.
+           05  ws-item-file-status     pic xx.
 
 
 

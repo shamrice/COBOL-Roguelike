@@ -19,29 +19,10 @@
        input-output section.
 
        file-control.
-           select optional fd-tile-data 
-               assign to dynamic ws-map-dat-file 
-               organization is record sequential.         
-          
-           select optional fd-enemy-data
-               assign to dynamic ws-map-enemy-file
-               organization is record sequential.
-
-           select optional fd-teleport-data
-               assign to dynamic ws-map-tel-file
-               organization is record sequential.
 
        data division.
 
        file section.
-
-      * TODO : copy book for shared file stuff      
-
-       copy "shared/copybooks/fd-tile-data.cpy".
-
-       copy "shared/copybooks/fd-enemy-data.cpy".
-
-       copy "shared/copybooks/fd-teleport-data.cpy".
 
        working-storage section.
 
@@ -56,6 +37,8 @@
        copy "shared/copybooks/ws-tile-map-table-matrix.cpy".
 
        copy "shared/copybooks/ws-teleport-data.cpy".
+
+       copy "shared/copybooks/ws-item-data.cpy".
 
 
        01  ws-mouse-flags              pic 9(4).
@@ -153,6 +136,7 @@
        01  ws-replace-enemy             pic a.
 
        01  ws-load-return-code          pic 9.
+       01  ws-save-return-code          pic 9.
 
        procedure division.
        
@@ -525,6 +509,7 @@
                call "load-map-data" using 
                    ws-map-files ws-tile-map-table-matrix 
                    ws-enemy-data ws-teleport-data
+                   ws-item-data 
                    ws-load-return-code
                end-call 
 
@@ -771,45 +756,26 @@
                perform set-file-names 
            end-if 
            
-           open output fd-tile-data
+           call "write-map-data" using 
+               ws-map-files, ws-tile-map-table-matrix,
+               ws-enemy-data, ws-teleport-data, ws-item-data, 
+               ws-save-return-code
+           end-call 
 
-           perform varying ws-counter-1 
-           from 1 by 1 until ws-counter-1 > ws-max-map-height
-               perform varying ws-counter-2 
-               from 1 by 1 until ws-counter-2 > ws-max-map-width
+           if ws-save-return-code = zero then 
+               display 
+                   "Saved map data: " at 2101
+                   ws-map-name at 2117
+               end-display 
+           else 
+               display 
+                   function concatenate(
+                       "Error saving map: ", ws-map-name, 
+                       " Return code: ", ws-save-return-code)
+                   at 2101
+               end-display 
+           end-if 
 
-                   move ws-tile-map-data(ws-counter-1, ws-counter-2) 
-                       to f-tile-data-record
-
-                   write f-tile-data-record                                                                      
-
-               end-perform
-           end-perform
-
-           close fd-tile-data
-
-           open output fd-enemy-data
-               perform varying ws-counter-1 
-               from 1 by 1 until ws-counter-1 > ws-cur-num-enemies
-                   move ws-enemy(ws-counter-1) to f-enemy
-                   write f-enemy 
-               end-perform 
-           close fd-enemy-data
-
-
-           open output fd-teleport-data
-               perform varying ws-counter-1 
-               from 1 by 1 until ws-counter-1 > ws-cur-num-teleports
-                   move ws-teleport-data-record(ws-counter-1) 
-                       to f-teleport-data-record
-                   write f-teleport-data-record
-               end-perform 
-           close fd-teleport-data
-
-           display 
-               "Saved map data: " at 2101
-               ws-map-name at 2117
-           end-display 
            accept ws-kb-input at 2150
 
            exit paragraph. 
