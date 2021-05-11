@@ -22,4 +22,5 @@
                    88  l-item-not-taken   value 'N'.               
                10  l-item-effect-id       pic 99.
                10  l-item-worth           pic 999.
-               
+               10  l-item-color           pic 9. 
+               10  l-item-char            pic x.               

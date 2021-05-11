@@ -22,4 +22,6 @@
                    88  ws-item-not-taken   value 'N'.               
                10  ws-item-effect-id       pic 99.
                10  ws-item-worth           pic 999.
+               10  ws-item-color           pic 9. 
+               10  ws-item-char            pic x.
                
