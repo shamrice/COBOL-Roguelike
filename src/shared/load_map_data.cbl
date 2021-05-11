@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-23
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-11
       *> Purpose: Module for engine to load the level data passed into
       *>          the related record structures.
       *> Tectonics:
@@ -160,9 +160,9 @@
 
            open input fd-enemy-data      
                perform until ls-is-eof 
-                   add 1 to l-cur-num-enemies        
+                   
                    if l-cur-num-enemies < ws-max-num-enemies then  
-
+                       add 1 to l-cur-num-enemies 
                        initialize l-enemy(l-cur-num-enemies)  
       *                 initialize l-enemy-draw-pos(l-cur-num-enemies)
 
@@ -186,7 +186,7 @@
                    else 
                        set ls-is-eof to true 
                    end-if 
-   
+                          
                end-perform 
            close fd-enemy-data
 
@@ -196,10 +196,9 @@
            set ls-not-eof to true             
 
            open input fd-teleport-data      
-               perform until ls-is-eof 
-                   add 1 to l-cur-num-teleports        
+               perform until ls-is-eof                    
                    if l-cur-num-teleports < ws-max-num-teleports then  
-
+                       add 1 to l-cur-num-teleports 
                        initialize 
                            l-teleport-data-record(l-cur-num-teleports)  
                                               
@@ -220,10 +219,10 @@
                                to l-return-code
                            goback 
                        end-if  
-
                    else 
                        set ls-is-eof to true 
-                   end-if                    
+                   end-if      
+                                        
                end-perform 
            close fd-teleport-data
 
@@ -233,10 +232,9 @@
            set ls-not-eof to true             
 
            open input fd-item-data      
-               perform until ls-is-eof 
-                   add 1 to l-cur-num-items
+               perform until ls-is-eof                    
                    if l-cur-num-items < ws-max-num-items then  
-
+                       add 1 to l-cur-num-items
                        initialize 
                            l-item-data-record(l-cur-num-items)  
                                               
@@ -261,6 +259,7 @@
                    else 
                        set ls-is-eof to true 
                    end-if                    
+                   
                end-perform 
            close fd-item-data
 

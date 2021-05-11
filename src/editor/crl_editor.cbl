@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-11
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -746,8 +746,9 @@
 
        write-world-data.
            
-           display "Enter map name: " at 2101
-           accept ws-map-name at 2117 update upper
+           display "Save map name as: " at 2101
+           display "[Blank to cancel]" at 2135
+           accept ws-map-name at 2120 update upper
            if ws-map-name = spaces then 
                move ws-map-name-temp to ws-map-name 
                exit paragraph 

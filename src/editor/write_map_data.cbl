@@ -132,7 +132,14 @@
                end-perform 
            close fd-teleport-data
 
-           *> TODO : Save item data!
+           open output fd-item-data
+               perform varying ws-counter-1 
+               from 1 by 1 until ws-counter-1 > l-cur-num-items
+                   move l-item-data-record(ws-counter-1) 
+                       to f-item-data-record
+                   write f-item-data-record
+               end-perform 
+           close fd-item-data
 
            move ws-save-status-success to l-return-code
 
