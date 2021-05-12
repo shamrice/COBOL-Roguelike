@@ -1,0 +1,54 @@
+
+Item Creator Developer Documentation
+-------------------------------------
+Last updated: 2021-05-12
+
+NOTE: Functionality is still in progress. Many features may not work at all yet!
+
+Overview: 
+    Item Creator is a utilty application where you can create and configure
+    items that can be then accessed in the CRL Editor for placement
+    on maps. This is so that items will remain consistant between maps as 
+    well as decrease on map building time as each attribute of every item 
+    does not need to be entered before the item is placed. 
+
+
+How to use:
+    * If "ITEM-LIST.LST" exists, the current list of items are loaded at 
+      start up.
+    * The user is prompted with either a blank list of items or a paged 
+      list of existing items.
+    * New items can be added using the 'N' key. When pressed, a new 
+      item screen will be displayed with a suggested pre-filled item id.
+      The default value is one higher than the highest id in the data
+      set. This value can be edited, though switching to an existing id 
+      will cause that record to be overwritten.
+    * Existing items can be edited either by clicking on the row of 
+      the record with the mouse or pressing 'E' and entering the 
+      item id number. 
+    * Both new item and edit item screens will have the following 
+      fields:
+        * Id - Either prefilled with new value or id of existing record.
+        * Name - Name of the item (up to 16 characters).
+        * Effect Id - Press F1 for the list of effects an item can have. 
+          this Id must be one of these ids. 
+            Ex: Effect-id 1 = increase gold
+        * Worth/Value - This is an integer value (up to 999) that is 
+          used to modify the player attribute or other field based on 
+          the effect id. 
+            Ex1: Effect id 1 & value of 5 will increase player's gold 
+                 count by 5 gold. 
+            Ex2: Effect id 5 (weapon) & value of 10 sets the players 
+                 current attack damage to base value + 10
+        * Color - The color id to use to draw the item. (0-7).
+        * Char - The character to represent the item on the map. 
+        * Highlight - True/False if the color should be the highlighted 
+          color value or not when the character is drawn. 
+        * Blink - True/False if the item should blink when drawn on
+          the map. 
+    * After the new/edit item screen is completed, the user will be 
+      prompted if they would like to save these changes. If so, the 
+      changes will be written to the "ITEM-LIST.LST" file. If not, 
+      all entered values will be lost. 
+
+      
