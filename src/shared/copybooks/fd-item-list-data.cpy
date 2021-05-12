@@ -17,4 +17,6 @@
            05  f-item-worth           pic 999.
            05  f-item-color           pic 9. 
            05  f-item-char            pic x.
+           05  f-item-highlight       pic a.
+           05  f-item-blink           pic a.
                
