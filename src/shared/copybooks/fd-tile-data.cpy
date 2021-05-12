@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-12
       *> Purpose: Shared copy book with file descriptor definition of
       *>          tile data file.
       *> Tectonics:
@@ -18,3 +18,4 @@
            05  f-tile-blocking         pic a.
            05  f-tile-blinking         pic a.
            05  f-tile-effect-id        pic 99.
+           05  f-tile-visibility       pic 999.

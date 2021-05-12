@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-11
+      *> Last Updated: 2021-05-12
       *> Purpose: COBOL Rogulike engine main entry point.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -396,7 +396,9 @@
 
                    *>set area as explored.
                    call "set-map-exploration" using 
-                       ws-map-explored-data, ws-temp-map-pos
+                       ws-map-explored-data, ws-temp-map-pos,
+                       ws-tile-visibility(
+                           ws-temp-map-pos-y, ws-temp-map-pos-x)
                    end-call 
 
                end-if

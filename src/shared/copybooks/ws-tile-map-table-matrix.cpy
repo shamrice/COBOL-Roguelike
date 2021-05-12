@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-12
       *> Purpose: Shared copy book with working storage definition of
       *>          tile map data record and related variables.
       *> Tectonics:
@@ -25,7 +25,8 @@
                    15  ws-tile-blinking             pic a value 'N'.
                        88  ws-tile-is-blinking      value 'Y'.
                        88  ws-tile-not-blinking     value 'N'.
-                   15  ws-tile-effect-id            pic 99.      
+                   15  ws-tile-effect-id            pic 99.  
+                   15  ws-tile-visibility           pic 999.    
 
 
        

@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-12
       *> Purpose: Shared copy book with linkage section definition of
       *>          tile map data record and related variables.
       *> Tectonics:
@@ -24,5 +24,6 @@
                    15  l-tile-blinking             pic a value 'N'.
                        88  l-tile-is-blinking      value 'Y'.
                        88  l-tile-not-blinking     value 'N'.
-                   15  l-tile-effect-id            pic 99.       
+                   15  l-tile-effect-id            pic 99.  
+                   15  l-tile-visibility           pic 999.     
 

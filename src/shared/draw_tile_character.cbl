@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-11
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-12
       *> Purpose: Module to draw individual character with correct display 
       *>          attributes.
       *> Tectonics:
@@ -40,7 +40,8 @@
                10  l-tile-blinking             pic a value 'N'.
                    88  l-tile-is-blinking      value 'Y'.
                    88  l-tile-not-blinking     value 'N'.
-               10  l-tile-effect-id            pic 99.            
+               10  l-tile-effect-id            pic 99.      
+               10  l-tile-visibility           pic 999.      
             
 
            01  l-char-to-draw                  pic x.

@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-12
       *> Purpose: Shared copy book with linkage section definition of
       *>          cursor data record and related variables.
       *> Tectonics:
@@ -32,6 +32,7 @@
            05  l-cursor-draw-blinking     pic a.
                88  l-cursor-blink         value 'Y'.
                88  l-cursor-not-blink     value 'N'. 
+           05  l-cursor-draw-visibility   pic 999.
            05  l-cursor-enemy-settings.
                10  l-cursor-enemy-name            pic x(16).
                10  l-cursor-enemy-hp              pic 999.

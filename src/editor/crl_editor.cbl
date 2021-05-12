@@ -40,6 +40,7 @@
 
        copy "shared/copybooks/ws-item-data.cpy".
 
+       78  ws-default-draw-visibility  value 3.
 
        01  ws-mouse-flags              pic 9(4).
 
@@ -82,6 +83,8 @@
            05  ws-cursor-draw-blinking    pic a value 'N'.
                88  ws-cursor-blink        value 'Y'.
                88  ws-cursor-not-blink    value 'N'.
+           05  ws-cursor-draw-visibility  pic 999 
+                                       value ws-default-draw-visibility.
            05  ws-cursor-enemy-settings.
                10  ws-cursor-enemy-name    pic x(16) value 'NONAME'.
                10  ws-cursor-enemy-hp              pic 999 value 10.                       
@@ -137,6 +140,7 @@
 
        01  ws-load-return-code          pic 9.
        01  ws-save-return-code          pic 9.
+       
 
        procedure division.
        
@@ -318,7 +322,10 @@
                    perform load-map-data
                
                when ws-kb-input = 'O' 
-                   perform write-world-data                   
+                   perform write-world-data    
+
+               when ws-kb-input = 'V' 
+                   perform set-tile-visibility
 
                when ws-kb-input = space
                    if ws-crt-status not = COB-SCR-TIME-OUT
@@ -495,8 +502,14 @@
            exit paragraph.
 
 
-       load-map-data.
+       set-tile-visibility.
+           display "Tile visibility: " at 2101
+           accept ws-cursor-draw-visibility at 2118 update 
 
+           exit paragraph.
+
+
+       load-map-data.
            display "Map name to load: " at 2101
            display "[Blank to cancel]" at 2135
            accept ws-map-name at 2120 update upper
@@ -614,6 +627,10 @@
            move ws-cursor-draw-blinking
                to ws-tile-blinking(ws-temp-map-pos-y, ws-temp-map-pos-x)
                    
+           move ws-cursor-draw-visibility
+               to ws-tile-visibility(
+                   ws-temp-map-pos-y, ws-temp-map-pos-x)
+
            if ws-cursor-draw-effect > 0 then 
                call "set-tile-effect" using
                    ws-temp-map-pos
@@ -738,6 +755,9 @@
 
                    move zero 
                        to ws-tile-effect-id(ws-counter-1, ws-counter-2)                                          
+
+                   move ws-default-draw-visibility
+                       to ws-tile-visibility(ws-counter-1, ws-counter-2)
 
                end-perform
            end-perform    

@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-12
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -238,6 +238,11 @@
            else 
                display "               " at 2174
            end-if 
+
+           display "      Visibility: " at 2253
+               l-cursor-draw-visibility at 2271
+           end-display 
+
            exit paragraph. 
 
 
@@ -270,6 +275,8 @@
            display "       Exp Worth:            " at 2153
            display l-cursor-enemy-exp-worth at 2171
 
+           display ws-line-mask at 2253
+
            exit paragraph. 
 
 
@@ -300,12 +307,15 @@
                "BLOCK: " at 2337
                l-tile-blocking(ws-temp-map-pos-y, ws-temp-map-pos-x) 
                    at 2343
-               "BLINK:" at 2346
+               "BLINK:" at 2402
                l-tile-blinking(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2352
-               "EFFECT: " at 2355
+                   at 2408
+               "EFFECT: " at 2411
                l-tile-effect-id(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2363
+                   at 2418
+               "VIS: " at 2421
+               l-tile-visibility(ws-temp-map-pos-y, ws-temp-map-pos-x)
+                   at 2425
            end-display 
 
            exit paragraph.
