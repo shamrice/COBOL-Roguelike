@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-11
-      *> Last Updated: 2021-05-11
+      *> Last Updated: 2021-05-13
       *> Purpose: Item editor for the game
       *> Tectonics:
       *>     ./build_item_creator.sh
@@ -68,8 +68,8 @@
            88  ws-is-eof                  value 'Y'.
            88  ws-not-eof                 value 'N'.
 
-       01  ws-is-quit                     pic a value 'N'.
-           88  ws-quit                    value 'Y'.
+       01  ws-quit-sw                     pic a value 'N'.
+           88  ws-is-quit                    value 'Y'.
            88  ws-not-quit                value 'N'.
 
        01  ws-selected-idx              pic 999 value 0.
@@ -82,6 +82,8 @@
 
        01  ws-load-return-code          pic 9.
        01  ws-save-return-code          pic 9.
+
+       01  ws-add-edit-return-code      pic 9.
 
        procedure division.
        
@@ -112,13 +114,47 @@
 
        main-procedure.
 
+           perform with test after until ws-is-quit 
+               perform display-current-items           
 
-           perform display-current-items           
-
-
+               perform get-input 
+           end-perform 
+            
            goback.
 
 
+
+       get-input.
+
+           accept ws-kb-input with no echo auto-skip upper at 2101
+
+           evaluate ws-kb-input
+
+               when 'Q' 
+                  set ws-is-quit to true 
+
+               when 'N'                   
+                   move ws-cur-num-list-items 
+                       to ws-item-list-id(ws-cur-num-list-items)                        
+                   call "add-edit-item" using 
+                       ws-item-list-data-record(ws-cur-num-list-items)
+                       ws-add-edit-return-code
+                   end-call 
+                   display 
+                       ws-item-list-data-record(ws-cur-num-list-items)
+                       at 2501
+                   end-display 
+      *             stop run 
+                   if ws-add-edit-return-code not = zero then 
+                       display "Failed to create new list item." at 2001
+      *                 stop run 
+                   else 
+                       add 1 to ws-cur-num-list-items  
+                   end-if 
+
+           end-evaluate
+
+           exit paragraph.
 
        display-current-items.
            

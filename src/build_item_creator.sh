@@ -39,7 +39,7 @@ else
     fi 
 
     echo Building CRL Item Creator...
-    cobc -Wall -x -O2 -o ./bin/crl_item_creator ./item_creator/crl_item_creator.cbl 
+    cobc -Wall -x -O2 -o ./bin/crl_item_creator ./item_creator/crl_item_creator.cbl  ./item_creator/add_edit_item.cbl 
     
 fi 
 echo Done.

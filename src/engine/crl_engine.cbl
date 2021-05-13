@@ -255,10 +255,10 @@
                *> TODO : Proper input checking so not to quit when 
                *> UP or DOWN is pressed. Also highscore, etc.
                perform  with test after until ws-kb-input = 'Q'
-                   accept ws-kb-input 
+                   accept ws-kb-input  
                        with auto-skip no-echo upper at 1004
                    end-accept 
-               end-perform 
+               end-perform
            end-if 
               
            goback.
@@ -297,7 +297,7 @@
                    add 1 to ws-player-pos-delta-x
 
                when COB-SCR-ESC
-                   display "QUITING" at 0917 
+      *             display "QUITING" at 0917 
                    set ws-quit to true 
 
                when COB-SCR-F1
@@ -315,7 +315,7 @@
            evaluate true
 
                when ws-kb-input = 'Q'
-                   display "QUITING" at 0917 
+      *             display "QUITING" at 0917 
                    set ws-quit to true 
 
                when ws-kb-input = 'S' 
