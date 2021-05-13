@@ -767,8 +767,10 @@
        write-world-data.
            
            display "Save map name as: " at 2101
-           display "[Blank to cancel]" at 2135
-           accept ws-map-name at 2120 update upper
+           display "[Blank to cancel]" at 2134
+           accept ws-map-name at 2119 update upper
+           display ws-line-mask at 2101
+
            if ws-map-name = spaces then 
                move ws-map-name-temp to ws-map-name 
                exit paragraph 
@@ -797,7 +799,7 @@
                end-display 
            end-if 
 
-           accept ws-kb-input at 2150
+           accept omitted at 2150
 
            exit paragraph. 
 
