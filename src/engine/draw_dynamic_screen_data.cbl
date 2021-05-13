@@ -154,7 +154,7 @@
                    end-if   
 
                end-perform
-           end-perform.
+           end-perform
 
       *> Draw enemies if they exist and are visible.
            if l-cur-num-enemies > 0 then 
