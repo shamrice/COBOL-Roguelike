@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-11
-      *> Last Updated: 2021-05-11
+      *> Last Updated: 2021-05-14
       *> Purpose: Writes current map data to disk.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -54,8 +54,8 @@
 
        copy "shared/copybooks/ws-constants.cpy".
 
-       01  ws-counter-1                 pic 999.
-       01  ws-counter-2                 pic 999.
+       01  ws-counter-1                 pic 999 comp.
+       01  ws-counter-2                 pic 999 comp.
 
 
        local-storage section.

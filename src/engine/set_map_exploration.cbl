@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-14
       *> Purpose: Module for engine to set the explored portion of the 
       *>          map around the player.
       *> Tectonics:
@@ -20,14 +20,14 @@
 
        local-storage section.
 
-       01  ls-start-idx-y             pic S99.
-       01  ls-end-idx-y               pic S99.
+       01  ls-start-idx-y             pic S99 comp.
+       01  ls-end-idx-y               pic S99 comp.
 
-       01  ls-start-idx-x             pic S99.
-       01  ls-end-idx-x               pic S99.
+       01  ls-start-idx-x             pic S99 comp.
+       01  ls-end-idx-x               pic S99 comp.
 
-       01  ls-idx-y                   pic S99.
-       01  ls-idx-x                   pic S99.
+       01  ls-idx-y                   pic S99 comp.
+       01  ls-idx-x                   pic S99 comp.
   
        linkage section.
 

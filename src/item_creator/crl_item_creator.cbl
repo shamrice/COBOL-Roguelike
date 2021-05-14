@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-11
-      *> Last Updated: 2021-05-13
+      *> Last Updated: 2021-05-14
       *> Purpose: Item editor for the game
       *> Tectonics:
       *>     ./build_item_creator.sh
@@ -72,9 +72,9 @@
            88  ws-is-quit                    value 'Y'.
            88  ws-not-quit                value 'N'.
 
-       01  ws-selected-idx              pic 999 value 0.
+       01  ws-selected-idx              pic 999 comp value 0.
 
-       01  ws-idx                       pic 999.
+       01  ws-idx                       pic 999 comp.
 
        01  ws-record-pos.
            05  ws-record-pos-y          pic 99.
@@ -146,7 +146,10 @@
                    end-display 
       *             stop run 
                    if ws-add-edit-return-code not = zero then 
-                       display "Failed to create new list item." at 2001
+                       display 
+                           "Failed to create new list item."
+                           upon syserr 
+                       end-display 
       *                 stop run 
                    else 
                        add 1 to ws-cur-num-list-items  

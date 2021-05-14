@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-12
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-14
       *> Purpose: Sets up tile effect data based on tile effect id.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -27,7 +27,7 @@
 
        01  ws-temp-input               pic a.
 
-       01  ws-counter-1                pic 999.
+       01  ws-counter-1                pic 999 comp.
            
 
        local-storage section.
@@ -36,7 +36,7 @@
            88  ls-teleport-is-found    value 'Y'.
            88  ls-teleport-not-found   value 'N'.
 
-       01  ls-found-idx                pic 999.
+       01  ls-found-idx                pic 999 comp.
 
        linkage section.
 

@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-23
-      *> Last Updated: 2021-05-11
+      *> Last Updated: 2021-05-14
       *> Purpose: Module for engine to load the level data passed into
       *>          the related record structures.
       *> Tectonics:
@@ -56,8 +56,8 @@
 
        local-storage section.
 
-       01  ls-counter-1                 pic 999.
-       01  ls-counter-2                 pic 999.           
+       01  ls-counter-1                 pic 999 comp.
+       01  ls-counter-2                 pic 999 comp.
 
        01  ls-map-file-statuses.
            05  ls-map-file-status      pic xx.

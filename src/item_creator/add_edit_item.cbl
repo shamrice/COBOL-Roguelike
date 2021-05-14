@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-12
-      *> Last Updated: 2021-05-12
+      *> Last Updated: 2021-05-14
       *> Purpose: Create or edit item passed via the linkage section.
       *> Tectonics:
       *>     ./build_item_creator.sh
@@ -69,7 +69,7 @@
            88  ws-not-eof                 value 'N'.
 
 
-       01  ws-selected-idx              pic 999 value 0.
+       01  ws-selected-idx              pic 999 comp value 0.
 
        01  ws-record-pos.
            05  ws-record-pos-y          pic 99.

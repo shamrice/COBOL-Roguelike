@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-11
+      *> Last Updated: 2021-05-14
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -121,8 +121,8 @@
            88  ws-scr-refresh           value 'Y'.
            88  ws-scr-no-refresh        value 'N'.
 
-       01  ws-counter-1                 pic 999.
-       01  ws-counter-2                 pic 999.
+       01  ws-counter-1                 pic 999 comp.
+       01  ws-counter-2                 pic 999 comp.
 
        01  ws-temp-map-pos.
            05  ws-temp-map-pos-y        pic S99 value 01.
@@ -134,7 +134,7 @@
            88  ws-enemy-found           value 'Y'.
            88  ws-enemy-not-found       value 'N'.
 
-       01  ws-enemy-found-idx           pic 99.
+       01  ws-enemy-found-idx           pic 99 comp.
 
        01  ws-replace-enemy             pic a.
 

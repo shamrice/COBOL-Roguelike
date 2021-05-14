@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-25
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-14
       *> Purpose: Module for engine to display action history to the 
       *>          screen. (Called from display-dynamic-screen-data)
       *> Tectonics:
@@ -21,7 +21,7 @@
 
        local-storage section.
 
-       01  ls-counter                   pic 99.
+       01  ls-counter                   pic 99 comp.
 
        01  ls-draw-pos.
            05  ls-draw-y                pic 99.

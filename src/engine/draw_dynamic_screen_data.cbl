@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-05-10
+      *> Last Updated: 2021-05-14
       *> Purpose: Module for engine to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -34,9 +34,9 @@
 
        local-storage section.
        
-       01  ls-counter-1                 pic 999.
-       01  ls-counter-2                 pic 999.
-       01  ls-enemy-idx                 pic 99.
+       01  ls-counter-1                 pic 999 comp.
+       01  ls-counter-2                 pic 999 comp.
+       01  ls-enemy-idx                 pic 99 comp.
            
        01  ls-scr-draw-pos.
            05  ls-scr-draw-y            pic 99.

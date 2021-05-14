@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-12
+      *> Last Updated: 2021-05-14
       *> Purpose: COBOL Rogulike engine main entry point.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -132,11 +132,11 @@
            88  ws-not-quit              value 'N'.
 
  
-       01  ws-counter-1                 pic 999.
-       01  ws-counter-2                 pic 999.
-       01  ws-enemy-idx                 pic 99.
-       01  ws-enemy-search-idx          pic 99.
-       01  ws-tele-idx                  pic 999.
+       01  ws-counter-1                 pic 999 comp.
+       01  ws-counter-2                 pic 999 comp.
+       01  ws-enemy-idx                 pic 99 comp.
+       01  ws-enemy-search-idx          pic 99 comp.
+       01  ws-tele-idx                  pic 999 comp.
 
        01  ws-temp-color                pic 9.
 
