@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-08
-      *> Last Updated: 2021-05-08
+      *> Last Updated: 2021-05-14
       *> Purpose: Module for engine used to handle what happens when the
       *>          player steps on a tile that has a tile effect.
       *> Tectonics:
@@ -18,7 +18,7 @@
        
        copy "shared/copybooks/ws-constants.cpy".
 
-       01  ws-tele-idx                    pic 99.
+       01  ws-tele-idx                    pic 999 comp.
 
        local-storage section.
 

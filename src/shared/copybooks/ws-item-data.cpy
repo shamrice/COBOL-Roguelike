@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-11
-      *> Last Updated: 2021-05-11
+      *> Last Updated: 2021-05-14
       *> Purpose: Shared copy book with working storage definition of
       *>          item data record and related variables.
       *> Tectonics:
@@ -10,7 +10,7 @@
       *>****************************************************************
 
        01  ws-item-data.
-           05  ws-cur-num-items            pic 999.
+           05  ws-cur-num-items            pic 999 comp.
            05  ws-item-data-record         occurs 0 to ws-max-num-items
                                           depending on ws-cur-num-items.
                10  ws-item-name            pic x(16).                                          

@@ -10,7 +10,7 @@
       *>****************************************************************
 
        01  l-enemy-data.
-           05  l-cur-num-enemies           pic 99.
+           05  l-cur-num-enemies           pic 99 comp.
            05  l-enemy           occurs 0 to unbounded times
                                  depending on l-cur-num-enemies.
                10  l-enemy-name            pic x(16).

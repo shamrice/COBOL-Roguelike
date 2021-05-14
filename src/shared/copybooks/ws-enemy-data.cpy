@@ -11,7 +11,7 @@
        
 
        01  ws-enemy-data.
-           05  ws-cur-num-enemies           pic 99 value 0.
+           05  ws-cur-num-enemies           pic 99 comp value 0.
            05  ws-enemy             occurs 0 to ws-max-num-enemies times
                                     depending on ws-cur-num-enemies.
                10  ws-enemy-name           pic x(16) value 'NONAME'.

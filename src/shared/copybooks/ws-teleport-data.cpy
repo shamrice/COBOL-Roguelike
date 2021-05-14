@@ -10,7 +10,7 @@
       *>****************************************************************
 
        01  ws-teleport-data.
-           05  ws-cur-num-teleports        pic 999.
+           05  ws-cur-num-teleports        pic 999 comp.
            05  ws-teleport-data-record  occurs 0 to ws-max-num-teleports
                                       depending on ws-cur-num-teleports.
                10  ws-teleport-pos.

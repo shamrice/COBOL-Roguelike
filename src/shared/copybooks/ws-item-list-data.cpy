@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-11
-      *> Last Updated: 2021-05-11
+      *> Last Updated: 2021-05-14
       *> Purpose: Shared copy book with working storage definition of
       *>          item list data record and related variables.
       *> Tectonics:
@@ -10,7 +10,7 @@
       *>****************************************************************
 
        01  ws-item-list-data.
-           05  ws-cur-num-list-items       pic 999.
+           05  ws-cur-num-list-items       pic 999 comp.
            05  ws-item-list-data-record    occurs 0 to 999 depending 
                                            on ws-cur-num-list-items.
                

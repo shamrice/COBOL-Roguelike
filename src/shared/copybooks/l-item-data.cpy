@@ -10,7 +10,7 @@
       *>****************************************************************
 
        01  l-item-data.
-           05  l-cur-num-items            pic 999.
+           05  l-cur-num-items            pic 999 comp.
            05  l-item-data-record         occurs 0 to ws-max-num-items
                                           depending on l-cur-num-items.
                10  l-item-name            pic x(16).                                          

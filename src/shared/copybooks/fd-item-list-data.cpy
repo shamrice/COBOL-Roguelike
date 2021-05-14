@@ -12,7 +12,7 @@
        fd  fd-item-list-data.
        01  f-item-list-data-record.
            05  f-item-id              pic 9(6).
-           05  f-item-name            pic x(16).                                          
+           05  f-item-name            pic x(16).
            05  f-item-effect-id       pic 99.
            05  f-item-worth           pic 999.
            05  f-item-color           pic 9. 
