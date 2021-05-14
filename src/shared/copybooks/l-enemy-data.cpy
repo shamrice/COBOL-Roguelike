@@ -15,21 +15,21 @@
                                  depending on l-cur-num-enemies.
                10  l-enemy-name            pic x(16).
                10  l-enemy-hp.
-                   15  l-enemy-hp-total    pic 999 value 10.
-                   15  l-enemy-hp-current  pic 999 value 10.
-               10  l-enemy-attack-damage   pic 999 value 1.
+                   15  l-enemy-hp-total    pic 999 comp value 10.
+                   15  l-enemy-hp-current  pic 999 comp value 10.
+               10  l-enemy-attack-damage   pic 999 comp value 1.
                10  l-enemy-pos.
                    15  l-enemy-y           pic 99.
                    15  l-enemy-x           pic 99.
                10  l-enemy-color           pic 9 value red.                                     
                10  l-enemy-char            pic x.
-               10  l-enemy-status              pic 9 value 0.
+               10  l-enemy-status              pic 9 comp value 0.
                    88  l-enemy-status-alive    value 0.
                    88  l-enemy-status-dead     value 1.
                    88  l-enemy-status-attacked value 2.
                    88  l-enemy-status-other    value 3.
                10  l-enemy-movement-ticks.
-                   15  l-enemy-current-ticks   pic 999.
-                   15  l-enemy-max-ticks       pic 999 value 3.    
-               10  l-enemy-exp-worth           pic 9(4).         
+                   15  l-enemy-current-ticks   pic 999 comp.
+                   15  l-enemy-max-ticks       pic 999 comp value 3.    
+               10  l-enemy-exp-worth           pic 9(4) comp.         
 

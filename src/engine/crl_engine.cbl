@@ -116,9 +116,9 @@
            88  ws-enemy-found           value 'Y'.
            88  ws-enemy-not-found       value 'N'.
        
-       01  ws-enemy-found-idx           pic 99.   
+       01  ws-enemy-found-idx           pic 99 comp.
 
-       01  ws-enemy-exp-temp            pic 9(7).
+       01  ws-enemy-exp-temp            pic 9(7) comp.
 
        01  ws-enemy-temp-pos.
            05  ws-enemy-temp-y          pic 99.

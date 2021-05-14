@@ -16,20 +16,20 @@
                                     depending on ws-cur-num-enemies.
                10  ws-enemy-name           pic x(16) value 'NONAME'.
                10  ws-enemy-hp.
-                   15  ws-enemy-hp-total    pic 999 value 10.
-                   15  ws-enemy-hp-current  pic 999 value 10.
-               10  ws-enemy-attack-damage   pic 999 value 1.
+                   15  ws-enemy-hp-total    pic 999 comp value 10.
+                   15  ws-enemy-hp-current  pic 999 comp value 10.
+               10  ws-enemy-attack-damage   pic 999 comp value 1.
                10  ws-enemy-pos.
                    15  ws-enemy-y           pic 99.
                    15  ws-enemy-x           pic 99.
                10  ws-enemy-color           pic 9 value 4.
                10  ws-enemy-char            pic x.
-               10  ws-enemy-status              pic 9 value 3.
+               10  ws-enemy-status              pic 9 comp value 3.
                    88  ws-enemy-status-alive    value 0.
                    88  ws-enemy-status-dead     value 1.
                    88  ws-enemy-status-attacked value 2.
                    88  ws-enemy-status-other    value 3.
                10  ws-enemy-movement-ticks.
-                   15  ws-enemy-current-ticks   pic 999.
-                   15  ws-enemy-max-ticks       pic 999.
-               10  ws-enemy-exp-worth           pic 9(4).
+                   15  ws-enemy-current-ticks   pic 999 comp.
+                   15  ws-enemy-max-ticks       pic 999 comp.
+               10  ws-enemy-exp-worth           pic 9(4) comp.
