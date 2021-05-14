@@ -43,18 +43,24 @@
            l-map-explored-data l-cur-map-pos l-tile-visibility.
 
        main-procedure.
+        
+            
 
            compute ls-start-idx-y = l-cur-map-pos-y - l-tile-visibility
            compute ls-end-idx-y = l-cur-map-pos-y + l-tile-visibility
            compute ls-start-idx-x = l-cur-map-pos-x - l-tile-visibility
            compute ls-end-idx-x = l-cur-map-pos-x + l-tile-visibility
+           
 
            perform varying ls-idx-y from ls-start-idx-y by 1 
            until ls-idx-y > ls-end-idx-y
                perform varying ls-idx-x from ls-start-idx-x by 1 
                until ls-idx-x > ls-end-idx-x 
 
-                   if ls-idx-y > 0 and ls-idx-x > 0 then 
+                   if ls-idx-y > 0 and ls-idx-x > 0 
+                   and ls-idx-y < ws-max-map-height 
+                   and ls-idx-x < ws-max-map-width then 
+
                        set l-is-explored(
                            ls-idx-y, ls-idx-x) to true 
                    end-if 

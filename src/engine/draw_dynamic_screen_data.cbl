@@ -29,7 +29,8 @@
            05  ws-unexplored-tile-highlight          pic a value 'N'.
            05  ws-unexplored-tile-blocking           pic a value 'N'.
            05  ws-unexplored-tile-blinking           pic a value 'N'.
-           05  ws-unexplored-tile-effect-id          pic 99 value zeros.       
+           05  ws-unexplored-tile-effect-id          pic 99 value zeros.
+           05  ws-unexplored-visiblity               pic 999 value zero.       
 
 
        local-storage section.
@@ -53,7 +54,7 @@
            05  ls-enemy-draw-y          pic 99.
            05  ls-enemy-draw-x          pic 99.
 
-       01  ls-char-to-draw              pic x.      
+       01  ls-char-to-draw              pic x value space.      
 
        01  ls-player-disp-stats.               
            05  ls-player-disp-hp.
@@ -115,7 +116,7 @@
                                move l-tile-char(
                                    ls-map-pos-y, ls-map-pos-x)                            
                                    to ls-char-to-draw                                                    
-
+                               
                                call "draw-tile-character" using
                                    ls-scr-draw-pos, 
                                    l-tile-map-data(
