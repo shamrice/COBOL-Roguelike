@@ -37,7 +37,7 @@
            05  l-cur-map-pos-y        pic S99.
            05  l-cur-map-pos-x        pic S99.
        
-       01  l-tile-visibility          pic 999.
+       01  l-tile-visibility          pic 999 comp.
 
        procedure division using 
            l-map-explored-data l-cur-map-pos l-tile-visibility.

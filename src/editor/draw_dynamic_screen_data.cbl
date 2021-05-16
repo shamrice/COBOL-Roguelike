@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2021-05-16
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -46,7 +46,17 @@
            05  ls-enemy-draw-y          pic 99.
            05  ls-enemy-draw-x          pic 99.
 
-       01  ws-char-to-draw              pic x.               
+       01  ws-char-to-draw              pic x.  
+
+       01  ws-tile-info-display.
+           05  ws-disp-tile-fg             pic 9.
+           05  ws-disp-tile-bg             pic 9.
+           05  ws-disp-tile-char           pic x.
+           05  ws-disp-tile-highlight      pic a.
+           05  ws-disp-tile-blocking       pic a.
+           05  ws-disp-tile-blinking       pic a.
+           05  ws-disp-tile-effect-id      pic 99.       
+           05  ws-disp-tile-visibility     pic 999.             
 
        linkage section.
 
@@ -284,38 +294,53 @@
 
        display-tile-info.
 
-      *> TODO : Recalculating this over and over isn't pretty...
+      *> TODO : move this to where the current help info is and 
+      *>        neaten the format. Move help to F1 key screen.
 
            compute ws-temp-map-pos-y = l-cursor-pos-y + l-cursor-scr-y                   
            compute ws-temp-map-pos-x = l-cursor-pos-x + l-cursor-scr-x                   
+
+           move l-tile-fg(ws-temp-map-pos-y, ws-temp-map-pos-x)
+               to ws-disp-tile-fg 
+           
+           move l-tile-bg(ws-temp-map-pos-y, ws-temp-map-pos-x)
+               to ws-disp-tile-bg 
+           
+           move l-tile-highlight(ws-temp-map-pos-y, ws-temp-map-pos-x)
+               to ws-disp-tile-highlight
+
+           move l-tile-blocking(ws-temp-map-pos-y, ws-temp-map-pos-x)
+               to ws-disp-tile-blocking
+
+           move l-tile-blinking(ws-temp-map-pos-y, ws-temp-map-pos-x)
+               to ws-disp-tile-blinking
+
+           move l-tile-effect-id(ws-temp-map-pos-y, ws-temp-map-pos-x)
+               to ws-disp-tile-effect-id
+
+           move l-tile-visibility(ws-temp-map-pos-y, ws-temp-map-pos-x)
+               to ws-disp-tile-visibility
 
            display "Current tile info:" at 2201 underline highlight
            display 
                "YX:" at 2302
                ws-temp-map-pos at 2305
                "FG: " at 2311 
-               l-tile-fg(ws-temp-map-pos-y, ws-temp-map-pos-x) at 2314
+               ws-disp-tile-fg at 2314
                "BG: " at 2317
-               l-tile-bg(ws-temp-map-pos-y, ws-temp-map-pos-x) at 2320
+               ws-disp-tile-bg at 2320
                "CHAR: " at 2323
-               l-tile-char(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2328
+               ws-disp-tile-char at 2328
                "HL: " at 2331
-               l-tile-highlight(
-                   ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2334
+               ws-disp-tile-highlight at 2334
                "BLOCK: " at 2337
-               l-tile-blocking(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2343
+               ws-disp-tile-blocking at 2343
                "BLINK:" at 2402
-               l-tile-blinking(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2408
+               ws-disp-tile-blinking at 2408
                "EFFECT: " at 2411
-               l-tile-effect-id(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-                   at 2418
+               ws-disp-tile-effect-id at 2418
                "VIS: " at 2421
-               l-tile-visibility(ws-temp-map-pos-y, ws-temp-map-pos-x)
-                   at 2425
+               ws-disp-tile-visibility at 2425
            end-display 
 
            exit paragraph.

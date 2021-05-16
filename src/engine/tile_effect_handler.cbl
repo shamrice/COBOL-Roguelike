@@ -25,7 +25,7 @@
   
        linkage section.
 
-       01  l-tile-effect-id               pic 99.
+       01  l-tile-effect-id               pic 99 comp.
 
        copy "engine/copybooks/l-player.cpy".
 

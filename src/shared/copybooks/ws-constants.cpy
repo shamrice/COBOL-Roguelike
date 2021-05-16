@@ -20,7 +20,7 @@
        01  white                          constant as 7.
 
       *> Tile effect ids           
-       01  ws-teleport-effect-id          constant as 01.
+       78  ws-teleport-effect-id          value 1.
 
        78  ws-load-map-return-code        value 1.
 

@@ -29,8 +29,8 @@
            05  ws-unexplored-tile-highlight          pic a value 'N'.
            05  ws-unexplored-tile-blocking           pic a value 'N'.
            05  ws-unexplored-tile-blinking           pic a value 'N'.
-           05  ws-unexplored-tile-effect-id          pic 99 value zeros.
-           05  ws-unexplored-visiblity               pic 999 value zero.       
+           05  ws-unexplored-tile-effect-id     pic 99 comp value zeros.
+           05  ws-unexplored-visiblity          pic 999 comp value zero.       
 
 
        local-storage section.

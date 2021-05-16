@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-12
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2021-05-16
       *> Purpose: Sets up tile effect data based on tile effect id.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -44,7 +44,7 @@
            05  l-placement-pos-y         pic S99.
            05  l-placement-pos-x         pic S99.  
 
-       01  l-cur-tile-effect-id          pic 99.
+       01  l-cur-tile-effect-id          pic 99 comp.
 
        copy "editor/copybooks/l-cursor.cpy".
 

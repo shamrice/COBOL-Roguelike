@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2021-05-16
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -367,13 +367,12 @@
                    exit paragraph
                end-if 
                
-      *        move ws-temp-map-pos to ws-cursor-pos
                add ws-cursor-pos-delta-x to ws-cursor-pos-x
                add ws-cursor-pos-delta-y to ws-cursor-pos-y 
                set ws-scr-refresh to true                
 
            end-if
-           display "MapYX: " at 2501 ws-temp-map-pos at 2508
+      *     display "MapYX: " at 2501 ws-temp-map-pos at 2508
            move zeros to ws-cursor-pos-delta
            exit paragraph.
 

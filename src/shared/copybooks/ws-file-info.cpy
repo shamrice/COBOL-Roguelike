@@ -10,8 +10,8 @@
       *>****************************************************************
 
        01  ws-map-files.  
-           05  ws-map-name             pic x(15) value "RETRO".
-           05  ws-map-name-temp        pic x(15) value "RETRO".           
+           05  ws-map-name             pic x(15) value "VOIDSPACE".
+           05  ws-map-name-temp        pic x(15) value "VOIDSPACE".           
            05  ws-map-dat-file         pic x(15).               
            05  ws-map-tel-file         pic x(15).
            05  ws-map-enemy-file       pic x(15).

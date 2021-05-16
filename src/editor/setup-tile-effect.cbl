@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-12
-      *> Last Updated: 2021-05-07
+      *> Last Updated: 2021-05-16
       *> Purpose: Sets up tile effect data based on tile effect id.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -34,7 +34,7 @@
 
        linkage section.
 
-       01  l-tile-effect-id             pic 99.
+       01  l-cursor-tile-effect-id             pic 99.
 
        01  l-cursor-teleport-settings.
            05  l-cursor-tel-dest-y            pic 99.
@@ -42,11 +42,11 @@
            05  l-cursor-tel-dest-map          pic x(15).              
 
        procedure division using 
-           l-tile-effect-id l-cursor-teleport-settings.
+           l-cursor-tile-effect-id l-cursor-teleport-settings.
        
        main-procedure.
 
-           evaluate l-tile-effect-id
+           evaluate l-cursor-tile-effect-id
 
                when ws-teleport-effect-id
                    perform setup-teleport
@@ -56,7 +56,7 @@
                    display "Not implemented. Press any key." at 2101
                    accept ws-filler at 2150 with auto-skip no-echo 
                    display ws-blank-line at 2101
-                   move zeros to l-tile-effect-id                   
+                   move zeros to l-cursor-tile-effect-id                   
 
            end-evaluate 
           
@@ -72,7 +72,7 @@
 
            if l-cursor-tel-dest-map = spaces or l-cursor-tel-dest-y <= 0 
            or l-cursor-tel-dest-x <= 0 then 
-               move zeros to l-tile-effect-id 
+               move zeros to l-cursor-tile-effect-id 
                display "Tile effect canceled. Press Enter.  " at 2101
                display "                         " at 2135
                accept ws-filler at 2140
