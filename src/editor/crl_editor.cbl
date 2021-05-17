@@ -639,7 +639,7 @@
                end-call 
            end-if 
 
-           display "Tile placed at:" at 2401 ws-temp-map-pos at 2417                  
+           display "Tile placed at:" at 2501 ws-temp-map-pos at 2517
 
            exit paragraph.
 
@@ -718,7 +718,7 @@
                move ws-temp-map-pos-x to ws-enemy-x(ws-cur-num-enemies)
 
                display 
-                   "Enemy placed at:" at 2401 ws-temp-map-pos at 2417                  
+                   "Enemy placed at:" at 2501 ws-temp-map-pos at 2517                  
                end-display
            end-if 
 

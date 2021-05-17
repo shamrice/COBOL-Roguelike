@@ -53,6 +53,7 @@
 
        copy "shared/copybooks/ws-constants.cpy".
 
+       01  ws-test-data                 pic 99.
 
        local-storage section.
 
@@ -162,15 +163,18 @@
                perform until ls-is-eof 
                    
                    if l-cur-num-enemies < ws-max-num-enemies then  
-                       add 1 to l-cur-num-enemies 
-                       initialize l-enemy(l-cur-num-enemies)  
-      *                 initialize l-enemy-draw-pos(l-cur-num-enemies)
+                                              
+                       add 1 to l-cur-num-enemies           
+                       initialize l-enemy(l-cur-num-enemies) 
 
                        read fd-enemy-data 
                            into l-enemy(l-cur-num-enemies)    
-                           at end set ls-is-eof to true 
+                           at end 
+                               set ls-is-eof to true 
+                        *>Not pretty, but count goes one too high at EOF
+                               subtract 1 from l-cur-num-enemies                              
                        end-read
-
+                   
                        if ls-enemy-file-status not = 
                        ws-file-status-ok and ls-enemy-file-status not = 
                        ws-file-status-eof then 
@@ -190,6 +194,9 @@
                end-perform 
            close fd-enemy-data
 
+      *     move l-cur-num-enemies to ws-test-data
+      *     display ws-test-data at 0101 
+      *     accept omitted
 
       *> Reset and load teleport file info.
            move 0 to l-cur-num-teleports
