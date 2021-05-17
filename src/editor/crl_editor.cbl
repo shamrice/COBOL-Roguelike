@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-16
+      *> Last Updated: 2021-05-17
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -190,9 +190,7 @@
          
 
 
-       main-procedure.
-
-           perform display-commands       
+       main-procedure.  
 
            perform until ws-quit         
                perform draw-screen               
@@ -221,7 +219,7 @@
 
        get-input.
                               
-           accept ws-kb-input at 2601 with auto-skip no-echo upper
+           accept ws-kb-input at 2101 with auto-skip no-echo upper
                      
 
       *> Check special keys being pressed.
@@ -242,6 +240,10 @@
                when COB-SCR-ESC
                    display "QUITING" at 0917 
                    set ws-quit to true 
+
+               when COB-SCR-F1 
+                   call "display-help"
+                   set ws-scr-refresh to true 
 
                when COB-SCR-F6 
                    if ws-display-mode-effects then 
@@ -801,24 +803,6 @@
            accept omitted at 2150
 
            exit paragraph. 
-
-
-       display-commands.
-           display "Commands:" at 0160 underline highlight           
-           display "arrows - move cursor" at 0253
-           display "     b - toggle blocking tiles" at 0353
-           display "     c - set tile character" at 0453
-           display "     d - set enemy attributes" at 0553
-           display "   f/g - set fore/background tile color" at 0653
-           display "     h - toggle fg tile highlight" at 0753
-           display "     k - toggle blinking tiles" at 0853
-           display "     l - load map data" at 0953
-           display "     o - save map data" at 1053
-           display "     q - quit editor" at 1153
-           display " space - place tile or enemy" at 1253
-           display "   tab - toggle tile/enemy placement mode" at 1353
-
-           exit paragraph.      
-
+ 
 
        end program cobol-roguelike-editor.

@@ -190,102 +190,104 @@
 
        display-cursor-info-tile.
 
-           display "Tile to Place: " at 1460 underline highlight  
+           display "Tile to Place: " at 1260 underline highlight  
 
-           display ws-line-mask at 1553          
+           display ws-line-mask at 1353          
 
-           display "  Tile character: " at 1553 
+           display "  Tile character: " at 1353 
            if l-cursor-highlight then 
                display 
-                   l-cursor-draw-char at 1571
+                   l-cursor-draw-char at 1371
                    foreground-color l-cursor-draw-color-fg
                    background-color l-cursor-draw-color-bg
                    highlight
                end-display 
            else 
                display 
-                   l-cursor-draw-char at 1571
+                   l-cursor-draw-char at 1371
                    foreground-color l-cursor-draw-color-fg
                    background-color l-cursor-draw-color-bg
                end-display 
            end-if 
-           display "Foreground color: " at 1653 
-               l-cursor-draw-color-fg at 1671
+           display "Foreground color: " at 1453 
+               l-cursor-draw-color-fg at 1471
            end-display 
-           display "Background color: " at 1753 
-               l-cursor-draw-color-bg at 1771
+           display "Background color: " at 1553 
+               l-cursor-draw-color-bg at 1571
            end-display 
-           display "    Is highlight: " at 1853
+           display "    Is highlight: " at 1653
            if l-cursor-highlight then 
+               display "true " at 1671
+           else 
+               display "false" at 1671
+           end-if 
+           display "     Is blocking: " at 1753
+           if l-cursor-blocking then 
+               display "true " at 1771
+           else 
+               display "false" at 1771
+           end-if 
+           display "     Is blinking: " at 1853
+           if l-cursor-blink then 
                display "true " at 1871
            else 
                display "false" at 1871
            end-if 
-           display "     Is blocking: " at 1953
-           if l-cursor-blocking then 
-               display "true " at 1971
-           else 
-               display "false" at 1971
-           end-if 
-           display "     Is blinking: " at 2053
-           if l-cursor-blink then 
-               display "true " at 2071
-           else 
-               display "false" at 2071
-           end-if 
-           display "  Tile effect id:" at 2153
-               l-cursor-draw-effect at 2171               
+           display "  Tile effect id:" at 1953
+               l-cursor-draw-effect at 1971               
            end-display 
-
-           if l-cursor-draw-effect > 0 then 
-               evaluate l-cursor-draw-effect
-                   when ws-teleport-effect-id
-                       display "(TELEPORT)" at 2174
+           
+           evaluate l-cursor-draw-effect
+               when zero 
+                   display "(NONE)    " at 1974
+               
+               when ws-teleport-effect-id
+                   display "(TELEPORT)" at 1974
                    
-                   when other 
-                       display "(UNKNOWN)" at 2174
-               end-evaluate
-           else 
-               display "               " at 2174
-           end-if 
-
-           display "      Visibility: " at 2253
-               l-cursor-draw-visibility at 2271
+               when other 
+                   display "(UNKNOWN) " at 1974
+           end-evaluate           
+           
+           display "      Visibility: " at 2053
+               l-cursor-draw-visibility at 2071
            end-display 
+
+           display space at 1473 background-color l-cursor-draw-color-fg
+           display space at 1573 background-color l-cursor-draw-color-bg
 
            exit paragraph. 
 
 
        display-cursor-info-enemy.
 
-           display "Enemy to Place:" at 1460 underline highlight           
+           display "Enemy to Place:" at 1260 underline highlight           
 
-           display "      Enemy name: " at 1553 
-           display l-cursor-enemy-name at 1571
+           display "      Enemy name: " at 1353 
+           display l-cursor-enemy-name at 1371
 
-           display " Enemy character: " at 1653            
+           display " Enemy character: " at 1453            
            display 
-               l-cursor-enemy-char at 1671
+               l-cursor-enemy-char at 1471
                foreground-color l-cursor-enemy-color
                background-color black               
            end-display 
            
-           display "           Color:            " at 1753 
-               l-cursor-enemy-color at 1771
+           display "           Color:            " at 1553 
+               l-cursor-enemy-color at 1571
            end-display 
-           display "              HP:            " at 1853 
-               l-cursor-enemy-hp at 1871
+           display "              HP:            " at 1653 
+               l-cursor-enemy-hp at 1671
            end-display 
-           display "   Attack Damage:            " at 1953           
-           display l-cursor-enemy-attack-damage at 1971
+           display "   Attack Damage:            " at 1753
+           display l-cursor-enemy-attack-damage at 1771
            
-           display "  Movement ticks:            " at 2053
-           display l-cursor-enemy-movement-ticks at 2071
+           display "  Movement ticks:            " at 1853
+           display l-cursor-enemy-movement-ticks at 1871
            
-           display "       Exp Worth:            " at 2153
-           display l-cursor-enemy-exp-worth at 2171
+           display "       Exp Worth:            " at 1953
+           display l-cursor-enemy-exp-worth at 1971
 
-           display ws-line-mask at 2253
+           display ws-line-mask at 2053
 
            exit paragraph. 
 
@@ -293,9 +295,6 @@
 
 
        display-tile-info.
-
-      *> TODO : move this to where the current help info is and 
-      *>        neaten the format. Move help to F1 key screen.
 
            compute ws-temp-map-pos-y = l-cursor-pos-y + l-cursor-scr-y                   
            compute ws-temp-map-pos-x = l-cursor-pos-x + l-cursor-scr-x                   
@@ -306,6 +305,9 @@
            move l-tile-bg(ws-temp-map-pos-y, ws-temp-map-pos-x)
                to ws-disp-tile-bg 
            
+           move l-tile-char(ws-temp-map-pos-y, ws-temp-map-pos-x)
+               to ws-disp-tile-char
+
            move l-tile-highlight(ws-temp-map-pos-y, ws-temp-map-pos-x)
                to ws-disp-tile-highlight
 
@@ -321,27 +323,58 @@
            move l-tile-visibility(ws-temp-map-pos-y, ws-temp-map-pos-x)
                to ws-disp-tile-visibility
 
-           display "Current tile info:" at 2201 underline highlight
+           display "Current Tile Info:" at 0160 underline highlight
            display 
-               "YX:" at 2302
-               ws-temp-map-pos at 2305
-               "FG: " at 2311 
-               ws-disp-tile-fg at 2314
-               "BG: " at 2317
-               ws-disp-tile-bg at 2320
-               "CHAR: " at 2323
-               ws-disp-tile-char at 2328
-               "HL: " at 2331
-               ws-disp-tile-highlight at 2334
-               "BLOCK: " at 2337
-               ws-disp-tile-blocking at 2343
-               "BLINK:" at 2402
-               ws-disp-tile-blinking at 2408
-               "EFFECT: " at 2411
-               ws-disp-tile-effect-id at 2418
-               "VIS: " at 2421
-               ws-disp-tile-visibility at 2425
+               "             Y/X:      " at 0253
+               ws-temp-map-pos-y at 0271
+               "/" at 0273
+               ws-temp-map-pos-x at 0274
+               "Foreground color:      " at 0353 
+               ws-disp-tile-fg at 0371
+               "Background color:      " at 0453
+               ws-disp-tile-bg at 0471               
+               "  Tile Character:      " at 0553
+               "       Highlight:      " at 0653
+               ws-disp-tile-highlight at 0671
+               "        Blocking:      " at 0753
+               ws-disp-tile-blocking at 0771
+               "        Blinking:      " at 0853
+               ws-disp-tile-blinking at 0871
+               "  Tile Effect Id:      " at 0953
+               ws-disp-tile-effect-id at 0971
+               "      Visibility:      " at 1053
+               ws-disp-tile-visibility at 1071
            end-display 
+
+           if ws-disp-tile-highlight = 'Y' then 
+               display 
+                   ws-disp-tile-char at 0571
+                   foreground-color ws-disp-tile-fg
+                   background-color ws-disp-tile-bg
+                   highlight
+               end-display 
+           else 
+               display 
+                   ws-disp-tile-char at 0571
+                   foreground-color ws-disp-tile-fg
+                   background-color ws-disp-tile-bg                   
+               end-display 
+           end-if 
+
+
+           evaluate ws-disp-tile-effect-id
+               when zero 
+                   display "(NONE)    " at 0974
+               
+               when ws-teleport-effect-id
+                   display "(TELEPORT)" at 0974
+                   
+               when other 
+                   display "(UNKNOWN) " at 0974
+           end-evaluate  
+
+           display space at 0373 background-color ws-disp-tile-fg
+           display space at 0473 background-color ws-disp-tile-bg
 
            exit paragraph.
 

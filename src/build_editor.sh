@@ -39,7 +39,7 @@ else
     fi 
 
     echo Building CRL Editor...
-    cobc -Wall -x -O2 -o ./bin/crl_editor ./editor/crl_editor.cbl ./editor/draw_dynamic_screen_data.cbl ./shared/draw_tile_character.cbl ./shared/load_map_data.cbl ./editor/setup-tile-effect.cbl ./editor/set-tile-effect.cbl ./editor/write_map_data.cbl
+    cobc -Wall -x -O2 -o ./bin/crl_editor ./editor/crl_editor.cbl ./editor/draw_dynamic_screen_data.cbl ./shared/draw_tile_character.cbl ./shared/load_map_data.cbl ./editor/setup-tile-effect.cbl ./editor/set-tile-effect.cbl ./editor/write_map_data.cbl ./editor/display_help.cbl
     
 fi 
 echo Done.
