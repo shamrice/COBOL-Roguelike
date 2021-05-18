@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-12
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2021-05-18
       *> Purpose: Create or edit item passed via the linkage section.
       *> Tectonics:
       *>     ./build_item_creator.sh
@@ -147,13 +147,34 @@
       *             move 1 to l-return-code 
 
                when COB-SCR-ESC
-      *             display "QUITING" at 0917 
                    move 9 to l-return-code
+                   display space blank screen 
+                   goback 
 
            end-evaluate
 
            if l-item-list-name not = spaces and l-item-list-id > zero 
-           and l-item-list-color <= 7 then 
+           then 
+
+           *> Input sanitization...
+               if l-item-list-color > 7 then 
+                   move 7 to l-item-list-color
+               end-if 
+               
+               move function upper-case(l-item-list-highlight-sw)
+                   to l-item-list-highlight-sw
+
+               move function upper-case(l-item-list-blink-sw)
+                   to l-item-list-blink-sw
+               
+               if 'Y' not = l-item-list-highlight-sw then 
+                   move 'N' to l-item-list-highlight-sw
+               end-if
+               
+               if 'Y' not = l-item-list-blink-sw then 
+                   move 'N' to l-item-list-blink-sw
+               end-if 
+
                move 0 to l-return-code 
            else 
                move 1 to l-return-code 

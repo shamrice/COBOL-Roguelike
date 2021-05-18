@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-13
-      *> Last Updated: 2021-05-13
+      *> Last Updated: 2021-05-18
       *> Purpose: Shared copy book with linkage section definition of
       *>          item list data record.
       *> Tectonics:
@@ -9,7 +9,7 @@
       *>****************************************************************
 
        01  l-item-list-data-record.               
-           10  l-item-list-id                 pic 9(6).
+           10  l-item-list-id                 pic 999.
            10  l-item-list-name               pic x(16).                                          
            10  l-item-list-effect-id          pic 99.
            10  l-item-list-worth              pic 999.

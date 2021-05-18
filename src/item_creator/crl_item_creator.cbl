@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-11
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2021-05-18
       *> Purpose: Item editor for the game
       *> Tectonics:
       *>     ./build_item_creator.sh
@@ -72,7 +72,7 @@
            88  ws-is-quit                    value 'Y'.
            88  ws-not-quit                value 'N'.
 
-       01  ws-selected-idx              pic 999 comp value 0.
+       01  ws-selected-idx              pic 999 value 0.
 
        01  ws-idx                       pic 999 comp.
 
@@ -84,6 +84,7 @@
        01  ws-save-return-code          pic 9.
 
        01  ws-add-edit-return-code      pic 9.
+ 
 
        procedure division.
        
@@ -140,27 +141,54 @@
                        ws-item-list-data-record(ws-cur-num-list-items)
                        ws-add-edit-return-code
                    end-call 
-                   display 
-                       ws-item-list-data-record(ws-cur-num-list-items)
-                       at 2501
-                   end-display 
+      
       *             stop run 
                    if ws-add-edit-return-code not = zero then 
+                   *> TODO : display error messages better.
                        display 
                            "Failed to create new list item."
                            upon syserr 
                        end-display 
       *                 stop run 
                    else 
+                       move ws-cur-num-list-items to ws-selected-idx
+                       perform save-list-item-record
                        add 1 to ws-cur-num-list-items  
                    end-if 
 
+               when 'E'
+                   display "Item ID to edit: " at 1901
+                   accept ws-selected-idx update at 1918
+                   if ws-selected-idx <= ws-cur-num-list-items then
+                      
+                       open i-o fd-item-list-data
+                           move ws-selected-idx to f-item-id 
+                           read fd-item-list-data 
+                               into ws-item-list-data-record(
+                               ws-selected-idx)
+                               invalid key 
+                                   display "Invalid index:" at 1801
+                               not invalid key                                    
+                                   call "add-edit-item" using 
+                                       ws-item-list-data-record(
+                                           ws-selected-idx)
+                                       ws-add-edit-return-code
+                                   end-call 
+                           end-read 
+                      close fd-item-list-data
+                   else 
+                       display "Invalid item id" at 1801
+                   end-if 
            end-evaluate
 
            exit paragraph.
 
+
+
        display-current-items.
            
+           *> TODO : Move to own sub.
+
            display "Current Items" with highlight underline at 0135
            
            display "ID" with highlight underline at 0201 
@@ -295,6 +323,7 @@
            if ws-selected-idx = zeros then 
                exit paragraph
            end-if 
+
 
            open i-o fd-item-list-data
                move ws-selected-idx to f-item-id 
