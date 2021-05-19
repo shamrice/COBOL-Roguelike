@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-11
-      *> Last Updated: 2021-05-18
+      *> Last Updated: 2021-05-19
       *> Purpose: Item editor for the game
       *> Tectonics:
       *>     ./build_item_creator.sh
@@ -157,6 +157,9 @@
                    end-if 
 
                when 'E'
+             *> TODO : Move to own paragraph... 
+             *>        Return code validation code duplication needs to 
+             *>        be refactored.
                    display "Item ID to edit: " at 1901
                    accept ws-selected-idx update at 1918
                    if ws-selected-idx <= ws-cur-num-list-items then
@@ -175,7 +178,16 @@
                                        ws-add-edit-return-code
                                    end-call 
                            end-read 
-                      close fd-item-list-data
+                       close fd-item-list-data
+                       if ws-add-edit-return-code not = zero then 
+                   
+                           display 
+                               "Failed to create new list item."
+                               upon syserr 
+                           end-display       
+                       else                            
+                           perform save-list-item-record                      
+                       end-if                       
                    else 
                        display "Invalid item id" at 1801
                    end-if 

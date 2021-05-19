@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-12
-      *> Last Updated: 2021-05-18
+      *> Last Updated: 2021-05-19
       *> Purpose: Create or edit item passed via the linkage section.
       *> Tectonics:
       *>     ./build_item_creator.sh
@@ -102,33 +102,37 @@
                10  line 7 column 29 pic x(16) using l-item-list-name.
            05  s-effect-id-line foreground-color 0 background-color 7.
                10  line 8 column 15 pic x(50) value spaces. 
-               10  line 8 column 16 value "WORTH/VALUE:".
-               10  line 8 column 29 pic 999 using l-item-list-worth.
-           05  s-effect-id-line foreground-color 0 background-color 7.
+               10  line 8 column 16 value "  EFFECT ID:".
+               10  line 8 column 29 pic 99 using l-item-list-effect-id.
+           05  s-worth-line foreground-color 0 background-color 7.
                10  line 9 column 15 pic x(50) value spaces. 
-               10  line 9 column 16 value "      COLOR:".
-               10  line 9 column 29 pic 9 using l-item-list-color.
-           05  s-effect-id-line foreground-color 0 background-color 7.
+               10  line 9 column 16 value "WORTH/VALUE:".
+               10  line 9 column 29 pic 999 using l-item-list-worth.
+           05  s-color-line foreground-color 0 background-color 7.
                10  line 10 column 15 pic x(50) value spaces. 
-               10  line 10 column 16 value "  CHARACTER:".
-               10  line 10 column 29 pic x using l-item-list-char.
-           05  s-effect-id-line foreground-color 0 background-color 7.
+               10  line 10 column 16 value "      COLOR:".
+               10  line 10 column 29 pic 9 using l-item-list-color.
+           05  s-char-line foreground-color 0 background-color 7.
                10  line 11 column 15 pic x(50) value spaces. 
-               10  line 11 column 16 value "  HIGHLIGHT:".
-               10  line 11 column 29 pic x 
-                   using l-item-list-highlight-sw.
-           05  s-effect-id-line foreground-color 0 background-color 7.
+               10  line 11 column 16 value "  CHARACTER:".
+               10  line 11 column 29 pic x using l-item-list-char.
+           05  s-highlight-line foreground-color 0 background-color 7.
                10  line 12 column 15 pic x(50) value spaces. 
-               10  line 12 column 16 value "      BLINK:".
-               10  line 12 column 29 pic x using l-item-list-blink-sw.
+               10  line 12 column 16 value "  HIGHLIGHT:".
+               10  line 12 column 29 pic x 
+                   using l-item-list-highlight-sw.
+           05  s-blink-line foreground-color 0 background-color 7.
+               10  line 13 column 15 pic x(50) value spaces. 
+               10  line 13 column 16 value "      BLINK:".
+               10  line 13 column 29 pic x using l-item-list-blink-sw.
            05  s-space-line foreground-color 0 background-color 7.
-               10  line 13 column 15 pic x(50) value spaces.
+               10  line 14 column 15 pic x(50) value spaces.
            05  s-info-line foreground-color 0 background-color 7.
-               10  line 14 column 15 pic x(50) value spaces. 
-               10  line 14 column 16 
+               10  line 15 column 15 pic x(50) value spaces. 
+               10  line 15 column 16 
                    value "Arrow keys between fields ESC to cancel.".
            05  s-space-line foreground-color 0 background-color 7.
-               10  line 15 column 15 pic x(50) value spaces.
+               10  line 16 column 15 pic x(50) value spaces.
 
        procedure division using 
            l-item-list-data-record l-return-code.
