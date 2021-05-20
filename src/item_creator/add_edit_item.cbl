@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-12
-      *> Last Updated: 2021-05-19
+      *> Last Updated: 2021-05-20
       *> Purpose: Create or edit item passed via the linkage section.
       *> Tectonics:
       *>     ./build_item_creator.sh
@@ -159,6 +159,9 @@
 
            if l-item-list-name not = spaces and l-item-list-id > zero 
            then 
+
+           *>There is a weird bug where if the name has a "?" the data
+           *>gets corrupted.
 
            *> Input sanitization...
                if l-item-list-color > 7 then 

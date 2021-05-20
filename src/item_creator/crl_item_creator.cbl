@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-11
-      *> Last Updated: 2021-05-19
+      *> Last Updated: 2021-05-20
       *> Purpose: Item editor for the game
       *> Tectonics:
       *>     ./build_item_creator.sh
@@ -45,6 +45,8 @@
 
        copy "shared/copybooks/ws-item-list-data.cpy".
 
+       01  ws-max-items-per-page       constant as 15.
+
 
        01  ws-mouse-flags              pic 9(4).
 
@@ -74,6 +76,8 @@
 
        01  ws-selected-idx              pic 999 value 0.
 
+       01  ws-next-id                   pic 999.
+
        01  ws-idx                       pic 999 comp.
 
        01  ws-record-pos.
@@ -85,6 +89,10 @@
 
        01  ws-add-edit-return-code      pic 9.
  
+       01  ws-create-new-item-sw        pic a value 'N'.
+           88  ws-create-new-item       value 'Y'.
+           88  ws-not-create-new-item   value 'N'.
+
 
        procedure division.
        
@@ -135,62 +143,14 @@
                   set ws-is-quit to true 
 
                when 'N'                   
-                   move ws-cur-num-list-items 
-                       to ws-item-list-id(ws-cur-num-list-items)                        
-                   call "add-edit-item" using 
-                       ws-item-list-data-record(ws-cur-num-list-items)
-                       ws-add-edit-return-code
-                   end-call 
-      
-      *             stop run 
-                   if ws-add-edit-return-code not = zero then 
-                   *> TODO : display error messages better.
-                       display 
-                           "Failed to create new list item."
-                           upon syserr 
-                       end-display 
-      *                 stop run 
-                   else 
-                       move ws-cur-num-list-items to ws-selected-idx
-                       perform save-list-item-record
-                       add 1 to ws-cur-num-list-items  
-                   end-if 
+                   perform create-new-item
 
                when 'E'
-             *> TODO : Move to own paragraph... 
-             *>        Return code validation code duplication needs to 
-             *>        be refactored.
-                   display "Item ID to edit: " at 1901
-                   accept ws-selected-idx update at 1918
-                   if ws-selected-idx <= ws-cur-num-list-items then
-                      
-                       open i-o fd-item-list-data
-                           move ws-selected-idx to f-item-id 
-                           read fd-item-list-data 
-                               into ws-item-list-data-record(
-                               ws-selected-idx)
-                               invalid key 
-                                   display "Invalid index:" at 1801
-                               not invalid key                                    
-                                   call "add-edit-item" using 
-                                       ws-item-list-data-record(
-                                           ws-selected-idx)
-                                       ws-add-edit-return-code
-                                   end-call 
-                           end-read 
-                       close fd-item-list-data
-                       if ws-add-edit-return-code not = zero then 
-                   
-                           display 
-                               "Failed to create new list item."
-                               upon syserr 
-                           end-display       
-                       else                            
-                           perform save-list-item-record                      
-                       end-if                       
-                   else 
-                       display "Invalid item id" at 1801
-                   end-if 
+                   perform edit-item 
+
+               when 'D'
+                   perform delete-item
+
            end-evaluate
 
            exit paragraph.
@@ -216,58 +176,71 @@
            move 1 to ws-record-pos-x 
 
            perform varying ws-idx from 1 by 1 
-           until ws-idx >= ws-cur-num-list-items
+           until ws-idx > ws-max-items-per-page
+
+               if ws-idx < ws-cur-num-list-items then 
 
       *         display ws-item-list-data-record(ws-idx) at ws-record-pos
-               display ws-item-list-id(ws-idx) at ws-record-pos
-               move 08 to ws-record-pos-x 
-               display ws-item-list-name(ws-idx) at ws-record-pos 
-               move 25 to ws-record-pos-x 
-               display ws-item-list-effect-id(ws-idx) at ws-record-pos                
-               move 35 to ws-record-pos-x 
-               display ws-item-list-worth(ws-idx) at ws-record-pos 
-               move 47 to ws-record-pos-x 
-               display ws-item-list-color(ws-idx) at ws-record-pos 
-               move 53 to ws-record-pos-x 
+                   display ws-item-list-id(ws-idx) at ws-record-pos
+                   move 08 to ws-record-pos-x 
+                   display ws-item-list-name(ws-idx) at ws-record-pos 
+                   move 25 to ws-record-pos-x 
+                   display ws-item-list-effect-id(ws-idx) 
+                       at ws-record-pos                
+                   end-display 
+                   move 35 to ws-record-pos-x 
+                   display ws-item-list-worth(ws-idx) at ws-record-pos 
+                   move 47 to ws-record-pos-x 
+                   display ws-item-list-color(ws-idx) at ws-record-pos 
+                   move 53 to ws-record-pos-x 
 
-               evaluate true 
-                   when ws-item-list-is-blink(ws-idx) 
-                   and ws-item-list-is-highlight(ws-idx)                    
-                       display ws-item-list-char(ws-idx) 
-                           foreground-color ws-item-list-color(ws-idx) 
-                           with blink highlight 
-                           at ws-record-pos 
-                       end-display 
+                   evaluate true 
+                       when ws-item-list-is-blink(ws-idx) 
+                       and ws-item-list-is-highlight(ws-idx)                    
+                           display ws-item-list-char(ws-idx) 
+                               foreground-color 
+                               ws-item-list-color(ws-idx) 
+                               with blink highlight 
+                               at ws-record-pos 
+                           end-display 
 
-                  when ws-item-list-is-blink(ws-idx) 
-                       display ws-item-list-char(ws-idx) 
-                           foreground-color ws-item-list-color(ws-idx) 
-                           with blink 
-                           at ws-record-pos
-                       end-display 
+                       when ws-item-list-is-blink(ws-idx) 
+                           display ws-item-list-char(ws-idx) 
+                               foreground-color 
+                                   ws-item-list-color(ws-idx) 
+                               with blink 
+                               at ws-record-pos
+                           end-display 
 
-                  when ws-item-list-is-highlight(ws-idx) 
-                       display ws-item-list-char(ws-idx) 
-                           foreground-color ws-item-list-color(ws-idx) 
-                           with highlight 
-                           at ws-record-pos 
-                       end-display 
+                       when ws-item-list-is-highlight(ws-idx) 
+                           display ws-item-list-char(ws-idx) 
+                               foreground-color 
+                                   ws-item-list-color(ws-idx) 
+                               with highlight 
+                               at ws-record-pos 
+                           end-display 
 
-                  when other 
-                      display ws-item-list-char(ws-idx) 
-                          foreground-color ws-item-list-color(ws-idx) 
-                          at ws-record-pos 
-                      end-display 
+                       when other 
+                           display ws-item-list-char(ws-idx) 
+                               foreground-color 
+                                   ws-item-list-color(ws-idx) 
+                               at ws-record-pos 
+                           end-display 
 
-               end-evaluate
+                   end-evaluate
 
-               move 58 to ws-record-pos-x 
-               display ws-item-list-highlight-sw(ws-idx) 
-                   at ws-record-pos
-               end-display 
-               move 68 to ws-record-pos-x
-               display ws-item-list-blink-sw(ws-idx) at ws-record-pos
-
+                   move 58 to ws-record-pos-x 
+                   display ws-item-list-highlight-sw(ws-idx) 
+                       at ws-record-pos
+                   end-display 
+                   move 68 to ws-record-pos-x
+                   display ws-item-list-blink-sw(ws-idx) 
+                       at ws-record-pos
+                   end-display 
+               else 
+                   move 1 to ws-record-pos-x
+                   display ws-line-mask at ws-record-pos    
+               end-if 
                move 1 to ws-record-pos-x 
                add 1 to ws-record-pos-y 
 
@@ -278,54 +251,45 @@
 
        load-item-list.
 
-           move 0 to ws-cur-num-list-items
+           move 1 to ws-cur-num-list-items
            set ws-not-eof to true             
 
-           open input fd-item-list-data      
-               perform until ws-is-eof                    
-                   if ws-cur-num-list-items < 999 then  
-                       add 1 to ws-cur-num-list-items
-                       initialize 
-                         ws-item-list-data-record(ws-cur-num-list-items)  
+           open input fd-item-list-data     
+               perform until ws-is-eof or ws-cur-num-list-items > 999                         
+                   initialize 
+                       ws-item-list-data-record(ws-cur-num-list-items)  
+      *             move 999 to ws-item-list-id(ws-cur-num-list-items)
 
-                       read fd-item-list-data next record 
-                           into ws-item-list-data-record(
-                               ws-cur-num-list-items)
-                           at end set ws-is-eof to true 
-                        end-read 
 
-      *                 read fd-item-list-data 
-      *                     into ws-item-list-data-record(
-      *                         ws-cur-num-list-items)
-      *                     key is ws-cur-num-list-items                           
-      *                     at end set ws-is-eof to true 
-      *                     invalid key 
-      *                         display function concatenate(
-      *                             "No id: " ws-cur-num-list-items)
-      *                             at 2201
-      *                         end-display 
-      *                         set ws-is-eof to true 
-      *                     not invalid key 
+                   read fd-item-list-data next record 
+                       into ws-item-list-data-record(
+                           ws-cur-num-list-items)
+                       at end 
+                           set ws-is-eof to true 
+                       not at end 
+                           add 1 to ws-cur-num-list-items
+                   end-read 
 
-      *                 end-read
-
-                       if ws-item-list-file-status not = 
-                       ws-file-status-ok and ws-item-list-file-status 
-                       not = ws-file-status-eof and 
-                       ws-item-list-file-status not = 23 then  *> 23 record not found.
-                         display "Error reading item list data." at 0101
-                           display ws-item-list-file-status at 0201
-                           close fd-item-list-data
-                    
-                           goback 
-                       end-if  
-
-                   else 
-                       set ws-is-eof to true 
-                   end-if                    
-                   
-               end-perform 
+                   if ws-item-list-file-status not = ws-file-status-ok 
+                   and ws-item-list-file-status not = 
+                   ws-file-status-eof and ws-item-list-file-status 
+                   not = 23 then  *> 23 record not found.
+                       display "Error reading item list data." at 0101
+                       display ws-item-list-file-status at 0201
+                       close fd-item-list-data                    
+                       goback 
+                   end-if  
+                                   
+               end-perform                   
            close fd-item-list-data       
+
+      *>This is an odd bug where if a new item was just added, the reload
+      *>causes an extra empty item to be displayed at the end of the
+      *>list. Only in this case too which makes it very odd.      
+           if ws-create-new-item then 
+               subtract 1 from ws-cur-num-list-items
+               set ws-not-create-new-item to true 
+           end-if 
 
            exit paragraph.
 
@@ -336,29 +300,122 @@
                exit paragraph
            end-if 
 
+           set ws-not-create-new-item to true
 
            open i-o fd-item-list-data
                move ws-selected-idx to f-item-id 
                rewrite f-item-list-data-record 
                    from ws-item-list-data-record(ws-selected-idx)
                    invalid key 
-                       write f-item-list-data-record 
-                       from ws-item-list-data-record(ws-selected-idx)    
-                       end-write 
-                       display function concatenate("Key: ", f-item-id, 
-                           " doesn't exist. Creating new record.")
-                           at 1505
-                       end-display 
+                       set ws-create-new-item to true 
                    not invalid key 
                        display function concatenate(
                            "Successfully updated record id ", f-item-id)
-                           at 1605
-                       end-display
+                           at 2001
+                       end-display                       
                end-rewrite 
 
+               if ws-create-new-item then                                   
+                   write f-item-list-data-record 
+                       from ws-item-list-data-record(ws-selected-idx)    
+                   end-write 
+                   display function concatenate("Key: ", f-item-id, 
+                       " doesn't exist. Creating new record.") at 2001
+                   end-display
+               end-if 
+
+           close fd-item-list-data
+           
+           perform load-item-list
+           
+           exit paragraph.    
+
+
+       create-new-item.
+           
+           if ws-cur-num-list-items > 0 then 
+               compute ws-next-id = 
+                   ws-item-list-id(ws-cur-num-list-items - 1) + 1
+               end-compute 
+           else 
+               move 1 to ws-next-id 
+           end-if 
+
+           move ws-next-id
+               to ws-item-list-id(ws-cur-num-list-items)
+
+           call "add-edit-item" using 
+               ws-item-list-data-record(ws-cur-num-list-items) 
+               ws-add-edit-return-code
+           end-call 
+      
+           if ws-add-edit-return-code not = zero then 
+           *> TODO : display error messages better.
+               display 
+                   "Failed to create new list item." upon syserr 
+               end-display 
+      
+           else 
+               move ws-cur-num-list-items to ws-selected-idx
+               perform save-list-item-record
+               add 1 to ws-cur-num-list-items  
+           end-if        
+
+           exit paragraph.
+
+
+
+       edit-item.
+
+             *> TODO:             
+             *>        Return code validation code duplication needs to 
+             *>        be refactored.
+           move 1 to ws-add-edit-return-code
+           
+           display "Item ID to edit: " at 1901
+           accept ws-selected-idx update at 1918
+                      
+           open i-o fd-item-list-data
+               move ws-selected-idx to f-item-id 
+               read fd-item-list-data 
+                   into ws-item-list-data-record(ws-selected-idx)
+                   invalid key 
+                       display "Invalid index:" at 2001
+                       move 9 to ws-add-edit-return-code
+                   not invalid key                                    
+                       call "add-edit-item" using 
+                           ws-item-list-data-record(ws-selected-idx)
+                           ws-add-edit-return-code
+                       end-call 
+               end-read 
+           close fd-item-list-data
+               
+           if ws-add-edit-return-code not = zero then                    
+               display "Failed to edit list item." upon syserr                            
+           else                            
+               perform save-list-item-record                      
+           end-if                       
+
+           exit paragraph.
+
+
+
+       delete-item.
+           display "Item ID to delete: " at 1901
+           accept ws-selected-idx update at 1922
+           
+           open i-o fd-item-list-data
+               move ws-selected-idx to f-item-id
+               delete fd-item-list-data record 
+                   invalid key 
+                       display "Item does not exist." 2001
+                   not invalid key
+                       display "Item deleted." at 2001
+                       perform load-item-list
+               end-delete
            close fd-item-list-data
 
-           exit paragraph.    
+           exit paragraph.
 
 
        generate-test-data.
