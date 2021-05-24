@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2021-05-24
       *> Purpose: COBOL Rogulike engine main entry point.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -118,7 +118,7 @@
        
        01  ws-enemy-found-idx           pic 99 comp.
 
-       01  ws-enemy-exp-temp            pic 9(7) comp.
+       01  ws-enemy-exp-disp            pic z(7).
 
        01  ws-enemy-temp-pos.
            05  ws-enemy-temp-y          pic 99.
@@ -657,10 +657,13 @@
                if ws-enemy-hp-current(ws-enemy-idx) <= 0 then                     
                    set ws-enemy-status-dead(ws-enemy-idx) to true 
 
+                   move ws-enemy-exp-worth(ws-enemy-idx) 
+                       to ws-enemy-exp-disp
+
                    move function concatenate(                       
                        function trim(ws-enemy-name(ws-enemy-idx)), 
                        " expires giving ",
-                       ws-enemy-exp-worth(ws-enemy-idx), 
+                       function trim(ws-enemy-exp-disp), 
                        " experience points."
                    ) to ws-action-history-temp
 
@@ -670,21 +673,19 @@
 
            *>Add exp and level up as needed.
            *> TODO : Move this to its own thing...
-           *> TODO : Temp not needed
            *> TODO : Keep track of kill total?
 
-                   move ws-enemy-exp-worth(ws-enemy-idx) 
-                       to ws-enemy-exp-temp
-
-                   if ws-enemy-exp-temp >= ws-player-exp-next-lvl then 
+                   if ws-enemy-exp-worth(ws-enemy-idx) >= 
+                   ws-player-exp-next-lvl then 
                        move zero to ws-player-exp-next-lvl
                    else
-                       subtract ws-enemy-exp-temp from 
+                       subtract ws-enemy-exp-worth(ws-enemy-idx) from 
                            ws-player-exp-next-lvl
                        end-subtract
                    end-if 
 
-                   add ws-enemy-exp-temp to ws-player-exp-total                   
+                   add ws-enemy-exp-worth(ws-enemy-idx) 
+                       to ws-player-exp-total                   
 
                *>If leveled up, update stats and log it.
                    if ws-player-exp-next-lvl = 0 then 

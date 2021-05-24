@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-25
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2021-05-24
       *> Purpose: Module for engine to display action history to the 
       *>          screen. (Called from display-dynamic-screen-data)
       *> Tectonics:
@@ -19,13 +19,15 @@
        78  ws-max-entries               value 10.
        78  ws-draw-row-start            value 21.
 
+       01  ws-line-mask                 pic x(50) value spaces.
+
        local-storage section.
 
        01  ls-counter                   pic 99 comp.
 
        01  ls-draw-pos.
            05  ls-draw-y                pic 99.
-           05  ls-draw-x                pic 99.
+           05  ls-draw-x                pic 99.       
 
        linkage section.
 
@@ -42,6 +44,7 @@
            from ws-max-entries by -1 until ls-counter = 0
            
                if l-action-history-text(ls-counter) not = spaces then 
+                   display ws-line-mask at ls-draw-pos
                    display l-action-history-text(ls-counter) 
                        at ls-draw-pos 
                    end-display 
