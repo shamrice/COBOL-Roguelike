@@ -140,10 +140,6 @@
 
        01  ws-load-return-code          pic 9.
        01  ws-save-return-code          pic 9.
-       
-       01  ws-load-map-sw               pic a value 'N'.
-           88  ws-load-map              value 'Y'.
-           88  ws-not-load-map          value 'N'.
 
        01  ws-command-line-buffer       pic x(1024).
 
