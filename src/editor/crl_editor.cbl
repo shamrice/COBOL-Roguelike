@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-17
+      *> Last Updated: 2021-05-24
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -141,6 +141,11 @@
        01  ws-load-return-code          pic 9.
        01  ws-save-return-code          pic 9.
        
+       01  ws-load-map-sw               pic a value 'N'.
+           88  ws-load-map              value 'Y'.
+           88  ws-not-load-map          value 'N'.
+
+       01  ws-command-line-buffer       pic x(1024).
 
        procedure division.
        
@@ -169,9 +174,38 @@
            accept ws-temp-time from time 
            move function random(ws-temp-time) to ws-filler
 
-           perform generate-init-world-data.
+        *> load map passed to command line if one is present.
+           accept ws-command-line-buffer from command-line 
+           if ws-command-line-buffer not = spaces then 
+               move function upper-case(
+                   function trim(ws-command-line-buffer)) to 
+                   ws-map-name
+               move ws-map-name to ws-map-name-temp 
 
+               perform set-file-names
 
+               call "load-map-data" using 
+                   ws-map-files ws-tile-map-table-matrix 
+                   ws-enemy-data ws-teleport-data
+                   ws-item-data 
+                   ws-load-return-code
+               end-call 
+
+               if ws-load-return-code not = 0 then 
+                   display "Error loading: " at 0201 ws-map-name at 0225
+                   accept ws-kb-input at 2101
+                   move ws-map-name-temp to ws-map-name 
+                   goback
+               end-if                 
+           
+           else 
+               perform generate-init-world-data
+               perform set-file-names
+           end-if 
+               
+           perform main-procedure.
+
+          
        set-file-names.
       *> Set file names based on map name
            move function concatenate(
@@ -188,7 +222,6 @@
            
            exit paragraph.
          
-
 
        main-procedure.  
 
@@ -644,6 +677,7 @@
            display "Tile placed at:" at 2501 ws-temp-map-pos at 2517
 
            exit paragraph.
+
 
 
       *> Called from place item at cursor or mouse!!! not directly!!!
