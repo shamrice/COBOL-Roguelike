@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-27
+      *> Last Updated: 2021-05-28
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -275,6 +275,14 @@
                when COB-SCR-F1 
                    call "display-help"
                    set ws-scr-refresh to true 
+
+               when COB-SCR-F2
+                   perform write-world-data 
+                   exit paragraph *> to avoid kb-input from being processed.
+
+               when COB-SCR-F3
+                   perform load-map-data
+                   exit paragraph 
 
                when COB-SCR-F6 
                    if ws-display-mode-effects then 
@@ -551,9 +559,7 @@
            accept ws-map-name at 2120 update upper
            display ws-line-mask at 2101
            
-           if ws-map-name not = spaces 
-           and ws-map-name not = ws-map-name-temp then 
-               
+           if ws-map-name not = spaces then 
                               
                call "load-map-data" using 
                    ws-map-files ws-tile-map-table-matrix 

@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-17
-      *> Last Updated: 2021-05-17
+      *> Last Updated: 2021-05-28
       *> Purpose: Displays the editor help screen
       *> Tectonics:
       *>     ./build_editor.sh
@@ -38,12 +38,12 @@
                "    f/g - set fore/background tile color" at 0601
                "      h - toggle fg tile highlight" at 0701
                "      k - toggle blinking tiles" at 0801
-               "      l - load map data" at 0901
-               "      o - save map data" at 1001
-               "  esc/q - quit editor" at 1101
-               "  space - place tile or enemy" at 1201
-               "    tab - toggle tile/enemy placement mode" at 1301
-               "     F1 - display this help screen." at 1401
+               "  esc/q - quit editor" at 0901
+               "  space - place tile or enemy" at 1001
+               "    tab - toggle tile/enemy placement mode" at 1101
+               "     F1 - display this help screen." at 1201
+               "   o/F2 - save map data" at 1301               
+               "   l/F3 - load map data" at 1401               
                "     F6 - toggle tile effect view on/off." at 1501
            end-display 
 
