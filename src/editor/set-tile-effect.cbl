@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-12
-      *> Last Updated: 2021-05-16
+      *> Last Updated: 2021-05-27
       *> Purpose: Sets up tile effect data based on tile effect id.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -59,8 +59,24 @@
 
            evaluate l-cursor-draw-effect
 
+               when ws-no-tile-effect-id
+                   move ws-no-tile-effect-id to l-cur-tile-effect-id              
+
                when ws-teleport-effect-id
                    perform set-teleport
+
+               when ws-conveyor-right-effect-id
+                   perform set-conveyor-right
+
+               when ws-conveyor-down-effect-id
+                   perform set-conveyor-down
+
+               when ws-conveyor-left-effect-id
+                   perform set-conveyor-left
+
+               when ws-conveyor-up-effect-id
+                   perform set-conveyor-up
+
 
                when other 
                    display "Not implemented" at 2525
@@ -129,11 +145,28 @@
                    "Teleport placed at:" at 2401 
                    l-teleport-pos(l-cur-num-teleports) at 2417                  
                end-display
-           end-if 
-
-  
-             
+           end-if    
 
            exit paragraph.
            
+
+       set-conveyor-right.
+           move ws-conveyor-right-effect-id to l-cur-tile-effect-id
+           exit paragraph.
+
+
+       set-conveyor-down.
+           move ws-conveyor-down-effect-id to l-cur-tile-effect-id
+           exit paragraph.
+
+       set-conveyor-left.
+           move ws-conveyor-left-effect-id to l-cur-tile-effect-id
+           exit paragraph.
+
+
+       set-conveyor-up.
+           move ws-conveyor-up-effect-id to l-cur-tile-effect-id
+           exit paragraph.
+
+
        end program set-tile-effect.

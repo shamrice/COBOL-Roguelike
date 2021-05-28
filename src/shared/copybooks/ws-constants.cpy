@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-11
+      *> Last Updated: 2021-05-27
       *> Purpose: Shared copy book with working storage definition of
       *>          variable constants.
       *> Tectonics:
@@ -19,8 +19,13 @@
        01  yellow                         constant as 6.  
        01  white                          constant as 7.
 
-      *> Tile effect ids           
+      *> Tile effect ids       
+       78  ws-no-tile-effect-id           value 0.    
        78  ws-teleport-effect-id          value 1.
+       78  ws-conveyor-right-effect-id    value 2.
+       78  ws-conveyor-down-effect-id     value 3.
+       78  ws-conveyor-left-effect-id     value 4.
+       78  ws-conveyor-up-effect-id       value 5.
 
        78  ws-load-map-return-code        value 1.
 

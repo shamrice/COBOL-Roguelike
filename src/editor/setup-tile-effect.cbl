@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-12
-      *> Last Updated: 2021-05-16
+      *> Last Updated: 2021-05-27
       *> Purpose: Sets up tile effect data based on tile effect id.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -48,8 +48,20 @@
 
            evaluate l-cursor-tile-effect-id
 
+               when ws-no-tile-effect-id
+                   goback
+
                when ws-teleport-effect-id
                    perform setup-teleport
+
+               when ws-conveyor-right-effect-id
+                   display "Conveyor belt right." at 2101
+               when ws-conveyor-down-effect-id
+                   display "Conveyor belt down." at 2101
+               when ws-conveyor-left-effect-id
+                   display "Conveyor belt left." at 2101
+               when ws-conveyor-up-effect-id
+                   display "Conveyor belt up." at 2101
 
                when other 
                    display ws-blank-line at 2101

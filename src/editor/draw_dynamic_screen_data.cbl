@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-05-16
+      *> Last Updated: 2021-05-27
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -100,6 +100,14 @@
                                        move '.' to ws-char-to-draw
                                    when ws-teleport-effect-id 
                                        move "T" to ws-char-to-draw
+                                   when ws-conveyor-right-effect-id
+                                       move ">" to ws-char-to-draw
+                                   when ws-conveyor-down-effect-id
+                                       move "v" to ws-char-to-draw
+                                   when ws-conveyor-left-effect-id
+                                       move "<" to ws-char-to-draw
+                                   when ws-conveyor-up-effect-id
+                                       move "^" to ws-char-to-draw                                                                                                                     
                                    when other 
                                        move "U" to ws-char-to-draw 
                                    end-evaluate
@@ -237,15 +245,30 @@
                l-cursor-draw-effect at 1971               
            end-display 
            
+
+           *>TODO : there is code duplication here with tile info with 
+           *>       just a difference of 10+ rows in display location. 
            evaluate l-cursor-draw-effect
                when zero 
-                   display "(NONE)    " at 1974
+                   display "(NONE)          " at 1974
                
                when ws-teleport-effect-id
-                   display "(TELEPORT)" at 1974
-                   
+                   display "(TELEPORT)      " at 1974
+
+               when ws-conveyor-right-effect-id
+                   display "(CONVEYOR RIGHT)" at 1974 
+
+               when ws-conveyor-down-effect-id
+                   display "(CONVEYOR DOWN) " at 1974 
+
+               when ws-conveyor-left-effect-id
+                   display "(CONVEYOR LEFT) " at 1974 
+
+               when ws-conveyor-up-effect-id
+                   display "(CONVEYOR UP)   " at 1974                                                          
+
                when other 
-                   display "(UNKNOWN) " at 1974
+                   display "(UNKNOWN)       " at 1974
            end-evaluate           
            
            display "      Visibility: " at 2053
@@ -262,10 +285,10 @@
 
            display "Enemy to Place:" at 1260 underline highlight           
 
-           display "      Enemy name: " at 1353 
+           display "      Enemy name:            " at 1353 
            display l-cursor-enemy-name at 1371
 
-           display " Enemy character: " at 1453            
+           display " Enemy character:            " at 1453            
            display 
                l-cursor-enemy-char at 1471
                foreground-color l-cursor-enemy-color
@@ -364,13 +387,25 @@
 
            evaluate ws-disp-tile-effect-id
                when zero 
-                   display "(NONE)    " at 0974
+                   display "(NONE)          " at 0974
                
                when ws-teleport-effect-id
-                   display "(TELEPORT)" at 0974
-                   
+                   display "(TELEPORT)      " at 0974
+
+               when ws-conveyor-right-effect-id
+                   display "(CONVEYOR RIGHT)" at 0974 
+
+               when ws-conveyor-down-effect-id
+                   display "(CONVEYOR DOWN) " at 0974 
+
+               when ws-conveyor-left-effect-id
+                   display "(CONVEYOR LEFT) " at 0974 
+
+               when ws-conveyor-up-effect-id
+                   display "(CONVEYOR UP)   " at 0974                                                          
+
                when other 
-                   display "(UNKNOWN) " at 0974
+                   display "(UNKNOWN)       " at 0974
            end-evaluate  
 
            display space at 0373 background-color ws-disp-tile-fg

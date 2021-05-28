@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-24
+      *> Last Updated: 2021-05-27
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -102,6 +102,8 @@
                88  ws-cursor-type-tile             value 'T'.
                88  ws-cursor-type-enemy            value 'E'.                                                      
            78  ws-cursor-char             value "+".
+
+       01  ws-draw-effect-temp            pic 99.
 
 
        01  ws-kb-input                    pic x.
@@ -519,13 +521,17 @@
 
 
        set-effect-id. 
+           move ws-cursor-draw-effect to ws-draw-effect-temp
            display "Tile effect id: " at 2101
-           display "[Zero to clear]" at 2122
+           display "[99 to cancel]" at 2122
            accept ws-cursor-draw-effect at 2117 update 
 
-           if ws-cursor-draw-effect > 0 then 
+           if ws-cursor-draw-effect not = 99 then 
                call "setup-tile-effect" using 
                    ws-cursor-draw-effect ws-cursor-teleport-settings
+           else 
+               *> revert input 
+               move ws-draw-effect-temp to ws-cursor-draw-effect
            end-if 
 
            set ws-scr-refresh to true 
@@ -660,15 +666,14 @@
            move ws-cursor-draw-visibility
                to ws-tile-visibility(
                    ws-temp-map-pos-y, ws-temp-map-pos-x)
-
-           if ws-cursor-draw-effect > 0 then 
-               call "set-tile-effect" using
-                   ws-temp-map-pos
-                   ws-tile-effect-id(
-                       ws-temp-map-pos-y, ws-temp-map-pos-x)
-                   ws-cursor ws-teleport-data 
-               end-call 
-           end-if 
+            
+           call "set-tile-effect" using
+               ws-temp-map-pos
+               ws-tile-effect-id(
+                   ws-temp-map-pos-y, ws-temp-map-pos-x)
+               ws-cursor ws-teleport-data 
+           end-call 
+           
 
            display "Tile placed at:" at 2501 ws-temp-map-pos at 2517
 

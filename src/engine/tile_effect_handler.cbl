@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-08
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2021-05-27
       *> Purpose: Module for engine used to handle what happens when the
       *>          player steps on a tile that has a tile effect.
       *> Tectonics:
@@ -58,6 +58,18 @@
                when ws-teleport-effect-id
                    perform check-teleport
 
+               when ws-conveyor-right-effect-id
+                   perform handle-conveyor-right
+
+               when ws-conveyor-down-effect-id
+                   perform handle-conveyor-down
+
+               when ws-conveyor-left-effect-id
+                   perform handle-conveyor-left
+
+               when ws-conveyor-up-effect-id
+                   perform handle-conveyor-up
+
            end-evaluate
 
            goback.
@@ -102,5 +114,27 @@
                    to l-tile-effect-return-code                   
            end-if    
            exit paragraph.    
+
+
+
+       handle-conveyor-right.
+           add 1 to l-player-x
+           exit paragraph.
+
+
+       handle-conveyor-down.
+           add 1 to l-player-y
+           exit paragraph.
+
+
+       handle-conveyor-left.
+           subtract 1 from l-player-x
+           exit paragraph.
+
+
+       handle-conveyor-up.
+           subtract 1 from l-player-y
+           exit paragraph.           
+
 
        end program tile-effect-handler.
