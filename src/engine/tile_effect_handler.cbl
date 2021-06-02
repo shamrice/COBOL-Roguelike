@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-08
-      *> Last Updated: 2021-05-27
+      *> Last Updated: 2021-06-02
       *> Purpose: Module for engine used to handle what happens when the
       *>          player steps on a tile that has a tile effect.
       *> Tectonics:
@@ -18,14 +18,23 @@
        
        copy "shared/copybooks/ws-constants.cpy".
 
-       01  ws-tele-idx                    pic 999 comp.
+       01  ws-tele-idx                   pic 999 comp.
+       01  ws-idx-y                      pic 999 comp.
+       01  ws-idx-x                      pic 999 comp.
+
+       01  ws-color-temp              pic 9.
+
+       01  ws-swap-colors-sw             pic a value 'N'.
+           88  ws-swap-colors            value 'Y'.
+           88  ws-not-swap-colors        value 'N'.
 
        local-storage section.
-
   
        linkage section.
 
-       01  l-tile-effect-id               pic 99 comp.
+       01  l-tile-effect-id-src               pic 99 comp.
+
+       01  l-tile-char-src                    pic x.
 
        copy "engine/copybooks/l-player.cpy".
 
@@ -37,23 +46,32 @@
 
        copy "engine/copybooks/l-map-files.cpy".
 
+       copy "shared/copybooks/l-tile-map-table-matrix.cpy".
+
        01  l-tile-effect-return-code      pic 99.
       
+       01  l-player-moved-sw              pic a.
+           88  l-player-moved             value 'Y'.
+           88  l-player-not-moved         value 'N'.
 
        procedure division using 
-           l-tile-effect-id l-player l-temp-map-pos
+           l-tile-effect-id-src 
+           l-tile-char-src
+           l-player l-temp-map-pos
            l-teleport-data l-map-files 
+           l-tile-map-table-matrix
+           l-player-moved-sw
            l-tile-effect-return-code.
 
        main-procedure.
 
            move zeros to l-tile-effect-return-code
 
-           if l-tile-effect-id is zeros then 
+           if l-tile-effect-id-src is zeros then 
                goback
            end-if 
-
-           evaluate l-tile-effect-id
+                  
+           evaluate l-tile-effect-id-src
 
                when ws-teleport-effect-id
                    perform check-teleport
@@ -67,9 +85,15 @@
                when ws-conveyor-left-effect-id
                    perform handle-conveyor-left
 
-               when ws-conveyor-up-effect-id
+               when ws-conveyor-up-effect-id                   
                    perform handle-conveyor-up
-
+                   
+               when ws-conveyor-reverse-effect-id 
+               *>Only check switch when player steps on it.
+                   if l-player-moved then                   
+                       perform handle-conveyor-reverse-switch
+                   end-if 
+                   
            end-evaluate
 
            goback.
@@ -116,25 +140,92 @@
            exit paragraph.    
 
 
-
-       handle-conveyor-right.
-           add 1 to l-player-x
+       handle-conveyor-right.           
+           add 1 to l-player-x              
            exit paragraph.
 
 
-       handle-conveyor-down.
+       handle-conveyor-down.           
            add 1 to l-player-y
            exit paragraph.
 
 
-       handle-conveyor-left.
-           subtract 1 from l-player-x
+       handle-conveyor-left.           
+           subtract 1 from l-player-x          
            exit paragraph.
 
 
-       handle-conveyor-up.
-           subtract 1 from l-player-y
+       handle-conveyor-up.           
+           subtract 1 from l-player-y           
            exit paragraph.           
 
+
+       handle-conveyor-reverse-switch.
+
+           if l-tile-char-src = '\' then 
+               move '/' to l-tile-char-src
+           else 
+               move '\' to l-tile-char-src
+           end-if            
+
+      *>Find conveyor belts, flip their effect id, character and 
+      *>swap the fg and bg colors.
+           perform varying ws-idx-y 
+           from 1 by 1 until ws-idx-y > ws-max-map-height
+               perform varying ws-idx-x 
+               from 1 by 1 until ws-idx-x > ws-max-map-width                   
+
+                   set ws-not-swap-colors to true 
+
+                   evaluate l-tile-effect-id(ws-idx-y, ws-idx-x)
+
+                       when ws-conveyor-right-effect-id
+                           move '<' to l-tile-char(ws-idx-y, ws-idx-x)
+                           move ws-conveyor-left-effect-id
+                               to l-tile-effect-id(ws-idx-y, ws-idx-x)
+                           set ws-swap-colors to true 
+
+                       when ws-conveyor-down-effect-id
+                           move '^' to l-tile-char(ws-idx-y, ws-idx-x)
+                           move ws-conveyor-up-effect-id
+                               to l-tile-effect-id(ws-idx-y, ws-idx-x)
+                           set ws-swap-colors to true 
+
+                       when ws-conveyor-left-effect-id
+                           move '>' to l-tile-char(ws-idx-y, ws-idx-x)
+                           move ws-conveyor-right-effect-id
+                               to l-tile-effect-id(ws-idx-y, ws-idx-x)
+                           set ws-swap-colors to true 
+
+                       when ws-conveyor-up-effect-id
+                           move 'v' to l-tile-char(ws-idx-y, ws-idx-x)
+                           move ws-conveyor-down-effect-id
+                               to l-tile-effect-id(ws-idx-y, ws-idx-x)
+                           set ws-swap-colors to true 
+
+                   end-evaluate
+
+                   if ws-swap-colors then 
+                       move l-tile-bg(ws-idx-y, ws-idx-x) 
+                           to ws-color-temp
+                       move l-tile-fg(ws-idx-y, ws-idx-x)
+                           to l-tile-bg(ws-idx-y, ws-idx-x) 
+                       move ws-color-temp
+                           to l-tile-fg(ws-idx-y, ws-idx-x)
+
+           *> TODO: decide if to keep blink toggle
+                       if l-tile-is-blinking(ws-idx-y, ws-idx-x) then 
+                           set l-tile-not-blinking(ws-idx-y, ws-idx-x)
+                               to true
+                       else
+                           set l-tile-is-blinking(ws-idx-y, ws-idx-x)
+                               to true
+                       end-if  
+                   end-if 
+
+               end-perform
+           end-perform
+           
+           exit paragraph.
 
        end program tile-effect-handler.

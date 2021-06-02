@@ -68,8 +68,10 @@
                   
                when ws-conveyor-up-effect-id
                    move "^" to l-cursor-draw-char
-              
 
+               when ws-conveyor-reverse-effect-id
+                   move "\" to l-cursor-draw-char
+              
                when other 
                    display ws-blank-line at 2101
                    display "Not implemented. Press any key." at 2101

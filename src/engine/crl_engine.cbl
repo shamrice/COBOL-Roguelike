@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-24
+      *> Last Updated: 2021-06-02
       *> Purpose: COBOL Rogulike engine main entry point.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -142,7 +142,7 @@
 
        01  ws-temp-map-pos.
            05  ws-temp-map-pos-y        pic S99.
-           05  ws-temp-map-pos-x        pic S99.
+           05  ws-temp-map-pos-x        pic S99.    
 
        01  ws-filler                    pic 9(9).
 
@@ -155,6 +155,10 @@
        01  ws-load-return-code          pic 9.
 
        01  ws-tile-effect-return-code   pic 99.
+
+       01  ws-player-moved-sw           pic a value 'N'.
+           88  ws-player-moved          value 'Y'.
+           88  ws-player-not-moved      value 'N'.
 
 
       *> Currently unused.
@@ -230,6 +234,19 @@
 
            *> reset explored areas on loaded map.
            initialize ws-map-explored-data
+
+           *>set start area as explored.           
+           move ws-player-pos to ws-temp-map-pos
+           add ws-player-scr-y to ws-temp-map-pos-y
+           add ws-player-scr-x to ws-temp-map-pos-x  
+
+           call "set-map-exploration" using 
+               ws-map-explored-data, ws-temp-map-pos,
+               ws-tile-visibility(
+                   ws-temp-map-pos-y, ws-temp-map-pos-x)
+           end-call 
+
+           perform draw-playfield 
            .
 
        main-procedure.
@@ -238,12 +255,12 @@
 
       *         move function current-date to ws-current-date-data
       *         move ws-current-millisecond to ws-start-frame
-                               
-               perform draw-playfield                              
-               perform get-input                              
-               perform move-player  
+                                                                           
+               perform get-input                           
+               perform move-player                 
                perform move-enemy                       
-               
+               perform draw-playfield 
+
            end-perform
 
            if ws-player-status-dead then 
@@ -352,61 +369,64 @@
 
 
        move-player.
-           
-           if ws-player-pos-delta <> 0 then 
 
       *> only move player if tile is not blocking and inside map.
-               move ws-player-pos to ws-temp-map-pos
-               add ws-player-scr-y to ws-temp-map-pos-y
-               add ws-player-scr-x to ws-temp-map-pos-x
-               add ws-player-pos-delta-y to ws-temp-map-pos-y
-               add ws-player-pos-delta-x to ws-temp-map-pos-x               
+           move ws-player-pos to ws-temp-map-pos
+           add ws-player-scr-y to ws-temp-map-pos-y
+           add ws-player-scr-x to ws-temp-map-pos-x             
+           add ws-player-pos-delta-y to ws-temp-map-pos-y               
+           add ws-player-pos-delta-x to ws-temp-map-pos-x               
             
+           if ws-temp-map-pos-y >= ws-max-map-height 
+               or ws-temp-map-pos-x >= ws-max-map-width
+               or ws-temp-map-pos-y <= 0 or ws-temp-map-pos-x <= 0 
+           then
+               *> Catch out of bounds.
+               move zeros to ws-player-pos-delta
+               exit paragraph
+           end-if 
 
-               if ws-temp-map-pos-y >= ws-max-map-height 
-                  or ws-temp-map-pos-x >= ws-max-map-width
-                  or ws-temp-map-pos-y <= 0 or ws-temp-map-pos-x <= 0 
-               then
-                   *> Catch out of bounds.
-                   move zeros to ws-player-pos-delta
-                   exit paragraph
-               end-if 
-
-               move zero to ws-enemy-found-idx
+           move zero to ws-enemy-found-idx
 
            *>Check if enemy is there and not dead, if so attack it.
-               perform varying ws-enemy-idx 
-               from 1 by 1 until ws-enemy-idx > ws-cur-num-enemies
-                   if ws-enemy-y(ws-enemy-idx) = ws-temp-map-pos-y 
-                   and ws-enemy-x(ws-enemy-idx) = ws-temp-map-pos-x
-                   and not ws-enemy-status-dead(ws-enemy-idx) 
-                   then 
-                       move ws-enemy-idx to ws-enemy-found-idx
-                       perform player-attack
-                       exit perform
-                   end-if 
-               end-perform 
+           perform varying ws-enemy-idx 
+           from 1 by 1 until ws-enemy-idx > ws-cur-num-enemies
+               if ws-enemy-y(ws-enemy-idx) = ws-temp-map-pos-y 
+               and ws-enemy-x(ws-enemy-idx) = ws-temp-map-pos-x
+               and not ws-enemy-status-dead(ws-enemy-idx) 
+               then 
+                   move ws-enemy-idx to ws-enemy-found-idx
+                   perform player-attack
+                   exit perform
+               end-if 
+           end-perform 
 
            *>If no enemy and tile isn't blocking. move player there.
-               if ws-enemy-found-idx = 0 and ws-tile-not-blocking(
-                   ws-temp-map-pos-y, ws-temp-map-pos-x)                
-               then                          
-                   add ws-player-pos-delta-x to ws-player-x
-                   add ws-player-pos-delta-y to ws-player-y
+           if ws-enemy-found-idx = 0 and ws-tile-not-blocking(
+               ws-temp-map-pos-y, ws-temp-map-pos-x)                
+           then                          
+               add ws-player-pos-delta-x to ws-player-x
+               add ws-player-pos-delta-y to ws-player-y
 
-                   *>set area as explored.
-                   call "set-map-exploration" using 
-                       ws-map-explored-data, ws-temp-map-pos,
-                       ws-tile-visibility(
-                           ws-temp-map-pos-y, ws-temp-map-pos-x)
-                   end-call 
+               *>set area as explored.
+               call "set-map-exploration" using 
+                   ws-map-explored-data, ws-temp-map-pos,
+                   ws-tile-visibility(
+                       ws-temp-map-pos-y, ws-temp-map-pos-x)
+               end-call 
 
+               if ws-player-pos-delta not zeros then
+                   set ws-player-moved to true 
+               else 
+                   set ws-player-not-moved to true   
                end-if
-
+           
                perform check-tile-effect
 
-           end-if
+           end-if                            
+           
            move zeros to ws-player-pos-delta
+
            exit paragraph.
 
 
@@ -414,7 +434,10 @@
 
            call "tile-effect-handler" using
                ws-tile-effect-id(ws-temp-map-pos-y, ws-temp-map-pos-x) 
-               ws-player ws-temp-map-pos ws-teleport-data ws-map-files 
+               ws-tile-char(ws-temp-map-pos-y, ws-temp-map-pos-x)
+               ws-player ws-temp-map-pos ws-teleport-data ws-map-files
+               ws-tile-map-table-matrix
+               ws-player-moved-sw 
                ws-tile-effect-return-code
            end-call
 

@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-10
-      *> Last Updated: 2021-05-27
+      *> Last Updated: 2021-06-02
       *> Purpose: Module to draw data passed to the screen.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -107,7 +107,9 @@
                                    when ws-conveyor-left-effect-id
                                        move "<" to ws-char-to-draw
                                    when ws-conveyor-up-effect-id
-                                       move "^" to ws-char-to-draw                                                                                                                     
+                                       move "^" to ws-char-to-draw   
+                                   when ws-conveyor-reverse-effect-id
+                                       move "R" to ws-char-to-draw                                                                                                                  
                                    when other 
                                        move "U" to ws-char-to-draw 
                                    end-evaluate
@@ -267,6 +269,9 @@
                when ws-conveyor-up-effect-id
                    display "(CONVEYOR UP)   " at 1974                                                          
 
+               when ws-conveyor-reverse-effect-id
+                   display "(CON REV SWITCH)" at 1974
+
                when other 
                    display "(UNKNOWN)       " at 1974
            end-evaluate           
@@ -403,6 +408,9 @@
 
                when ws-conveyor-up-effect-id
                    display "(CONVEYOR UP)   " at 0974                                                          
+
+               when ws-conveyor-reverse-effect-id
+                   display "(CON REV SWITCH)" at 0974
 
                when other 
                    display "(UNKNOWN)       " at 0974

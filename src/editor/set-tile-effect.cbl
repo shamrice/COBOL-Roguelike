@@ -77,6 +77,8 @@
                when ws-conveyor-up-effect-id
                    perform set-conveyor-up
 
+               when ws-conveyor-reverse-effect-id
+                   perform set-conveyor-reverse
 
                when other 
                    display "Not implemented" at 2525
@@ -168,5 +170,8 @@
            move ws-conveyor-up-effect-id to l-cur-tile-effect-id
            exit paragraph.
 
+       set-conveyor-reverse.
+           move ws-conveyor-reverse-effect-id to l-cur-tile-effect-id
+           exit paragraph.
 
        end program set-tile-effect.

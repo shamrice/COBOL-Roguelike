@@ -1,7 +1,7 @@
       *>****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-07
-      *> Last Updated: 2021-05-27
+      *> Last Updated: 2021-06-02
       *> Purpose: Shared copy book with working storage definition of
       *>          variable constants.
       *> Tectonics:
@@ -26,6 +26,7 @@
        78  ws-conveyor-down-effect-id     value 3.
        78  ws-conveyor-left-effect-id     value 4.
        78  ws-conveyor-up-effect-id       value 5.
+       78  ws-conveyor-reverse-effect-id  value 6.
 
        78  ws-load-map-return-code        value 1.
 
