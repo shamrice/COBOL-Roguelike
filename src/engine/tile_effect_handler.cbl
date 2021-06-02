@@ -28,13 +28,17 @@
            88  ws-swap-colors            value 'Y'.
            88  ws-not-swap-colors        value 'N'.
 
+       
        local-storage section.
-  
+       
+       01  ls-action-history-temp          pic x(50).      
+
+
        linkage section.
 
-       01  l-tile-effect-id-src               pic 99 comp.
+       01  l-tile-effect-id-src            pic 99 comp.
 
-       01  l-tile-char-src                    pic x.
+       01  l-tile-char-src                 pic x.       
 
        copy "engine/copybooks/l-player.cpy".
 
@@ -54,6 +58,8 @@
            88  l-player-moved             value 'Y'.
            88  l-player-not-moved         value 'N'.
 
+       copy "engine/copybooks/l-action-history.cpy".
+
        procedure division using 
            l-tile-effect-id-src 
            l-tile-char-src
@@ -61,6 +67,7 @@
            l-teleport-data l-map-files 
            l-tile-map-table-matrix
            l-player-moved-sw
+           l-action-history
            l-tile-effect-return-code.
 
        main-procedure.
@@ -164,9 +171,17 @@
 
            if l-tile-char-src = '\' then 
                move '/' to l-tile-char-src
+               move "Switch pressed. Conveyor belt direction: REVERSE"
+                   to ls-action-history-temp
            else 
                move '\' to l-tile-char-src
-           end-if            
+               move "Switch pressed. Conveyor belt direction: FORWARD"
+                   to ls-action-history-temp
+           end-if   
+
+           call "add-action-history-item" using
+               ls-action-history-temp l-action-history
+           end-call                         
 
       *>Find conveyor belts, flip their effect id, character and 
       *>swap the fg and bg colors.

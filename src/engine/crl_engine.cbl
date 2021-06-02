@@ -383,6 +383,7 @@
            then
                *> Catch out of bounds.
                move zeros to ws-player-pos-delta
+               set ws-player-not-moved to true 
                exit paragraph
            end-if 
 
@@ -438,6 +439,7 @@
                ws-player ws-temp-map-pos ws-teleport-data ws-map-files
                ws-tile-map-table-matrix
                ws-player-moved-sw 
+               ws-action-history
                ws-tile-effect-return-code
            end-call
 
