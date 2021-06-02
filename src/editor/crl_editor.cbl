@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-05-28
+      *> Last Updated: 2021-06-02
       *> Purpose: Map editor for the game
       *> Tectonics:
       *>     ./build_editor.sh
@@ -537,6 +537,7 @@
            if ws-cursor-draw-effect not = 99 then 
                call "setup-tile-effect" using 
                    ws-cursor-draw-effect ws-cursor-teleport-settings
+                   ws-cursor-draw-char
            else 
                *> revert input 
                move ws-draw-effect-temp to ws-cursor-draw-effect

@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-12
-      *> Last Updated: 2021-05-27
+      *> Last Updated: 2021-06-02
       *> Purpose: Sets up tile effect data based on tile effect id.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -34,15 +34,18 @@
 
        linkage section.
 
-       01  l-cursor-tile-effect-id             pic 99.
+       01  l-cursor-tile-effect-id            pic 99.
 
        01  l-cursor-teleport-settings.
            05  l-cursor-tel-dest-y            pic 99.
            05  l-cursor-tel-dest-x            pic 99.
            05  l-cursor-tel-dest-map          pic x(15).              
 
+       01  l-cursor-draw-char                 pic x.
+
        procedure division using 
-           l-cursor-tile-effect-id l-cursor-teleport-settings.
+           l-cursor-tile-effect-id l-cursor-teleport-settings
+           l-cursor-draw-char.
        
        main-procedure.
 
@@ -55,13 +58,17 @@
                    perform setup-teleport
 
                when ws-conveyor-right-effect-id
-                   display "Conveyor belt right." at 2101
+                   move ">" to l-cursor-draw-char
+   
                when ws-conveyor-down-effect-id
-                   display "Conveyor belt down." at 2101
+                   move "v" to l-cursor-draw-char
+
                when ws-conveyor-left-effect-id
-                   display "Conveyor belt left." at 2101
+                   move "<" to l-cursor-draw-char
+                  
                when ws-conveyor-up-effect-id
-                   display "Conveyor belt up." at 2101
+                   move "^" to l-cursor-draw-char
+              
 
                when other 
                    display ws-blank-line at 2101
