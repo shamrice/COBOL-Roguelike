@@ -185,6 +185,10 @@
 
       *>Find conveyor belts, flip their effect id, character and 
       *>swap the fg and bg colors.
+
+      *> TODO : All switches in the map should be flipped to match 
+      *>        switch direction that was pressed. Otherwise wrong 
+      *>        direction is displayed in action history.
            perform varying ws-idx-y 
            from 1 by 1 until ws-idx-y > ws-max-map-height
                perform varying ws-idx-x 

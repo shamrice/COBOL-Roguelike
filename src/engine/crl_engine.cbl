@@ -584,9 +584,9 @@
 
           *> random roll to see if attack hits.
            compute ws-attack-attempt = function random * 100 + 1
-           display function concatenate("Enemy attack roll: ", 
-               ws-attack-attempt) at 2660
-           end-display
+      *     display function concatenate("Enemy attack roll: ", 
+      *         ws-attack-attempt) at 2660      
+      *     end-display
              
            *> if they miss, note it in the log and leave paragraph
            if ws-attack-attempt > 65 then *>magic numbers...
@@ -653,10 +653,10 @@
            and not ws-enemy-status-dead(ws-enemy-idx) then
 
           *> random roll to see if attack hits.
-               compute ws-attack-attempt = function random * 100 + 1
-               display function concatenate("Player attack roll: ",
-                   ws-attack-attempt) at 2560
-               end-display
+               compute ws-attack-attempt = function random * 100 + 1      
+      *         display function concatenate("Player attack roll: ",
+      *             ws-attack-attempt) at 2560
+      *         end-display
 
                *> for some reason this doesn't always roll high enough??
 
