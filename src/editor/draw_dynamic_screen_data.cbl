@@ -109,7 +109,9 @@
                                    when ws-conveyor-up-effect-id
                                        move "^" to ws-char-to-draw   
                                    when ws-conveyor-reverse-effect-id
-                                       move "R" to ws-char-to-draw                                                                                                                  
+                                       move "R" to ws-char-to-draw   
+                                   when ws-player-start-effect-id
+                                       move "S" to ws-char-to-draw                                                                                                               
                                    when other 
                                        move "U" to ws-char-to-draw 
                                    end-evaluate
@@ -272,6 +274,9 @@
                when ws-conveyor-reverse-effect-id
                    display "(CON REV SWITCH)" at 1974
 
+               when ws-player-start-effect-id
+                   display "(PLAYER START)  " at 1974
+
                when other 
                    display "(UNKNOWN)       " at 1974
            end-evaluate           
@@ -411,6 +416,9 @@
 
                when ws-conveyor-reverse-effect-id
                    display "(CON REV SWITCH)" at 0974
+
+               when ws-player-start-effect-id
+                   display "(PLAYER START)  " at 0974                   
 
                when other 
                    display "(UNKNOWN)       " at 0974

@@ -160,6 +160,10 @@
            88  ws-player-moved          value 'Y'.
            88  ws-player-not-moved      value 'N'.
 
+       01  ws-teleport-used-sw          pic a value 'N'.
+           88  ws-teleport-used         value 'Y'.
+           88  ws-teleport-not-used     value 'N'.
+
 
       *> Currently unused.
        01  ws-frame-rate.
@@ -188,9 +192,7 @@
            set environment "COB_TIMEOUT_SCALE" to '3'.
       *     set environment "COB_EXIT_WAIT" to "NO".
 
-       init-setup. 
-           move '0505' to ws-player-pos                         
-
+       init-setup.                          
            display space blank screen 
 
            accept ws-temp-time from time 
@@ -231,6 +233,13 @@
                end-display 
                stop run 
            end-if
+
+           if ws-teleport-not-used then 
+               perform set-player-start-position
+           end-if 
+
+           *> Set teleport switch to false after map load.
+           set ws-teleport-not-used to true 
 
            *> reset explored areas on loaded map.
            initialize ws-map-explored-data
@@ -447,7 +456,8 @@
            end-call
 
            evaluate ws-tile-effect-return-code
-               when ws-load-map-return-code 
+               when ws-load-map-tele-return-code
+                   set ws-teleport-used to true  
                    perform load-tile-map
            end-evaluate
 
@@ -759,6 +769,36 @@
 
            exit paragraph.
            
+
+      *> Sets players start position at start position tile effect. If
+      *> Not found, default start position of 1,1 will be used. 
+       set-player-start-position.
+
+      *> To set a 'actual' 1,1 need to subtract screen coords
+           compute ws-player-y = 1 - ws-player-scr-y 
+           compute ws-player-x = 1 - ws-player-scr-x 
+
+           perform varying ws-counter-1 
+           from 1 by 1 until ws-counter-1 > ws-max-map-height
+               perform varying ws-counter-2 
+               from 1 by 1 until ws-counter-2 > ws-max-map-width
+
+                   if ws-tile-effect-id(ws-counter-1, ws-counter-2)
+                   = ws-player-start-effect-id then
+                       compute ws-player-y = 
+                           ws-counter-1 - ws-player-scr-y
+                       end-compute 
+                       compute ws-player-x =
+                           ws-counter-2 - ws-player-scr-x 
+                       end-compute 
+                       exit paragraph 
+                   end-if 
+
+               end-perform
+           end-perform 
+
+           exit paragraph.
+
 
       *> Debug paragraph to set the full map as explored.
        debug-set-full-map-exploration.

@@ -141,7 +141,7 @@
            *> set return code to load the map.
            if l-map-name-temp not = l-map-name then    
                move l-map-name-temp to l-map-name             
-               move ws-load-map-return-code 
+               move ws-load-map-tele-return-code 
                    to l-tile-effect-return-code                   
            end-if    
            exit paragraph.    

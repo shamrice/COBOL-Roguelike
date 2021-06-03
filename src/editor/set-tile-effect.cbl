@@ -80,6 +80,10 @@
                when ws-conveyor-reverse-effect-id
                    perform set-conveyor-reverse
 
+               when ws-player-start-effect-id
+                   move ws-player-start-effect-id 
+                       to l-cur-tile-effect-id
+
                when other 
                    display "Not implemented" at 2525
 

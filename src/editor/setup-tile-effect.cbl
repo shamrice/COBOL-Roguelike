@@ -71,6 +71,9 @@
 
                when ws-conveyor-reverse-effect-id
                    move "\" to l-cursor-draw-char
+
+               when ws-player-start-effect-id
+                   display "Nothing to set." at 2101
               
                when other 
                    display ws-blank-line at 2101

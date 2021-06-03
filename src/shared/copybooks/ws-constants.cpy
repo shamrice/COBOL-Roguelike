@@ -27,8 +27,9 @@
        78  ws-conveyor-left-effect-id     value 4.
        78  ws-conveyor-up-effect-id       value 5.
        78  ws-conveyor-reverse-effect-id  value 6.
+       78  ws-player-start-effect-id      value 98.
 
-       78  ws-load-map-return-code        value 1.
+       78  ws-load-map-tele-return-code   value 1.
 
        78  ws-max-view-height             value 20.
        78  ws-max-view-width              value 50.

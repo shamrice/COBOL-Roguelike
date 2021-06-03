@@ -68,7 +68,7 @@
                10  ws-cursor-pos-delta-y  pic S99. 
                10  ws-cursor-pos-delta-x  pic S99.
            05  ws-cursor-scr-pos.  
-               10  ws-cursor-scr-y         pic 99 value 10.
+               10  ws-cursor-scr-y         pic 99 value 12.
                10  ws-cursor-scr-x         pic 99 value 20.                      
            05  ws-cursor-color            pic 9 value yellow.
            05  ws-cursor-draw-color-fg    pic 9 value black.
@@ -166,7 +166,7 @@
                    + COB-ALLOW-MOUSE-MOVE
            set environment "COB_MOUSE_FLAGS" to ws-mouse-flags
 
-           move '1010' to ws-cursor-pos           
+           move zeros to ws-cursor-pos           
            display space blank screen 
 
            accept ws-temp-time from time 
