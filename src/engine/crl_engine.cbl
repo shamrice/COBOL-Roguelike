@@ -359,6 +359,9 @@
                when ws-kb-input = 'A'
                    subtract 1 from ws-player-pos-delta-x
 
+               when ws-kb-input = 'R'
+                   perform restart-level
+
 
            *> TODO : maybe this is for ranged attack (if they have it)
            *>        as moving the player into an enemy causes them to attack.
@@ -796,6 +799,23 @@
 
                end-perform
            end-perform 
+
+           exit paragraph.
+
+       
+      *> TODO : Should also handle when maps are teleported into and 
+      *>        don't have a start pos tile effect in the map.
+       restart-level.
+
+           display "Restart level? [Y/N]: " 
+               foreground-color 0
+               background-color 7
+               at 1010 
+           end-display 
+           accept ws-kb-input upper at 1032
+           if ws-kb-input = 'Y' then 
+               perform load-tile-map
+           end-if         
 
            exit paragraph.
 
