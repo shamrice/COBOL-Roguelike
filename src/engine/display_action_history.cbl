@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-25
-      *> Last Updated: 2021-05-24
+      *> Last Updated: 2021-06-02
       *> Purpose: Module for engine to display action history to the 
       *>          screen. (Called from display-dynamic-screen-data)
       *> Tectonics:
@@ -19,7 +19,7 @@
        78  ws-max-entries               value 10.
        78  ws-draw-row-start            value 21.
 
-       01  ws-line-mask                 pic x(50) value spaces.
+       01  ws-line-mask                 pic x(75) value spaces.
 
        local-storage section.
 

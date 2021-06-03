@@ -31,7 +31,7 @@
        
        local-storage section.
        
-       01  ls-action-history-temp          pic x(50).      
+       01  ls-action-history-temp          pic x(75).      
 
 
        linkage section.

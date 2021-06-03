@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-25
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2021-06-02
       *> Purpose: Module for engine to add action history text to action 
       *>          history items. Oldest entries will be bumped off list.
       *> Tectonics:
@@ -24,7 +24,7 @@
 
        linkage section.
 
-       01  l-new-history-text            pic x(50).
+       01  l-new-history-text            pic x(75).
 
        copy "engine/copybooks/l-action-history.cpy".
 

@@ -323,6 +323,9 @@
                        ws-temp-map-pos   
                    end-call                        
 
+               when COB-SCR-F9
+                   perform debug-set-full-map-exploration
+
       *         when other 
       *             display "KB INPUT" at 1760 ws-crt-status at 1775
 
@@ -752,12 +755,25 @@
                        end-call 
                    end-if                        
                end-if 
-           end-if 
-
-
-     
+           end-if   
 
            exit paragraph.
            
+
+      *> Debug paragraph to set the full map as explored.
+       debug-set-full-map-exploration.
+           
+           perform varying ws-counter-1 
+           from 1 by 1 until ws-counter-1 > ws-max-map-height
+               perform varying ws-counter-2 
+               from 1 by 1 until ws-counter-2 > ws-max-map-width
+
+                   set ws-is-explored(ws-counter-1, ws-counter-2) 
+                       to true    
+
+               end-perform 
+           end-perform 
+
+           exit paragraph.
 
        end program cobol-roguelike-engine.
