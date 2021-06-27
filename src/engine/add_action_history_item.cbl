@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-25
-      *> Last Updated: 2021-06-02
+      *> Last Updated: 2021-06-27
       *> Purpose: Module for engine to add action history text to action 
       *>          history items. Oldest entries will be bumped off list.
       *> Tectonics:
@@ -16,11 +16,11 @@
 
        working-storage section.
        
-       78  ws-max-entries               value 10.               
+       78  ws-max-entries               value 150.                      
 
-       01  ws-counter                    pic 99 comp.
+       01  ws-counter                    pic 999 comp.
 
-       01  ws-current-idx                pic 99 comp value 1.
+       01  ws-current-idx                pic 999 comp value 1.
 
        linkage section.
 
