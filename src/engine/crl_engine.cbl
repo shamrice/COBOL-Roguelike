@@ -185,11 +185,6 @@
 
        01  ws-command-line-buffer         pic x(1024).
 
-       01  ws-log-action-history-sw      pic a value 'N'.
-           88  ws-log-action-history     value 'Y'.
-           88  ws-not-log-action-history value 'N'.
-
-
        procedure division.
            set environment "COB_SCREEN_EXCEPTIONS" to 'Y'.
            set environment "COB_SCREEN_ESC" to 'Y'.
@@ -213,8 +208,7 @@
                evaluate function upper-case(function trim(
                    ws-command-line-buffer))
 
-                   when "--LOG-HISTORY"                        
-                       set ws-log-action-history to true
+                   when "--LOG-HISTORY"                                               
                        move "BELTTEST" to ws-map-name  *> DEBUG!
                        move "BELTTEST" to ws-map-name-temp *>DEBUG!
                        call "action-history-log-start" 
