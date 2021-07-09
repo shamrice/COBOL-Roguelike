@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-06-02
+      *> Last Updated: 2021-07-09
       *> Purpose: COBOL Rogulike engine main entry point.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -185,6 +185,10 @@
 
        01  ws-command-line-buffer         pic x(1024).
 
+       01  ws-log-action-history-sw      pic a value 'N'.
+           88  ws-log-action-history     value 'Y'.
+           88  ws-not-log-action-history value 'N'.
+
 
        procedure division.
            set environment "COB_SCREEN_EXCEPTIONS" to 'Y'.
@@ -198,13 +202,30 @@
            accept ws-temp-time from time 
            move function random(ws-temp-time) to ws-filler
 
-           *> load map passed to command line if one is present.
+
+      *> TODO : *** MOVE TO COMMAND LINE PARSER SUB PROGRAM *********
+
+           *> evaluate command line args if present.
            accept ws-command-line-buffer from command-line 
-           if ws-command-line-buffer not = spaces then 
-               move function upper-case(
-                   function trim(ws-command-line-buffer)) to 
-                   ws-map-name
-               move ws-map-name to ws-map-name-temp                
+
+           if ws-command-line-buffer not = spaces then                
+
+               evaluate function upper-case(function trim(
+                   ws-command-line-buffer))
+
+                   when "--LOG-HISTORY"                        
+                       set ws-log-action-history to true
+                       move "BELTTEST" to ws-map-name  *> DEBUG!
+                       move "BELTTEST" to ws-map-name-temp *>DEBUG!
+                       call "action-history-log-start" 
+
+                   when other 
+                       move function upper-case(
+                           function trim(ws-command-line-buffer)) to 
+                           ws-map-name
+                       move ws-map-name to ws-map-name-temp                        
+               end-evaluate
+
            end-if .
            
        load-tile-map.
@@ -286,6 +307,9 @@
                    end-accept 
                end-perform
            end-if 
+
+      *> Stop and close log if currently enabled and open.
+           call "action-history-log-end" 
               
            goback.
 
