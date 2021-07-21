@@ -46,13 +46,13 @@
        78  ws-file-status-ok              value "00".
        78  ws-file-status-eof             value "10".
 
-       78  ws-load-status-fail        value 9.
-       78  ws-load-status-read-fail   value 8.
-       78  ws-load-status-bad-data    value 7.
-       78  ws-load-status-success     value 0.       
+       78  ws-load-status-fail            value 9.
+       78  ws-load-status-read-fail       value 8.
+       78  ws-load-status-bad-data        value 7.
+       78  ws-load-status-success         value 0.       
 
-       78  ws-save-status-fail        value 9.
-       78  ws-save-status-success     value 0.
+       78  ws-save-status-fail            value 9.
+       78  ws-save-status-success         value 0.
 
        78  ws-data-file-ext               value ".DAT".
        78  ws-teleport-file-ext           value ".TEL".

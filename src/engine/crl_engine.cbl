@@ -183,7 +183,7 @@
                10  ws-current-second       PIC 9(02).
                10  ws-current-millisecond  PIC 9(02).
 
-       01  ws-command-line-buffer         pic x(1024).
+       01  ws-command-line-buffer         pic x(2048).
 
        procedure division.
            set environment "COB_SCREEN_EXCEPTIONS" to 'Y'.
@@ -191,8 +191,7 @@
            set environment "COB_TIMEOUT_SCALE" to '3'.
       *     set environment "COB_EXIT_WAIT" to "NO".
 
-       init-setup.                          
-           display space blank screen 
+       init-setup.                                     
 
            accept ws-temp-time from time 
            move function random(ws-temp-time) to ws-filler
@@ -203,24 +202,16 @@
            *> evaluate command line args if present.
            accept ws-command-line-buffer from command-line 
 
-           if ws-command-line-buffer not = spaces then                
-
-               evaluate function upper-case(function trim(
-                   ws-command-line-buffer))
-
-                   when "--LOG-HISTORY"                                               
-                       move "BELTTEST" to ws-map-name  *> DEBUG!
-                       move "BELTTEST" to ws-map-name-temp *>DEBUG!
-                       call "action-history-log-start" 
-
-                   when other 
-                       move function upper-case(
-                           function trim(ws-command-line-buffer)) to 
-                           ws-map-name
-                       move ws-map-name to ws-map-name-temp                        
-               end-evaluate
-
-           end-if .
+           if ws-command-line-buffer not = spaces then 
+               call "command-line-parser" using 
+                   ws-command-line-buffer
+                   ws-map-name
+                   ws-map-name-temp 
+               end-call 
+           end-if 
+               
+           display space blank screen                
+           .
            
        load-tile-map.
            move function concatenate("Entering ",
