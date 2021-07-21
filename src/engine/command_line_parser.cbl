@@ -34,7 +34,7 @@
            05  ls-map-param-count        pic 9.
            05  ls-help-param-count       pic 9.
 
-       01  ls-param-count                pic 9.      
+       01  ls-param-count                pic 9 comp.      
 
        01  ls-key-val-pair.
            05  ls-key                    pic x(16).
