@@ -13,4 +13,7 @@ echo
 ./build_editor.sh
 ./build_engine.sh
 
+echo 
+echo WARNING: This build script is deprecated. Please use \'make\' instead.
+echo 
 
