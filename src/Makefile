@@ -2,7 +2,7 @@
 
 CBL=cobc
 CBLFLAGS=-Wall -O2 -fstatic-call # -lncurses
-#CBL_DEBUG_FLAG=--debug 
+CBL_DEBUG_FLAG=--debug 
 
 CRL_EDITOR_MAIN=./editor/crl_editor.cbl
 CRL_EDITOR_SOURCES=$(shell find ./editor -type f -name '*.cbl'  | grep -v '${CRL_EDITOR_MAIN}')

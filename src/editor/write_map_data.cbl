@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-05-11
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2022-04-21
       *> Purpose: Writes current map data to disk.
       *> Tectonics:
       *>     ./build_editor.sh
@@ -75,6 +75,7 @@
            05  l-map-tel-file         pic x(15).
            05  l-map-enemy-file       pic x(15).   
            05  l-map-item-file        pic x(15).
+           05  l-map-working-dir      pic x(1024).
 
        copy "shared/copybooks/l-tile-map-table-matrix.cpy".
 
@@ -84,8 +85,6 @@
 
        copy "shared/copybooks/l-item-data.cpy".
 
-
-
        01  l-return-code                   pic 9 value 0.         
 
        procedure division using 
@@ -94,6 +93,9 @@
            l-return-code. 
 
        main-procedure.
+
+      *> TODO : Use l-map-working-dir to save maps to a specified 
+      *>        directory instead of just the current one.
 
            move ws-save-status-fail to l-return-code 
 

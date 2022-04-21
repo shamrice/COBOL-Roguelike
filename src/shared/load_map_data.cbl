@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-04-23
-      *> Last Updated: 2021-05-14
+      *> Last Updated: 2022-04-21
       *> Purpose: Module for engine to load the level data passed into
       *>          the related record structures.
       *> Tectonics:
@@ -12,26 +12,32 @@
 
        environment division.
 
+       configuration section.
+
+       repository.
+           function all intrinsic.
+   
+
        input-output section.
 
        file-control.
            select optional fd-tile-data 
-               assign to dynamic l-map-dat-file 
+               assign to dynamic ls-map-dat-file 
                organization is record sequential
                file status is ls-map-file-status.
 
            select optional fd-teleport-data
-               assign to dynamic l-map-tel-file
+               assign to dynamic ls-map-tel-file
                organization is record sequential
                file status is ls-teleport-file-status.            
 
            select optional fd-enemy-data
-               assign to dynamic l-map-enemy-file
+               assign to dynamic ls-map-enemy-file
                organization is record sequential
                file status is ls-enemy-file-status.
 
            select optional fd-item-data
-               assign to dynamic l-map-item-file
+               assign to dynamic ls-map-item-file
                organization is record sequential
                file status is ls-item-file-status.
 
@@ -70,6 +76,12 @@
            88 ls-is-eof                 value 'Y'.
            88 ls-not-eof                value 'N'.
        
+       01  ls-map-full-paths.
+           05  ls-map-dat-file         pic x(1039).               
+           05  ls-map-tel-file         pic x(1039).
+           05  ls-map-enemy-file       pic x(1039).   
+           05  ls-map-item-file        pic x(10).
+
                      
        linkage section.
 
@@ -80,6 +92,7 @@
            05  l-map-tel-file         pic x(15).
            05  l-map-enemy-file       pic x(15).   
            05  l-map-item-file        pic x(15).
+           05  l-map-working-dir      pic x(1024).
 
        copy "shared/copybooks/l-tile-map-table-matrix.cpy".
 
@@ -100,34 +113,47 @@
 
        main-procedure.
 
+      *> Set file names based map name
+           move concatenate(trim(l-map-name) ws-data-file-ext)
+           to l-map-dat-file
 
-      *> Set file names based on map name
-           move function concatenate(
-               function trim(l-map-name), ws-data-file-ext)
-               to l-map-dat-file
+           move concatenate(trim(l-map-name) ws-teleport-file-ext)
+           to l-map-tel-file
 
-           move function concatenate(
-               function trim(l-map-name), ws-teleport-file-ext)
-               to l-map-tel-file
+           move concatenate(trim(l-map-name) ws-enemy-file-ext)
+           to l-map-enemy-file    
 
-           move function concatenate(
-               function trim(l-map-name), ws-enemy-file-ext)
-               to l-map-enemy-file    
+           move concatenate(trim(l-map-name) ws-item-file-ext)
+           to l-map-item-file    
 
-           move function concatenate(
-               function trim(l-map-name), ws-item-file-ext)
-               to l-map-item-file    
-               
+
+      *> Move generated file names to full path variables using 
+      *> working directory (if exists) for loading the actual data.
+           move concat(trim(l-map-working-dir) l-map-dat-file) 
+           to ls-map-dat-file
+
+           move concat(trim(l-map-working-dir) l-map-tel-file) 
+           to ls-map-tel-file
+
+           move concat(trim(l-map-working-dir) l-map-enemy-file) 
+           to ls-map-enemy-file
+
+           move concat(trim(l-map-working-dir) l-map-item-file) 
+           to ls-map-item-file
 
       *> Load data from files.
 
            open input fd-tile-data
 
+      *> TODO : log this info as it gets overwritten by engine
+      *>        error message on error
            if ls-map-file-status not = ws-file-status-ok then
                close fd-tile-data  
                display 
                    "Failed to open tile data: " at 0101
-                   l-map-dat-file at 0130
+                   trim(ls-map-dat-file) at 0130
+                   "File status: " at 0201
+                   ls-map-file-status at 0230 
                end-display 
                move ws-load-status-fail to l-return-code
                goback                

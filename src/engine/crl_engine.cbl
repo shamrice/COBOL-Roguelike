@@ -1,7 +1,7 @@
       *>*****************************************************************
       *> Author: Erik Eriksen
       *> Create Date: 2021-03-14
-      *> Last Updated: 2021-07-09
+      *> Last Updated: 2022-04-21
       *> Purpose: COBOL Rogulike engine main entry point.
       *> Tectonics:
       *>     ./build_engine.sh
@@ -12,6 +12,9 @@
        environment division.
 
        configuration section.
+
+       repository.
+           function all intrinsic.
 
        special-names.
            crt status is ws-crt-status.
@@ -207,9 +210,10 @@
                    ws-command-line-buffer
                    ws-map-name
                    ws-map-name-temp 
+                   ws-map-working-dir
                end-call 
            end-if 
-               
+ 
            display space blank screen                
            .
            
@@ -228,14 +232,14 @@
                ws-item-data 
                ws-load-return-code
            end-call 
-
+           
            if ws-load-return-code > 0 then 
                display space blank screen 
                display 
                    "FATAL ERROR :: Failed to load area data: " at 0101
-                   ws-map-name at 0143 
+                   concat(trim(ws-map-working-dir) ws-map-name) at 0143 
                    "Please make sure related DAT, BGS, TEL files exist"
-                   & " in level data directory." at 0201
+                   & " in same working directory." at 0201
                end-display 
                stop run 
            end-if
